@@ -1,0 +1,128 @@
+{% extends "base.html" %}
+
+{% block title %}MercAPP — Categorías{% endblock %}
+
+{% block content %}
+<div class="page-container">
+ <div class="page-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+ <h1 class="page-title">
+ <span class="title-icon"></span> Categorías
+ </h1>
+ <div style="display: flex; gap: 10px;">
+ <a href="{{ url_for('dashboard') }}" class="btn btn-outline"> Volver</a>
+ <a href="{{ url_for('category_add') }}" class="btn btn-primary" style="padding: 10px 20px; font-weight: bold;">
+ Nueva Categoría
+ </a>
+ </div>
+ </div>
+
+ <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 20px;">
+  Usa las flechas para reordenar y el ícono de visibilidad para mostrar/ocultar categorías en la caja.
+ </p>
+
+ <!-- Category Grid -->
+ <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px;" id="categoriesContainer">
+ {% for cat in categories %}
+ <div class="card" style="padding: 0; overflow: hidden; display: flex; flex-direction: column;" data-cat-id="{{ cat.id }}">
+ <!-- Image Area -->
+ <div style="height: 140px; position: relative; background: #e0e0e0; {{ 'opacity: 0.5;' if not cat.visible_in_pos else '' }}">
+ {% if cat.image %}
+ <img src="{{ url_for('user_images', filename='categories/' + cat.image) }}" 
+ style="width: 100%; height: 100%; object-fit: cover;" 
+ alt="{{ cat.name }}">
+ {% else %}
+ <div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 3rem; color: #aaa;"></div>
+ {% endif %}
+ <div style="position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(transparent, rgba(0,0,0,0.7)); padding: 10px;">
+ <h3 style="margin: 0; color: white; font-size: 1.2rem;">{{ cat.name }}</h3>
+ </div>
+ <!-- Visibility badge -->
+ {% if not cat.visible_in_pos %}
+ <div style="position: absolute; top: 8px; right: 8px; background: rgba(229,57,53,0.9); color: white; padding: 3px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 700;">
+  OCULTA EN CAJA
+ </div>
+ {% endif %}
+ </div>
+ 
+ <!-- Details & Actions -->
+ <div style="padding: 15px; flex: 1; display: flex; flex-direction: column; justify-content: space-between;">
+ <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 10px;">
+ {{ cat.description or 'Sin descripción' }}
+ </p>
+ <div style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 12px;">
+  Orden: {{ cat.display_order }} · {{ 'Visible en caja' if cat.visible_in_pos else 'Oculta en caja' }}
+ </div>
+ 
+ <!-- Reorder & Visibility Controls -->
+ <div style="display: flex; gap: 6px; margin-bottom: 10px;">
+  <button class="btn btn-outline btn-sm d-flex justify-content-center align-items-center" style="flex: 0; padding: 6px 10px;" onclick="reorderCategory({{ cat.id }}, 'up')" title="Subir">
+   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m18 15-6-6-6 6"/></svg>
+  </button>
+  <button class="btn btn-outline btn-sm d-flex justify-content-center align-items-center" style="flex: 0; padding: 6px 10px;" onclick="reorderCategory({{ cat.id }}, 'down')" title="Bajar">
+   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+  </button>
+  <button class="btn btn-outline btn-sm d-flex justify-content-center align-items-center" style="flex: 1; padding: 6px;" onclick="toggleVisibility({{ cat.id }}, this)" id="visBtn-{{ cat.id }}"
+   title="{{ 'Ocultar de la caja' if cat.visible_in_pos else 'Mostrar en la caja' }}">
+   {% if cat.visible_in_pos %}
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 4px;"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg> Visible
+   {% else %}
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 4px;"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/><line x1="2" y1="2" x2="22" y2="22"/></svg> Oculta
+   {% endif %}
+  </button>
+ </div>
+
+ <div style="display: flex; gap: 10px;">
+ <a href="{{ url_for('category_edit', category_id=cat.id) }}" class="btn btn-outline" style="flex: 1; text-align: center; padding: 6px;"> Editar</a>
+ <form action="{{ url_for('category_delete', category_id=cat.id) }}" method="POST" style="flex: 1;" onsubmit="return confirm('¿Estás seguro de eliminar esta categoría? Solo se podrá si NO tiene productos.')">
+ <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+ <button type="submit" class="btn btn-outline" style="width: 100%; padding: 6px; color: var(--danger); border-color: var(--danger);"> Borrar</button>
+ </form>
+ </div>
+ </div>
+ </div>
+ {% else %}
+ <div class="empty-state" style="grid-column: 1 / -1;">
+ <div class="empty-icon"></div>
+ <h3>No hay categorías creadas</h3>
+ <p>Agrega tu primera categoría para organizar tus productos.</p>
+ </div>
+ {% endfor %}
+ </div>
+</div>
+
+<meta name="csrf-token" content="{{ csrf_token() }}">
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function reorderCategory(catId, direction) {
+    const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+    fetch('/api/categories/reorder', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json', 'X-CSRFToken': csrfToken},
+        body: JSON.stringify({category_id: catId, direction: direction})
+    }).then(r => r.json()).then(res => {
+        if (res.success) {
+            location.reload();
+        } else {
+            alert(res.message || 'Error al reordenar.');
+        }
+    }).catch(() => alert('Error de conexión.'));
+}
+
+function toggleVisibility(catId, btn) {
+    const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+    fetch('/api/categories/toggle-visibility', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json', 'X-CSRFToken': csrfToken},
+        body: JSON.stringify({category_id: catId})
+    }).then(r => r.json()).then(res => {
+        if (res.success) {
+            location.reload();
+        } else {
+            alert(res.message || 'Error al cambiar visibilidad.');
+        }
+    }).catch(() => alert('Error de conexión.'));
+}
+</script>
+{% endblock %}

@@ -1,0 +1,268 @@
+{% extends "base.html" %}
+{% block title %}MercAPP — {{ 'Editar' if editing else 'Agregar' }} Producto{% endblock %}
+
+{% block content %}
+<div class="page-container" style="max-width: 800px;">
+ <div class="page-header">
+ <h1 class="page-title">
+ <span class="title-icon">{{ '' if editing else '' }}</span> 
+ {{ 'Editar Producto' if editing else 'Agregar Nuevo Producto' }}
+ </h1>
+ <a href="{{ url_for('products') }}" class="btn btn-outline">
+ ← Volver a Productos
+ </a>
+ </div>
+
+ <div class="card">
+ <form method="POST" enctype="multipart/form-data" id="productForm">
+ <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+ <!-- Category Selection with Visual Buttons -->
+ <div class="form-group">
+ <label class="form-label">Categoría *</label>
+ <div class="category-grid" style="grid-template-columns: repeat(3, 1fr); margin-bottom: 8px;">
+ {% for cat in categories %}
+ <label class="category-btn" style="cursor: pointer; position: relative;" 
+ id="catBtn{{ cat.id }}" onclick="selectCategory({{ cat.id }})">
+ <input type="radio" name="category_id" value="{{ cat.id }}" 
+ style="position: absolute; opacity: 0;"
+ {% if editing and product.category_id == cat.id %}checked{% endif %}
+ required>
+ <span class="cat-name">{{ cat.name }}</span>
+ </label>
+ {% endfor %}
+ </div>
+ </div>
+
+ <!-- Subcategory -->
+ <div class="form-group" id="subcategoryGroup" style="display: none;">
+ <label class="form-label">Subcategoría</label>
+ <select name="subcategory_id" id="subcategorySelect" class="form-control">
+ <option value="">-- Sin subcategoría --</option>
+ </select>
+ </div>
+
+ <!-- Product Name -->
+ <div class="form-group">
+ <label class="form-label" for="productName">Nombre del Producto *</label>
+ <input type="text" id="productName" name="name" class="form-control" 
+ placeholder="Ej: Coca-Cola 600ml"
+ value="{{ product.name if editing else '' }}" 
+ required minlength="2" maxlength="150">
+ </div>
+
+ <!-- Barcode -->
+ <div class="form-group">
+ <label class="form-label" for="productBarcode">Código de Barras</label>
+ <input type="text" id="productBarcode" name="barcode" class="form-control" 
+ placeholder="Escanea o escribe el código (opcional)"
+ value="{{ product.barcode if editing and product.barcode else '' }}">
+ <div class="form-hint">Si no tiene código de barras, déjalo vacío. El producto aparecerá como botón manual en la caja.</div>
+ </div>
+
+ <!-- PLU Code (for label-printing scales) -->
+ <div class="form-group">
+ <label class="form-label" for="productPlu">Código PLU (Básculas Etiquetadoras)</label>
+ <input type="text" id="productPlu" name="plu_code" class="form-control" 
+ placeholder="Ej: 00015 (opcional)"
+ value="{{ product.plu_code if editing and product.plu_code else '' }}">
+ <div class="form-hint">Si usas una báscula que imprime códigos de barras con precio, ingresa aquí los 5 dígitos del producto.</div>
+ </div>
+
+ <!-- Sell by Weight Toggle -->
+ <div class="form-group">
+ <label class="form-label">¿Se vende por peso?</label>
+ <div style="display: flex; align-items: center; gap: 16px;">
+ <label class="weight-toggle" style="display: flex; align-items: center; gap: 10px; cursor: pointer; padding: 12px 20px; background: var(--bg-input); border: 2px solid var(--border); border-radius: var(--radius-sm); transition: var(--transition);">
+ <input type="checkbox" name="sell_by_weight" id="sellByWeight"
+ {% if editing and product.sell_by_weight %}checked{% endif %}
+ onchange="toggleWeightMode(this.checked)"
+ style="width: 20px; height: 20px; accent-color: var(--primary);">
+ <span style="font-weight: 600;"> Venta por peso</span>
+ </label>
+ <div id="weightUnitGroup" style="display: none;">
+ <select name="weight_unit" id="weightUnit" class="form-control" style="max-width: 180px;" onchange="updatePriceLabel()">
+ <option value="kg" {% if editing and product.weight_unit == 'kg' %}selected{% endif %}>Kilogramo (kg)</option>
+ <option value="lb" {% if editing and product.weight_unit == 'lb' %}selected{% endif %}> Libra (500g)</option>
+ </select>
+ </div>
+ </div>
+ <div class="form-hint">Actívalo para productos como frutas, verduras, carnes que se venden al peso.</div>
+ </div>
+
+ <!-- Price -->
+ <div class="form-group">
+ <label class="form-label" for="productPrice" id="priceLabel">Precio (Pesos Colombianos) *</label>
+ <input type="text" id="productPrice" name="price" class="form-control" 
+ placeholder="Ej: 3500 (sin puntos ni comas)"
+ value="{{ product.price if editing else '' }}" 
+ required style="font-size: 1.2rem; font-weight: 700;">
+ <div class="form-hint" id="priceHint">Solo números enteros. Ejemplo: 3500 = $3.500 COP. Mínimo $100, Máximo $10.000.000</div>
+ </div>
+
+ <!-- Price Preview -->
+ <div id="pricePreview" style="display: none; padding: 10px 16px; background: var(--success-bg); border: 1px solid rgba(67,160,71,0.3); border-radius: var(--radius-sm); margin-bottom: 20px; font-weight: 700; color: var(--success);">
+ Precio: <span id="pricePreviewValue">$0</span> <span id="pricePreviewUnit"></span>
+ </div>
+
+ <!-- Image -->
+ <div class="form-group">
+ <label class="form-label" for="productImage">Imagen del Producto</label>
+ {% if editing and product.image and product.image != 'default_product.png' %}
+ <div style="margin-bottom: 12px;">
+ <img src="{{ url_for('user_images', filename='products/' + product.image) }}" 
+ alt="{{ product.name }}" style="width: 100px; height: 100px; object-fit: cover; border-radius: var(--radius-sm); border: 2px solid var(--border);">
+ <p class="form-hint">Imagen actual. Sube una nueva para reemplazarla.</p>
+ </div>
+ {% endif %}
+ <input type="file" id="productImage" name="image" class="form-control" 
+ accept=".jpg,.jpeg,.png,.webp">
+ <div class="form-hint">Formatos: JPG, PNG, WEBP. Máximo 5MB. La imagen se optimizará automáticamente.</div>
+ </div>
+
+ <!-- Stock (hidden when sell_by_weight) -->
+ <div class="form-group" id="stockGroup">
+ <label class="form-label" for="productStock">Stock Actual (Opcional)</label>
+ <input type="number" id="productStock" name="stock" class="form-control" 
+ value="{{ product.stock if editing and product.stock is not none else '' }}" 
+ min="0" max="999999" style="max-width: 200px;">
+ <div class="form-hint">Deja este campo vacío para productos con stock infinito. Si pones 0, el producto no se podrá vender.</div>
+ </div>
+
+ <!-- Submit -->
+ <div style="display: flex; gap: 12px; margin-top: 24px;">
+ <button type="submit" class="btn btn-primary btn-lg">
+ {{ ' Guardar Cambios' if editing else ' Agregar Producto' }}
+ </button>
+ <a href="{{ url_for('products') }}" class="btn btn-outline btn-lg">Cancelar</a>
+ </div>
+ </form>
+ </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+ // Weight mode toggle
+ function toggleWeightMode(enabled) {
+  const unitGroup = document.getElementById('weightUnitGroup');
+  const stockGroup = document.getElementById('stockGroup');
+  const toggle = document.querySelector('.weight-toggle');
+  
+  unitGroup.style.display = enabled ? 'block' : 'none';
+  stockGroup.style.display = enabled ? 'none' : 'block';
+ 
+ if (enabled) {
+ toggle.style.borderColor = 'var(--primary)';
+ toggle.style.background = 'var(--success-bg)';
+ } else {
+ toggle.style.borderColor = 'var(--border)';
+ toggle.style.background = 'var(--bg-input)';
+ }
+ 
+ updatePriceLabel();
+ }
+ 
+ function updatePriceLabel() {
+ const isWeight = document.getElementById('sellByWeight').checked;
+ const unit = document.getElementById('weightUnit').value;
+ const label = document.getElementById('priceLabel');
+ const hint = document.getElementById('priceHint');
+ const previewUnit = document.getElementById('pricePreviewUnit');
+ 
+ if (isWeight) {
+ if (unit === 'lb') {
+ label.textContent = 'Precio por Libra (COP) *';
+ hint.textContent = 'Precio por cada libra (500g). Ej: 3500 = $3.500 por libra.';
+ previewUnit.textContent = '/ libra';
+ } else {
+ label.textContent = 'Precio por Kilo (COP) *';
+ hint.textContent = 'Precio por cada kilogramo. Ej: 7000 = $7.000 por kilo.';
+ previewUnit.textContent = '/ kg';
+ }
+ } else {
+ label.textContent = 'Precio (Pesos Colombianos) *';
+ hint.textContent = 'Solo números enteros. Ejemplo: 3500 = $3.500 COP. Mínimo $100, Máximo $10.000.000';
+ previewUnit.textContent = '';
+ }
+ }
+
+ // Price input: only digits
+ document.getElementById('productPrice').addEventListener('input', function() {
+ this.value = this.value.replace(/\D/g, '');
+ const val = parseInt(this.value) || 0;
+ const preview = document.getElementById('pricePreview');
+ const previewValue = document.getElementById('pricePreviewValue');
+ 
+ if (val > 0) {
+ preview.style.display = 'block';
+ previewValue.textContent = '$' + val.toLocaleString('es-CO');
+ } else {
+ preview.style.display = 'none';
+ }
+ });
+
+ // Barcode: only digits
+ document.getElementById('productBarcode').addEventListener('input', function() {
+ this.value = this.value.replace(/\D/g, '');
+ });
+
+ // Category selection
+ function selectCategory(catId) {
+ document.querySelectorAll('.category-btn').forEach(btn => btn.classList.remove('active'));
+ document.getElementById('catBtn' + catId).classList.add('active');
+ 
+ // Load subcategories
+ fetch(`/api/subcategories/${catId}`)
+ .then(res => res.json())
+ .then(data => {
+ const select = document.getElementById('subcategorySelect');
+ const group = document.getElementById('subcategoryGroup');
+ select.innerHTML = '<option value="">-- Sin subcategoría --</option>';
+ 
+ if (data.subcategories.length > 0) {
+ data.subcategories.forEach(sub => {
+ const opt = document.createElement('option');
+ opt.value = sub.id;
+ opt.textContent = sub.name;
+ select.appendChild(opt);
+ });
+ group.style.display = 'block';
+ } else {
+ group.style.display = 'none';
+ }
+ });
+ }
+
+ // Initialize on page load
+ document.addEventListener('DOMContentLoaded', () => {
+ // Initialize weight mode
+ const sellByWeight = document.getElementById('sellByWeight');
+ if (sellByWeight.checked) {
+ toggleWeightMode(true);
+ }
+ 
+ {% if editing and product.category_id %}
+ selectCategory({{ product.category_id }});
+ {% if product.subcategory_id %}
+ setTimeout(() => {
+ document.getElementById('subcategorySelect').value = '{{ product.subcategory_id }}';
+ }, 500);
+ {% endif %}
+ {% endif %}
+ 
+ {% if editing %}
+ document.getElementById('productPrice').dispatchEvent(new Event('input'));
+ {% endif %}
+
+ // Pre-fill barcode from URL parameter (from POS Agregar a Inventario)
+ const urlParams = new URLSearchParams(window.location.search);
+ const prefillBarcode = urlParams.get('barcode');
+ if (prefillBarcode) {
+     document.getElementById('productBarcode').value = prefillBarcode;
+     document.getElementById('productName').focus();
+ }
+ });
+</script>
+{% endblock %}
+

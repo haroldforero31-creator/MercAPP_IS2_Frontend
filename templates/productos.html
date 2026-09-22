@@ -1,0 +1,443 @@
+{% extends "base.html" %}
+{% block title %}MercAPP — Gestión de Productos{% endblock %}
+
+{% block content %}
+<div class="page-container">
+    <div class="page-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <h1 class="page-title">Gestión de Productos</h1>
+        <div style="display: flex; gap: 10px; align-items: center;">
+            <a href="{{ url_for('dashboard') }}" class="btn btn-outline">Volver</a>
+            
+            <div class="dropdown">
+                <button class="btn btn-outline" style="display: flex; align-items: center; gap: 8px;">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                    CSV
+                </button>
+                <div class="dropdown-content">
+                    <a href="#" onclick="openExportModal()">Exportar Inventario</a>
+                    <a href="#" onclick="document.getElementById('importFile').click()">Importar Inventario</a>
+                </div>
+            </div>
+
+            <form id="importForm" action="{{ url_for('products_import') }}" method="POST" enctype="multipart/form-data" style="display: none;">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <input type="file" id="importFile" name="file" accept=".csv" onchange="document.getElementById('importForm').submit()">
+            </form>
+
+            <a href="{{ url_for('product_add') }}" class="btn btn-primary">
+                Agregar Producto
+            </a>
+        </div>
+    </div>
+
+    <style>
+        .dropdown { position: relative; display: inline-block; }
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            background-color: var(--bg-card);
+            min-width: 180px;
+            box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.5);
+            z-index: 10;
+            border-radius: 8px;
+            border: 1px solid var(--bg-input);
+            right: 0;
+            overflow: hidden;
+        }
+        .dropdown-content a {
+            color: var(--text-main);
+            padding: 12px 16px;
+            text-decoration: none;
+            display: block;
+            font-size: 0.9rem;
+        }
+        .dropdown-content a:hover { background-color: var(--bg-input); color: var(--primary); }
+        .dropdown:hover .dropdown-content { display: block; }
+    </style>
+
+    <!-- Stats -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-icon green"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--success)" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg></div>
+            <div class="stat-info">
+                <div class="stat-value">{{ products | selectattr('is_active') | list | length }}</div>
+                <div class="stat-label">Productos Activos</div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon orange"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--warning)" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="7" y1="8" x2="7" y2="16"/><line x1="11" y1="8" x2="11" y2="16"/><line x1="15" y1="8" x2="15" y2="16"/></svg></div>
+            <div class="stat-info">
+                <div class="stat-value">{{ products | selectattr('has_barcode') | list | length }}</div>
+                <div class="stat-label">Con Código de Barras</div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon blue"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--info)" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg></div>
+            <div class="stat-info">
+                <div class="stat-value">{{ categories | length }}</div>
+                <div class="stat-label">Categorías</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <form class="filter-bar" method="GET" action="{{ url_for('products') }}">
+        <input type="text" name="search" id="productSearchInput" class="form-control" placeholder="Buscar por nombre o código..." 
+               value="{{ search }}" style="flex: 1; min-width: 200px;" autofocus>
+        <select name="category" class="form-control" style="max-width: 200px;">
+            <option value="">Todas las categorías</option>
+            {% for cat in categories %}
+            <option value="{{ cat.id }}" {% if category_filter == cat.id|string %}selected{% endif %}>{{ cat.name }}</option>
+            {% endfor %}
+        </select>
+        <button type="submit" class="btn btn-primary btn-sm">Filtrar</button>
+        {% if search or category_filter %}
+        <a href="{{ url_for('products') }}" class="btn btn-outline btn-sm">Limpiar</a>
+        {% endif %}
+    </form>
+
+    <!-- Products Table -->
+    {% if products %}
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th style="width: 40px; text-align: center;">
+                        <input type="checkbox" id="selectAllCheckbox" onchange="toggleSelectAll(this.checked)" 
+                               title="Seleccionar / Deseleccionar todos"
+                               style="width: 18px; height: 18px; accent-color: var(--primary); cursor: pointer;">
+                    </th>
+                    <th>Imagen</th>
+                    <th>Producto</th>
+                    <th>Código de Barras</th>
+                    <th>Categoría</th>
+                    <th style="text-align: right;">Precio</th>
+                    <th style="text-align: center;">Stock</th>
+                    <th>Estado</th>
+                    <th style="text-align: center;">Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for product in products %}
+                <tr class="{{ 'product-inactive' if not product.is_active }}" id="productRow{{ product.id }}">
+                    <td style="text-align: center;">
+                        <input type="checkbox" class="product-select-chk" value="{{ product.id }}" 
+                               onchange="updateBulkSelection()"
+                               style="width: 18px; height: 18px; accent-color: var(--primary); cursor: pointer;">
+                    </td>
+                    <td>
+                        {% if product.image and product.image != 'default_product.png' %}
+                        <img src="{{ url_for('user_images', filename='products/' + product.image) }}" 
+                             alt="{{ product.name }}" class="product-thumb">
+                        {% else %}
+                        <div class="product-thumb" style="display: flex; align-items: center; justify-content: center; background: var(--bg-input);"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg></div>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <strong>{{ product.name }}</strong>
+                    </td>
+                    <td>
+                        {% if product.barcode %}
+                        <code style="background: var(--bg-input); padding: 4px 8px; border-radius: 4px; font-size: 0.85rem;">{{ product.barcode }}</code>
+                        {% else %}
+                        <span class="text-muted">Sin código</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ product.category.name if product.category else '-' }}</td>
+                    <td style="text-align: right; font-weight: 700; color: var(--accent-light);" id="priceCell{{ product.id }}">
+                        {{ product.price | cop }}
+                    </td>
+                    <td style="text-align: center;">
+                        {% if product.sell_by_weight %}
+                        <span class="text-muted">-</span>
+                        {% elif product.stock is none %}
+                        <span class="text-muted">-</span>
+                        {% elif product.stock <= 0 %}
+                        <span class="badge badge-error">Agotado</span>
+                        {% elif product.stock <= 5 %}
+                        <span class="badge badge-warning">{{ product.stock }} und.</span>
+                        {% else %}
+                        <span class="badge badge-success">{{ product.stock }} und.</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if product.is_active %}
+                        <span class="badge badge-success">Activo</span>
+                        {% else %}
+                        <span class="badge badge-error">Inactivo</span>
+                        {% endif %}
+                    </td>
+                    <td style="text-align: center;">
+                        <div class="d-flex gap-1 justify-center" style="justify-content: center;">
+                            <a href="{{ url_for('product_edit', product_id=product.id) }}" class="btn btn-outline btn-sm" title="Editar">Editar</a>
+                            <form method="POST" action="{{ url_for('product_delete', product_id=product.id) }}" style="display: inline;" 
+                                  onsubmit="return confirm('¿{{ 'Desactivar' if product.is_active else 'Reactivar' }} este producto?')">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                <button type="submit" class="btn btn-sm {{ 'btn-danger' if product.is_active else 'btn-primary' }}" title="{{ 'Desactivar' if product.is_active else 'Reactivar' }}">
+                                    {{ 'Desactivar' if product.is_active else 'Activar' }}
+                                </button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Bulk Actions Bar (fixed at bottom, hidden until products selected) -->
+    <div id="bulkActionsBar" style="display: none; position: fixed; bottom: 0; left: 0; right: 0; z-index: 100;
+        background: var(--bg-card); border-top: 2px solid var(--primary); padding: 14px 24px;
+        box-shadow: 0 -4px 20px rgba(0,0,0,0.3); backdrop-filter: blur(10px);">
+        <div style="max-width: 1200px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap;">
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <span style="font-weight: 700; font-size: 1rem; color: var(--primary);">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="vertical-align: middle; margin-right: 4px;"><path d="M20 6L9 17l-5-5"/></svg>
+                    <span id="bulkSelectedCount">0</span> productos seleccionados
+                </span>
+                <button class="btn btn-outline btn-sm" onclick="clearBulkSelection()" style="font-size: 0.8rem;">Deseleccionar</button>
+            </div>
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <label style="font-weight: 600; font-size: 0.95rem; white-space: nowrap;">Nuevo precio (COP):</label>
+                <input type="text" id="bulkNewPrice" class="form-control" placeholder="Ej: 4000" 
+                       style="width: 150px; font-size: 1.1rem; font-weight: 700; text-align: center;"
+                       oninput="this.value = this.value.replace(/\D/g, ''); updateBulkPricePreview();">
+                <span id="bulkPricePreview" style="font-weight: 700; color: var(--success); min-width: 90px;"></span>
+                <button class="btn btn-primary" onclick="applyBulkPrice()" id="btnApplyBulkPrice" style="font-weight: 700; padding: 10px 24px;">
+                    Aplicar Precio
+                </button>
+            </div>
+        </div>
+    </div>
+
+    {% else %}
+    <div class="empty-state">
+        <div class="empty-icon"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg></div>
+        <h3>No hay productos registrados</h3>
+        <p>Comienza agregando los productos de tu supermercado.</p>
+        <a href="{{ url_for('product_add') }}" class="btn btn-primary mt-2">Agregar Primer Producto</a>
+    </div>
+    {% endif %}
+
+    <!-- Export Modal -->
+    <div id="exportModal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center; backdrop-filter: blur(3px);">
+        <div style="background: var(--bg-card); padding: 24px; border-radius: 12px; width: 400px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); border: 1px solid var(--bg-input);">
+            <h3 style="margin-top: 0; color: var(--primary);">Exportar Inventario</h3>
+            <p style="color: var(--text-muted); margin-bottom: 20px;">¿Qué productos deseas descargar a Excel (CSV)?</p>
+            
+            <label style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px; cursor: pointer;">
+                <input type="radio" name="exportMode" value="all" checked onchange="document.getElementById('exportCategorySelect').style.display='none'" style="accent-color: var(--primary); width: 18px; height: 18px;">
+                <span style="font-weight: 600;">Todo el inventario</span>
+            </label>
+            
+            <label style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px; cursor: pointer;">
+                <input type="radio" name="exportMode" value="category" onchange="document.getElementById('exportCategorySelect').style.display='block'" style="accent-color: var(--primary); width: 18px; height: 18px;">
+                <span style="font-weight: 600;">Por categorías específicas</span>
+            </label>
+            
+            <div id="exportCategorySelect" style="display: none; margin-left: 26px; width: calc(100% - 26px); margin-bottom: 20px; max-height: 150px; overflow-y: auto; background: var(--bg-input); padding: 10px; border-radius: 8px;">
+                {% for cat in categories %}
+                <label style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px; cursor: pointer; font-size: 0.9rem;">
+                    <input type="checkbox" class="export-category-chk" value="{{ cat.id }}" style="accent-color: var(--primary);">
+                    <span>{{ cat.name }}</span>
+                </label>
+                {% endfor %}
+            </div>
+            
+            <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 24px;">
+                <button class="btn btn-outline" onclick="closeExportModal()">Cancelar</button>
+                <button class="btn btn-primary" onclick="executeExport()">Descargar Archivo</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// ============================================================
+// EXPORT MODAL
+// ============================================================
+function openExportModal() {
+    document.getElementById('exportModal').style.display = 'flex';
+}
+
+function closeExportModal() {
+    document.getElementById('exportModal').style.display = 'none';
+}
+
+function executeExport() {
+    const mode = document.querySelector('input[name="exportMode"]:checked').value;
+    let url = '{{ url_for("products_export") }}';
+    
+    if (mode === 'category') {
+        const checkboxes = document.querySelectorAll('.export-category-chk:checked');
+        if (checkboxes.length > 0) {
+            const catIds = Array.from(checkboxes).map(c => c.value).join(',');
+            url += '?categories=' + catIds;
+        } else {
+            alert('Por favor selecciona al menos una categoría.');
+            return;
+        }
+    }
+    
+    window.location.href = url;
+    closeExportModal();
+}
+
+// ============================================================
+// BULK PRICE EDITING
+// ============================================================
+
+const CSRF = '{{ csrf_token() }}';
+
+function toggleSelectAll(checked) {
+    document.querySelectorAll('.product-select-chk').forEach(chk => {
+        chk.checked = checked;
+    });
+    updateBulkSelection();
+}
+
+function updateBulkSelection() {
+    const checked = document.querySelectorAll('.product-select-chk:checked');
+    const bar = document.getElementById('bulkActionsBar');
+    const count = document.getElementById('bulkSelectedCount');
+    const selectAll = document.getElementById('selectAllCheckbox');
+    const allChks = document.querySelectorAll('.product-select-chk');
+
+    count.textContent = checked.length;
+
+    if (checked.length > 0) {
+        bar.style.display = 'block';
+    } else {
+        bar.style.display = 'none';
+    }
+
+    // Update "select all" checkbox state
+    if (checked.length === 0) {
+        selectAll.checked = false;
+        selectAll.indeterminate = false;
+    } else if (checked.length === allChks.length) {
+        selectAll.checked = true;
+        selectAll.indeterminate = false;
+    } else {
+        selectAll.checked = false;
+        selectAll.indeterminate = true;
+    }
+
+    // Highlight selected rows
+    allChks.forEach(chk => {
+        const row = chk.closest('tr');
+        if (chk.checked) {
+            row.style.background = 'rgba(46, 125, 50, 0.08)';
+        } else {
+            row.style.background = '';
+        }
+    });
+}
+
+function clearBulkSelection() {
+    document.querySelectorAll('.product-select-chk').forEach(chk => {
+        chk.checked = false;
+    });
+    document.getElementById('selectAllCheckbox').checked = false;
+    document.getElementById('selectAllCheckbox').indeterminate = false;
+    document.getElementById('bulkNewPrice').value = '';
+    document.getElementById('bulkPricePreview').textContent = '';
+    updateBulkSelection();
+}
+
+function updateBulkPricePreview() {
+    const val = parseInt(document.getElementById('bulkNewPrice').value) || 0;
+    const preview = document.getElementById('bulkPricePreview');
+    if (val > 0) {
+        preview.textContent = '$' + val.toLocaleString('es-CO');
+    } else {
+        preview.textContent = '';
+    }
+}
+
+function applyBulkPrice() {
+    const checked = document.querySelectorAll('.product-select-chk:checked');
+    const priceInput = document.getElementById('bulkNewPrice');
+    const newPrice = priceInput.value.trim();
+
+    if (checked.length === 0) {
+        alert('Selecciona al menos un producto.');
+        return;
+    }
+
+    if (!newPrice || parseInt(newPrice) < 100) {
+        alert('Ingresa un precio válido (mínimo $100 COP).');
+        priceInput.focus();
+        return;
+    }
+
+    if (parseInt(newPrice) > 10000000) {
+        alert('El precio máximo es $10.000.000 COP.');
+        priceInput.focus();
+        return;
+    }
+
+    // Build list of product names for confirmation
+    const productIds = [];
+    const productNames = [];
+    checked.forEach(chk => {
+        productIds.push(parseInt(chk.value));
+        const row = chk.closest('tr');
+        const nameCell = row.querySelector('strong');
+        if (nameCell) productNames.push(nameCell.textContent.trim());
+    });
+
+    const priceFormatted = '$' + parseInt(newPrice).toLocaleString('es-CO');
+    const confirmation = `¿Estás seguro de cambiar el precio de ${productIds.length} producto${productIds.length > 1 ? 's' : ''} a ${priceFormatted}?\n\nProductos:\n• ${productNames.slice(0, 10).join('\n• ')}${productNames.length > 10 ? `\n... y ${productNames.length - 10} más` : ''}`;
+
+    if (!confirm(confirmation)) return;
+
+    // Disable button while processing
+    const btn = document.getElementById('btnApplyBulkPrice');
+    btn.disabled = true;
+    btn.textContent = 'Aplicando...';
+
+    fetch('/api/products/bulk-price', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': CSRF
+        },
+        body: JSON.stringify({
+            product_ids: productIds,
+            new_price: newPrice
+        })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.success) {
+            // Update the price cells in the table without reloading
+            productIds.forEach(pid => {
+                const cell = document.getElementById('priceCell' + pid);
+                if (cell) {
+                    cell.textContent = data.new_price_formatted;
+                    cell.style.transition = 'background 0.3s';
+                    cell.style.background = 'rgba(46, 125, 50, 0.2)';
+                    setTimeout(() => { cell.style.background = ''; }, 2000);
+                }
+            });
+            
+            alert(data.message);
+            clearBulkSelection();
+        } else {
+            alert('Error: ' + data.message);
+        }
+    })
+    .catch(err => {
+        alert('Error de conexión. Intenta de nuevo.');
+        console.error(err);
+    })
+    .finally(() => {
+        btn.disabled = false;
+        btn.textContent = 'Aplicar Precio';
+    });
+}
+</script>
+{% endblock %}

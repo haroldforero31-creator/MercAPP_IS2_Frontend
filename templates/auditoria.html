@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+{% block title %}MercAPP — Registro de Auditoría{% endblock %}
+
+{% block content %}
+<div class="page-container">
+    <div class="page-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <div>
+            <h1 class="page-title">
+                Registro de Auditoría
+            </h1>
+            <p style="color: var(--text-secondary); margin-top: 5px; font-size: 0.9rem;">
+                Control de accesos y trazabilidad de operaciones del sistema.
+            </p>
+        </div>
+    </div>
+
+    <!-- Stats -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px;">
+        <div class="card" style="padding: 15px; border-left: 4px solid var(--primary, #10b981);">
+            <div style="font-size: 0.85rem; color: var(--text-secondary);">Total Eventos</div>
+            <div style="font-size: 1.6rem; font-weight: bold; margin-top: 5px;">{{ logs|length }}</div>
+        </div>
+        <div class="card" style="padding: 15px; border-left: 4px solid #3b82f6;">
+            <div style="font-size: 0.85rem; color: var(--text-secondary);">Sesiones (Login/Logout/Register)</div>
+            <div style="font-size: 1.6rem; font-weight: bold; margin-top: 5px;">{{ session_count }}</div>
+        </div>
+        <div class="card" style="padding: 15px; border-left: 4px solid #f59e0b;">
+            <div style="font-size: 0.85rem; color: var(--text-secondary);">Operaciones de Inventario</div>
+            <div style="font-size: 1.6rem; font-weight: bold; margin-top: 5px;">{{ inventory_count }}</div>
+        </div>
+    </div>
+
+    <!-- Audit Table -->
+    <div class="card" style="padding: 0; overflow: hidden;">
+        <div style="overflow-x: auto;">
+            <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.9rem;">
+                <thead>
+                    <tr style="background: var(--bg-card, #1f2937); border-bottom: 2px solid var(--border, #374151); color: var(--text-secondary, #9ca3af);">
+                        <th style="padding: 12px 16px;">#</th>
+                        <th style="padding: 12px 16px;">Fecha y Hora</th>
+                        <th style="padding: 12px 16px;">Usuario</th>
+                        <th style="padding: 12px 16px;">Evento</th>
+                        <th style="padding: 12px 16px;">Detalle</th>
+                        <th style="padding: 12px 16px;">IP</th>
+                        <th style="padding: 12px 16px;">Nivel</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for log in logs %}
+                    <tr style="border-bottom: 1px solid var(--border, #374151);">
+                        <td style="padding: 12px 16px; color: var(--text-secondary);">{{ log.id }}</td>
+                        <td style="padding: 12px 16px; white-space: nowrap; font-family: monospace;">
+                            {{ log.created_at.strftime('%Y-%m-%d %H:%M:%S') }}
+                        </td>
+                        <td style="padding: 12px 16px;">
+                            <strong>{{ log.user.name if log.user else 'Anónimo' }}</strong>
+                            {% if log.user and log.user.email %}
+                            <div style="font-size: 0.75rem; color: var(--text-secondary);">{{ log.user.email }}</div>
+                            {% endif %}
+                        </td>
+                        <td style="padding: 12px 16px;">
+                            {% if log.action == 'LOGIN' %}
+                            <span style="background: rgba(16,185,129,0.2); color: #10b981; padding: 4px 8px; border-radius: 6px; font-weight: 600; font-size: 0.75rem;">INICIO SESIÓN</span>
+                            {% elif log.action == 'LOGOUT' %}
+                            <span style="background: rgba(156,163,175,0.2); color: #9ca3af; padding: 4px 8px; border-radius: 6px; font-weight: 600; font-size: 0.75rem;">CIERRE SESIÓN</span>
+                            {% elif log.action == 'REGISTER' %}
+                            <span style="background: rgba(59,130,246,0.2); color: #3b82f6; padding: 4px 8px; border-radius: 6px; font-weight: 600; font-size: 0.75rem;">REGISTRO</span>
+                            {% elif log.action == 'LOGIN_FAILED' %}
+                            <span style="background: rgba(239,68,68,0.2); color: #ef4444; padding: 4px 8px; border-radius: 6px; font-weight: 600; font-size: 0.75rem;">LOGIN FALLIDO</span>
+                            {% elif 'PRODUCT' in log.action %}
+                            <span style="background: rgba(139,92,246,0.2); color: #8b5cf6; padding: 4px 8px; border-radius: 6px; font-weight: 600; font-size: 0.75rem;">{{ log.action }}</span>
+                            {% elif 'CATEGORY' in log.action %}
+                            <span style="background: rgba(245,158,11,0.2); color: #f59e0b; padding: 4px 8px; border-radius: 6px; font-weight: 600; font-size: 0.75rem;">{{ log.action }}</span>
+                            {% else %}
+                            <span style="background: rgba(107,114,128,0.2); color: #d1d5db; padding: 4px 8px; border-radius: 6px; font-weight: 600; font-size: 0.75rem;">{{ log.action }}</span>
+                            {% endif %}
+                        </td>
+                        <td style="padding: 12px 16px;">{{ log.description }}</td>
+                        <td style="padding: 12px 16px; font-family: monospace; font-size: 0.85rem; color: var(--text-secondary);">{{ log.ip_address }}</td>
+                        <td style="padding: 12px 16px;">
+                            {% if log.severity == 'CRITICAL' %}
+                            <span style="background: rgba(239, 68, 68, 0.15); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3); padding: 3px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 600; text-transform: uppercase;">Crítico</span>
+                            {% elif log.severity == 'WARNING' %}
+                            <span style="background: rgba(245, 158, 11, 0.15); color: #f59e0b; border: 1px solid rgba(245, 158, 11, 0.3); padding: 3px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 600; text-transform: uppercase;">Aviso</span>
+                            {% else %}
+                            <span style="background: rgba(16, 185, 129, 0.15); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.3); padding: 3px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 600; text-transform: uppercase;">Info</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="7" style="padding: 40px; text-align: center; color: var(--text-secondary);">
+                            No hay registros de auditoría aún. Los eventos se registrarán automáticamente.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

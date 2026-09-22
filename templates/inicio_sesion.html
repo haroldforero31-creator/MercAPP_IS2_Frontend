@@ -166,7 +166,6 @@
                 </div>
 
                 <form method="POST" class="login-form" id="loginForm">
-                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                     
                     <div class="form-group">
                         <label class="form-label" for="email">Correo Electrónico (Administrador)</label>
@@ -179,7 +178,7 @@
                         <input type="password" id="password" name="password" class="form-control" 
                         placeholder="••••••••" required autocomplete="current-password">
                         <div style="text-align: right; margin-top: 8px;">
-                            <a href="{{ url_for('forgot_password') }}" style="font-size: 0.85rem; color: var(--text-secondary); text-decoration: none;">¿Olvidaste tu contraseña?</a>
+                            <a href="#" style="font-size: 0.85rem; color: var(--text-secondary); text-decoration: none;">¿Olvidaste tu contraseña?</a>
                         </div>
                     </div>
 
