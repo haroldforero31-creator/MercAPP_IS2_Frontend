@@ -55,18 +55,20 @@
  <div class="form-group">
  <label class="form-label" for="productBarcode">Código de Barras</label>
  <input type="text" id="productBarcode" name="barcode" class="form-control" 
- placeholder="Escanea o escribe el código (opcional)"
+ placeholder="Escanea o escribe el código (opcional, máx 50 caracteres)"
+ maxlength="50"
  value="{{ product.barcode if editing and product.barcode else '' }}">
- <div class="form-hint">Si no tiene código de barras, déjalo vacío. El producto aparecerá como botón manual en la caja.</div>
+ <div class="form-hint">Si no tiene código de barras, déjalo vacío. Soporta códigos largos de hasta 50 dígitos.</div>
  </div>
 
  <!-- PLU Code (for label-printing scales) -->
  <div class="form-group">
  <label class="form-label" for="productPlu">Código PLU (Básculas Etiquetadoras)</label>
  <input type="text" id="productPlu" name="plu_code" class="form-control" 
- placeholder="Ej: 00015 (opcional)"
+ placeholder="Ej: 00015 (opcional, máx 50 caracteres)"
+ maxlength="50"
  value="{{ product.plu_code if editing and product.plu_code else '' }}">
- <div class="form-hint">Si usas una báscula que imprime códigos de barras con precio, ingresa aquí los 5 dígitos del producto.</div>
+ <div class="form-hint">Si usas una báscula que imprime códigos de barras con precio o código de producto (hasta 50 caracteres).</div>
  </div>
 
  <!-- Sell by Weight Toggle -->
@@ -95,9 +97,10 @@
  <label class="form-label" for="productPrice" id="priceLabel">Precio (Pesos Colombianos) *</label>
  <input type="text" id="productPrice" name="price" class="form-control" 
  placeholder="Ej: 3500 (sin puntos ni comas)"
+ maxlength="9"
  value="{{ product.price if editing else '' }}" 
  required style="font-size: 1.2rem; font-weight: 700;">
- <div class="form-hint" id="priceHint">Solo números enteros. Ejemplo: 3500 = $3.500 COP. Mínimo $100, Máximo $10.000.000</div>
+ <div class="form-hint" id="priceHint">Solo números enteros. Ejemplo: 3500 = $3.500 COP. Mínimo $100, Máximo $100.000.000</div>
  </div>
 
  <!-- Price Preview -->
@@ -187,25 +190,41 @@
  }
  }
 
- // Price input: only digits
- document.getElementById('productPrice').addEventListener('input', function() {
- this.value = this.value.replace(/\D/g, '');
- const val = parseInt(this.value) || 0;
- const preview = document.getElementById('pricePreview');
- const previewValue = document.getElementById('pricePreviewValue');
- 
- if (val > 0) {
- preview.style.display = 'block';
- previewValue.textContent = '$' + val.toLocaleString('es-CO');
- } else {
- preview.style.display = 'none';
- }
- });
+  // Price input: only digits, max 9 digits (max 100,000,000 COP)
+  document.getElementById('productPrice').addEventListener('input', function() {
+    this.value = this.value.replace(/\D/g, '').slice(0, 9);
+    const val = parseInt(this.value) || 0;
+    const preview = document.getElementById('pricePreview');
+    const previewValue = document.getElementById('pricePreviewValue');
+    
+    if (val > 0) {
+      preview.style.display = 'block';
+      previewValue.textContent = '$' + val.toLocaleString('es-CO');
+    } else {
+      preview.style.display = 'none';
+    }
+  });
 
- // Barcode: only digits
- document.getElementById('productBarcode').addEventListener('input', function() {
- this.value = this.value.replace(/\D/g, '');
- });
+  // Barcode: up to 50 characters
+  document.getElementById('productBarcode').addEventListener('input', function() {
+    this.value = this.value.replace(/[^0-9a-zA-Z]/g, '').slice(0, 50);
+  });
+
+  // PLU: up to 50 characters
+  const pluInput = document.getElementById('productPlu');
+  if (pluInput) {
+    pluInput.addEventListener('input', function() {
+      this.value = this.value.replace(/[^0-9a-zA-Z]/g, '').slice(0, 50);
+    });
+  }
+
+  // Stock: max 6 digits (up to 999,999)
+  const stockInput = document.getElementById('productStock');
+  if (stockInput) {
+    stockInput.addEventListener('input', function() {
+      this.value = this.value.replace(/\D/g, '').slice(0, 6);
+    });
+  }
 
  // Category selection
  function selectCategory(catId) {
