@@ -1,0 +1,490 @@
+{% extends "base.html" %}
+{% block title %}MercAPP — Configuración{% endblock %}
+
+{% block content %}
+<div class="page-container" style="max-width: 1000px;">
+ <div class="page-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+ <h1 class="page-title">
+ <span class="title-icon"></span> Datos del Supermercado
+ </h1>
+ <a href="{{ url_for('settings') }}" class="btn btn-outline"> Volver</a>
+ </div>
+
+ <form method="POST" enctype="multipart/form-data">
+ <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+ 
+ <div class="settings-grid">
+ <!-- Información General -->
+ <div class="settings-section">
+ <h3> Información General</h3>
+ 
+ <div class="form-group">
+ <label class="form-label">Nombre del Supermercado</label>
+ <input type="text" name="store_name" class="form-control" value="{{ store.store_name }}">
+ </div>
+ 
+ <div class="form-group">
+ <label class="form-label">Tu Nombre (Administrador)</label>
+ <input type="text" name="user_name" class="form-control" value="{{ current_user.name }}" placeholder="Ej: Eraldo Barbosa">
+ <div class="form-hint">Este es el nombre que aparece en la barra de navegación.</div>
+ </div>
+ 
+ <div class="form-group">
+ <label class="form-label">Logo</label>
+ {% if store.logo and store.logo != 'logo.png' %}
+ <div style="margin-bottom: 8px;">
+ <img src="{{ url_for('user_images', filename='' + store.logo) }}" 
+ alt="Logo" style="max-width: 120px; border-radius: 8px; border: 2px solid var(--border);">
+ </div>
+ {% endif %}
+ <input type="file" name="logo" class="form-control" accept=".jpg,.jpeg,.png,.webp">
+ <div class="form-hint">Formatos: JPG, PNG, WEBP. Se optimizará automáticamente.</div>
+ </div>
+
+ <div class="form-group">
+ <label class="form-label">Código QR para Transferencias</label>
+ {% if store.qr_transferencia %}
+ <div style="margin-bottom: 8px;">
+ <img src="{{ url_for('user_images', filename='' + store.qr_transferencia) }}" 
+ alt="QR Transferencia" style="max-width: 120px; border-radius: 8px; border: 2px solid var(--border);">
+ </div>
+ {% endif %}
+ <input type="file" name="qr_transferencia" class="form-control" accept=".jpg,.jpeg,.png,.webp">
+ <div class="form-hint">Añade aquí tu QR de Nequi, Daviplata o Bancolombia. Se mostrará en el POS al cobrar.</div>
+ </div>
+
+ <div class="form-group">
+ <label class="form-label">Dirección</label>
+ <input type="text" name="direccion" class="form-control" value="{{ store.direccion }}" placeholder="Ej: Calle 10 #15-30">
+ </div>
+ 
+ <div class="form-group">
+ <label class="form-label">Teléfono</label>
+ <input type="text" name="telefono" class="form-control" value="{{ store.telefono }}" placeholder="Ej: 310 555 1234">
+ </div>
+ 
+ <div class="form-group">
+ <label class="form-label">Ciudad / Departamento</label>
+ <input type="text" name="ciudad" class="form-control" value="{{ store.ciudad }}" placeholder="Ej: Bogotá, Cundinamarca">
+ </div>
+ </div>
+
+ <!-- Información Fiscal -->
+ <div class="settings-section">
+ <h3> Información Fiscal</h3>
+ 
+ <div class="form-group">
+ <label class="form-label">Razón Social</label>
+ <input type="text" name="razon_social" class="form-control" value="{{ store.razon_social }}" placeholder="Ej: MercAPP S.A.S">
+ </div>
+ 
+ <div class="form-group">
+ <label class="form-label">NIT</label>
+ <input type="text" name="nit" class="form-control" value="{{ store.nit }}" placeholder="Ej: 900.123.456-7">
+ </div>
+ 
+ <div class="form-group">
+ <label class="form-label">RUT</label>
+ <input type="text" name="rut" class="form-control" value="{{ store.rut }}" placeholder="Número de RUT">
+ </div>
+ 
+ <div class="form-group">
+ <label class="form-label">Régimen Tributario</label>
+ <select name="regimen_tributario" class="form-control">
+ <option value="No responsable de IVA" {% if store.regimen_tributario == 'No responsable de IVA' %}selected{% endif %}>No responsable de IVA</option>
+ <option value="Responsable de IVA" {% if store.regimen_tributario == 'Responsable de IVA' %}selected{% endif %}>Responsable de IVA</option>
+ <option value="Régimen Simple" {% if store.regimen_tributario == 'Régimen Simple' %}selected{% endif %}>Régimen Simple de Tributación</option>
+ </select>
+ </div>
+ 
+ <div class="form-group">
+ <label class="form-label">Gran Contribuyente (si aplica)</label>
+ <input type="text" name="gran_contribuyente" class="form-control" value="{{ store.gran_contribuyente }}" placeholder="Ej: GRAN CONTRIBUYENTE Res. 267/14">
+ </div>
+ 
+ <div class="form-group">
+ <label class="form-label">Agente de Retención (si aplica)</label>
+ <input type="text" name="agente_retencion" class="form-control" value="{{ store.agente_retencion }}" placeholder="Ej: Agente de Retención de IVA">
+ </div>
+ </div>
+
+ <!-- Resolución DIAN -->
+ <div class="settings-section">
+ <h3>🏛️ Resolución DIAN</h3>
+ 
+ <div class="form-group">
+ <label class="form-label">Número de Resolución</label>
+ <input type="text" name="resolucion_dian" class="form-control" value="{{ store.resolucion_dian }}" placeholder="Ej: 18764000001234">
+ </div>
+ 
+ <div class="form-group">
+ <label class="form-label">Vigencia de Resolución</label>
+ <input type="text" name="resolucion_fecha" class="form-control" value="{{ store.resolucion_fecha }}" placeholder="Ej: Del 01/01/2026 al 31/12/2026">
+ </div>
+ 
+ <div class="form-group">
+ <label class="form-label">Rango Autorizado Desde</label>
+ <input type="text" name="rango_desde" class="form-control" value="{{ store.rango_desde }}" placeholder="Ej: MRC-0001">
+ </div>
+ 
+ <div class="form-group">
+ <label class="form-label">Rango Autorizado Hasta</label>
+ <input type="text" name="rango_hasta" class="form-control" value="{{ store.rango_hasta }}" placeholder="Ej: MRC-9999">
+ </div>
+ </div>
+
+ <!-- Diseño y Tema Visual -->
+ <div class="settings-section">
+ <h3>🎨 Diseño y Tema Visual</h3>
+ 
+ <!-- Inputs hidden to post parameters -->
+ <input type="hidden" name="theme_color_primary" id="theme_color_primary" value="{{ store.theme_color_primary or 'default' }}">
+ <input type="hidden" name="theme_color_accent" id="theme_color_accent" value="{{ store.theme_color_accent or 'default' }}">
+ <input type="hidden" name="theme_color_background" id="theme_color_background" value="{{ store.theme_color_background or 'default' }}">
+ <input type="hidden" name="theme_font_family" id="theme_font_family" value="{{ store.theme_font_family or 'default' }}">
+ <input type="hidden" name="theme_font_size" id="theme_font_size" value="{{ store.theme_font_size or 'default' }}">
+ <input type="hidden" name="theme_btn_clear_color" id="theme_btn_clear_color" value="{{ store.theme_btn_clear_color or 'default' }}">
+ <input type="hidden" name="theme_btn_charge_color" id="theme_btn_charge_color" value="{{ store.theme_btn_charge_color or 'default' }}">
+
+ <!-- 1. Primary Color -->
+ <div class="form-group" style="margin-bottom: 20px;">
+ <label class="form-label" style="display: flex; justify-content: space-between; align-items: center;">
+ <span>Color Primario (Menús, Barra Superior)</span>
+ <button type="button" class="btn-reset" onclick="resetColor('primary', '#1B5E20')" style="background: none; border: none; color: var(--accent); font-size: 0.75rem; cursor: pointer; padding: 0; outline: none;">Original</button>
+ </label>
+ <div style="display: flex; gap: 10px; align-items: center;">
+ <input type="color" id="theme_color_primary_picker" class="form-control" style="width: 50px; height: 38px; padding: 2px; cursor: pointer;" value="{% if store.theme_color_primary and store.theme_color_primary != 'default' %}{{ store.theme_color_primary }}{% else %}#1b5e20{% endif %}">
+ <input type="text" id="theme_color_primary_text" class="form-control" style="font-family: monospace; font-size: 0.9rem;" placeholder="#1b5e20" value="{% if store.theme_color_primary and store.theme_color_primary != 'default' %}{{ store.theme_color_primary }}{% else %}#1b5e20{% endif %}">
+ </div>
+ </div>
+
+ <!-- 2. Accent Color -->
+ <div class="form-group" style="margin-bottom: 20px;">
+ <label class="form-label" style="display: flex; justify-content: space-between; align-items: center;">
+ <span>Color de Acento (Detalles, Indicadores)</span>
+ <button type="button" class="btn-reset" onclick="resetColor('accent', '#FF8F00')" style="background: none; border: none; color: var(--accent); font-size: 0.75rem; cursor: pointer; padding: 0; outline: none;">Original</button>
+ </label>
+ <div style="display: flex; gap: 10px; align-items: center;">
+ <input type="color" id="theme_color_accent_picker" class="form-control" style="width: 50px; height: 38px; padding: 2px; cursor: pointer;" value="{% if store.theme_color_accent and store.theme_color_accent != 'default' %}{{ store.theme_color_accent }}{% else %}#ff8f00{% endif %}">
+ <input type="text" id="theme_color_accent_text" class="form-control" style="font-family: monospace; font-size: 0.9rem;" placeholder="#ff8f00" value="{% if store.theme_color_accent and store.theme_color_accent != 'default' %}{{ store.theme_color_accent }}{% else %}#ff8f00{% endif %}">
+ </div>
+ </div>
+
+ <!-- 3. Clean Button Color -->
+ <div class="form-group" style="margin-bottom: 20px;">
+ <label class="form-label" style="display: flex; justify-content: space-between; align-items: center;">
+ <span>Color del Botón "Limpiar" (POS)</span>
+ <button type="button" class="btn-reset" onclick="resetColor('btn_clear', '#E53935')" style="background: none; border: none; color: var(--accent); font-size: 0.75rem; cursor: pointer; padding: 0; outline: none;">Original</button>
+ </label>
+ <div style="display: flex; gap: 10px; align-items: center;">
+ <input type="color" id="theme_btn_clear_picker" class="form-control" style="width: 50px; height: 38px; padding: 2px; cursor: pointer;" value="{% if store.theme_btn_clear_color and store.theme_btn_clear_color != 'default' %}{{ store.theme_btn_clear_color }}{% else %}#e53935{% endif %}">
+ <input type="text" id="theme_btn_clear_text" class="form-control" style="font-family: monospace; font-size: 0.9rem;" placeholder="#e53935" value="{% if store.theme_btn_clear_color and store.theme_btn_clear_color != 'default' %}{{ store.theme_btn_clear_color }}{% else %}#e53935{% endif %}">
+ </div>
+ </div>
+
+ <!-- 4. Charge Button Color -->
+ <div class="form-group" style="margin-bottom: 20px;">
+ <label class="form-label" style="display: flex; justify-content: space-between; align-items: center;">
+ <span>Color del Botón "Cobrar" (POS)</span>
+ <button type="button" class="btn-reset" onclick="resetColor('btn_charge', '#FF8F00')" style="background: none; border: none; color: var(--accent); font-size: 0.75rem; cursor: pointer; padding: 0; outline: none;">Original</button>
+ </label>
+ <div style="display: flex; gap: 10px; align-items: center;">
+ <input type="color" id="theme_btn_charge_picker" class="form-control" style="width: 50px; height: 38px; padding: 2px; cursor: pointer;" value="{% if store.theme_btn_charge_color and store.theme_btn_charge_color != 'default' %}{{ store.theme_btn_charge_color }}{% else %}#ff8f00{% endif %}">
+ <input type="text" id="theme_btn_charge_text" class="form-control" style="font-family: monospace; font-size: 0.9rem;" placeholder="#ff8f00" value="{% if store.theme_btn_charge_color and store.theme_btn_charge_color != 'default' %}{{ store.theme_btn_charge_color }}{% else %}#ff8f00{% endif %}">
+ </div>
+ </div>
+
+ <!-- 5. Background Color -->
+ <div class="form-group" style="margin-bottom: 20px;">
+ <label class="form-label">Color de Fondo (Nivel de Oscuridad)</label>
+ <select id="theme_color_background_select" class="form-control">
+ <option value="default" {% if not store.theme_color_background or store.theme_color_background == 'default' %}selected{% endif %}>Oscuro Obsidiana (Original)</option>
+ <option value="#090d16" {% if store.theme_color_background == '#090d16' %}selected{% endif %}>Medianoche Profundo</option>
+ <option value="#111827" {% if store.theme_color_background == '#111827' %}selected{% endif %}>Pizarra Oscuro</option>
+ <option value="#000000" {% if store.theme_color_background == '#000000' %}selected{% endif %}>Negro Absoluto</option>
+ </select>
+ </div>
+
+ <!-- 6. Font Family -->
+ <div class="form-group" style="margin-bottom: 20px;">
+ <label class="form-label">Tipografía (Letra)</label>
+ <select id="theme_font_family_select" class="form-control">
+ <option value="default" {% if not store.theme_font_family or store.theme_font_family == 'default' %}selected{% endif %}>Outfit (Predeterminada)</option>
+ <option value="Inter" {% if store.theme_font_family == 'Inter' %}selected{% endif %}>Inter (Limpia y técnica)</option>
+ <option value="Roboto" {% if store.theme_font_family == 'Roboto' %}selected{% endif %}>Roboto (Estándar legible)</option>
+ <option value="Montserrat" {% if store.theme_font_family == 'Montserrat' %}selected{% endif %}>Montserrat (Elegante y moderna)</option>
+ <option value="Poppins" {% if store.theme_font_family == 'Poppins' %}selected{% endif %}>Poppins (Redondeada y amigable)</option>
+ <option value="Playfair Display" {% if store.theme_font_family == 'Playfair Display' %}selected{% endif %}>Playfair Display (Serif clásica)</option>
+ <option value="Comfortaa" {% if store.theme_font_family == 'Comfortaa' %}selected{% endif %}>Comfortaa (Redondeada y suave)</option>
+ <option value="Oswald" {% if store.theme_font_family == 'Oswald' %}selected{% endif %}>Oswald (Condensada y fuerte)</option>
+ <option value="Quicksand" {% if store.theme_font_family == 'Quicksand' %}selected{% endif %}>Quicksand (Amigable y geométrica)</option>
+ <option value="Pacifico" {% if store.theme_font_family == 'Pacifico' %}selected{% endif %}>Pacifico (Manuscrita divertida)</option>
+ <option value="Playpen Sans" {% if store.theme_font_family == 'Playpen Sans' %}selected{% endif %}>Playpen Sans (Casual y manuscrita)</option>
+ </select>
+ </div>
+
+ <!-- 7. Font Size -->
+ <div class="form-group" style="margin-bottom: 20px;">
+ <label class="form-label">Tamaño de la Letra</label>
+ <select id="theme_font_size_select" class="form-control">
+ <option value="default" {% if not store.theme_font_size or store.theme_font_size == 'default' %}selected{% endif %}>Mediano (Predeterminado - 16px)</option>
+ <option value="small" {% if store.theme_font_size == 'small' %}selected{% endif %}>Pequeño (14px - Compacto)</option>
+ <option value="large" {% if store.theme_font_size == 'large' %}selected{% endif %}>Grande (18px - Legible)</option>
+ </select>
+ </div>
+
+ <!-- Preview -->
+ <div class="theme-preview-card" style="margin-top: 16px; padding: 20px; border-radius: 12px; border: 1px solid var(--border); transition: all 0.3s ease;">
+ <h4 style="margin: 0 0 10px 0; font-size: 1.1rem;" class="preview-title">Vista Previa de POS</h4>
+ <p style="font-size: 0.9rem; margin: 0 0 16px 0;" class="preview-text">Vista previa interactiva de los botones "Limpiar" y "Cobrar" con tu tema actual:</p>
+ <div style="display: flex; flex-direction: column; gap: 10px;">
+ <button type="button" class="preview-btn-clear" style="padding: 14px; font-weight: 700; border-radius: 6px; cursor: default; border: 2px solid; text-align: center;">Limpiar Carrito</button>
+ <button type="button" class="preview-btn-charge" style="padding: 14px; font-weight: 800; border-radius: 6px; border: none; cursor: default; text-align: center; color: #fff;">COBRAR $0</button>
+ </div>
+ </div>
+ </div>
+
+ <!-- Personalización del Ticket -->
+ <div class="settings-section">
+ <h3> Personalización del Ticket</h3>
+ 
+ <div class="form-group">
+ <label class="form-label">Mensaje de Despedida</label>
+ <input type="text" name="mensaje_ticket" class="form-control" value="{{ store.mensaje_ticket }}" placeholder="¡Gracias por su compra!">
+ <div class="form-hint">Este mensaje aparece al final de cada factura.</div>
+ </div>
+ 
+ <!-- Preview -->
+ <div style="margin-top: 16px; padding: 16px; background: #fff; color: #000; border-radius: 8px; font-family: 'Courier New', monospace; font-size: 11px; text-align: center; line-height: 1.5;">
+ <strong style="font-size: 14px;">{{ store.store_name }}</strong><br>
+ <span style="font-size: 10px;">SUPERMERCADO</span><br>
+ <span style="font-size: 9px;">───────────────────────</span><br>
+ {% if store.razon_social %}<span style="font-size: 9px;">{{ store.razon_social }}</span><br>{% endif %}
+ {% if store.nit != '000.000.000-0' %}<span style="font-size: 9px;">NIT: {{ store.nit }}</span><br>{% endif %}
+ {% if store.direccion %}<span style="font-size: 9px;">{{ store.direccion }}</span><br>{% endif %}
+ {% if store.ciudad %}<span style="font-size: 9px;">{{ store.ciudad }}</span><br>{% endif %}
+ <span style="font-size: 9px;">───────────────────────</span><br>
+ <span style="font-size: 10px; color: #666;">Vista previa del encabezado</span>
+ </div>
+ </div>
+ </div>
+
+ <div style="margin-top: 24px; text-align: center;">
+ <button type="submit" class="btn btn-primary btn-lg">
+ Guardar Configuración
+ </button>
+ </div>
+ </form>
+</div>
+
+<script>
+// Global function to reset color values to default
+window.resetColor = function(type, defaultHex) {
+    if (type === 'primary') {
+        document.getElementById('theme_color_primary').value = 'default';
+        document.getElementById('theme_color_primary_picker').value = defaultHex;
+        document.getElementById('theme_color_primary_text').value = 'default';
+    } else if (type === 'accent') {
+        document.getElementById('theme_color_accent').value = 'default';
+        document.getElementById('theme_color_accent_picker').value = defaultHex;
+        document.getElementById('theme_color_accent_text').value = 'default';
+    } else if (type === 'btn_clear') {
+        document.getElementById('theme_btn_clear_color').value = 'default';
+        document.getElementById('theme_btn_clear_picker').value = defaultHex;
+        document.getElementById('theme_btn_clear_text').value = 'default';
+    } else if (type === 'btn_charge') {
+        document.getElementById('theme_btn_charge_color').value = 'default';
+        document.getElementById('theme_btn_charge_picker').value = defaultHex;
+        document.getElementById('theme_btn_charge_text').value = 'default';
+    }
+    if (window.triggerUpdatePreview) {
+        window.triggerUpdatePreview();
+    }
+};
+
+document.addEventListener('DOMContentLoaded', function() {
+    // 1. Get elements
+    const primaryPicker = document.getElementById('theme_color_primary_picker');
+    const primaryText = document.getElementById('theme_color_primary_text');
+    const primaryHidden = document.getElementById('theme_color_primary');
+    
+    const accentPicker = document.getElementById('theme_color_accent_picker');
+    const accentText = document.getElementById('theme_color_accent_text');
+    const accentHidden = document.getElementById('theme_color_accent');
+    
+    const clearPicker = document.getElementById('theme_btn_clear_picker');
+    const clearText = document.getElementById('theme_btn_clear_text');
+    const clearHidden = document.getElementById('theme_btn_clear_color');
+    
+    const chargePicker = document.getElementById('theme_btn_charge_picker');
+    const chargeText = document.getElementById('theme_btn_charge_text');
+    const chargeHidden = document.getElementById('theme_btn_charge_color');
+    
+    const bgSelect = document.getElementById('theme_color_background_select');
+    const fontSelect = document.getElementById('theme_font_family_select');
+    const sizeSelect = document.getElementById('theme_font_size_select');
+    
+    // Preview targets
+    const previewCard = document.querySelector('.theme-preview-card');
+    const previewTitle = document.querySelector('.preview-title');
+    const previewTextEl = document.querySelector('.preview-text');
+    const previewBtnClear = document.querySelector('.preview-btn-clear');
+    const previewBtnCharge = document.querySelector('.preview-btn-charge');
+    
+    // Helper function to validate hex color
+    function isValidHex(hex) {
+        return /^#[0-9A-F]{6}$/i.test(hex);
+    }
+    
+    // Core function to update colors
+    function syncColor(picker, text, hidden, defaultVal) {
+        let val = text.value.trim();
+        if (val === 'default') {
+            hidden.value = 'default';
+            picker.value = defaultVal;
+        } else if (isValidHex(val)) {
+            hidden.value = val;
+            picker.value = val;
+        } else {
+            // Check if user is typing a hex but hasn't finished, or if picker value changed
+            if (val.startsWith('#') && val.length === 7) {
+                hidden.value = val;
+                picker.value = val;
+            } else if (!val.startsWith('#') && val.length === 6 && isValidHex('#' + val)) {
+                text.value = '#' + val;
+                hidden.value = '#' + val;
+                picker.value = '#' + val;
+            }
+        }
+    }
+    
+    function mixColors(color1, color2, weight) {
+        if (!color1 || !color1.startsWith('#') || color1.length !== 7) return color1;
+        let r1 = parseInt(color1.substring(1,3), 16);
+        let g1 = parseInt(color1.substring(3,5), 16);
+        let b1 = parseInt(color1.substring(5,7), 16);
+        
+        let r2, g2, b2;
+        if (color2 === 'white') {
+            r2 = g2 = b2 = 255;
+        } else if (color2 === 'black') {
+            r2 = g2 = b2 = 0;
+        } else {
+            if (!color2 || !color2.startsWith('#') || color2.length !== 7) return color1;
+            r2 = parseInt(color2.substring(1,3), 16);
+            g2 = parseInt(color2.substring(3,5), 16);
+            b2 = parseInt(color2.substring(5,7), 16);
+        }
+        
+        let r = Math.round(r1 * weight + r2 * (1 - weight));
+        let g = Math.round(g1 * weight + g2 * (1 - weight));
+        let b = Math.round(b1 * weight + b2 * (1 - weight));
+        
+        r = Math.max(0, Math.min(255, r));
+        g = Math.max(0, Math.min(255, g));
+        b = Math.max(0, Math.min(255, b));
+        
+        return '#' + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
+    }
+
+    function colorToRgba(color, alpha) {
+        if (!color || !color.startsWith('#') || color.length !== 7) return color;
+        let r = parseInt(color.substring(1,3), 16);
+        let g = parseInt(color.substring(3,5), 16);
+        let b = parseInt(color.substring(5,7), 16);
+        return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+    }
+
+    function updatePreview() {
+        // Sync color controls
+        syncColor(primaryPicker, primaryText, primaryHidden, '#1B5E20');
+        syncColor(accentPicker, accentText, accentHidden, '#FF8F00');
+        syncColor(clearPicker, clearText, clearHidden, '#E53935');
+        syncColor(chargePicker, chargeText, chargeHidden, '#FF8F00');
+        
+        // Resolve display values
+        let displayPrimary = primaryHidden.value === 'default' ? '#1B5E20' : primaryHidden.value;
+        let displayAccent = accentHidden.value === 'default' ? '#FF8F00' : accentHidden.value;
+        let displayClear = clearHidden.value === 'default' ? '#E53935' : clearHidden.value;
+        let displayCharge = chargeHidden.value === 'default' ? '#FF8F00' : chargeHidden.value;
+        
+        let bgColor = bgSelect.value;
+        document.getElementById('theme_color_background').value = bgColor;
+        let displayBg = bgColor === 'default' ? '#0F1218' : bgColor;
+        
+        let fontFamily = fontSelect.value;
+        document.getElementById('theme_font_family').value = fontFamily;
+        let displayFont = fontFamily === 'default' ? 'Outfit' : fontFamily;
+        
+        let fontSize = sizeSelect.value;
+        document.getElementById('theme_font_size').value = fontSize;
+        let displayFontSize = '16px';
+        if (fontSize === 'small') displayFontSize = '14px';
+        if (fontSize === 'large') displayFontSize = '18px';
+        
+        // Apply styling to Preview Card
+        let displayBorder = mixColors(displayBg, 'white', 0.80);
+        let displayInput = mixColors(displayBg, 'white', 0.96);
+        
+        previewCard.style.backgroundColor = displayBg;
+        previewCard.style.fontFamily = `'${displayFont}', sans-serif`;
+        previewCard.style.fontSize = displayFontSize;
+        previewCard.style.borderColor = displayBorder;
+        
+        previewTitle.style.color = '#E8EAED';
+        previewTextEl.style.color = '#9AA0A6';
+        
+        // Apply clear button preview
+        previewBtnClear.style.color = displayClear;
+        previewBtnClear.style.backgroundColor = colorToRgba(displayClear, 0.12);
+        previewBtnClear.style.borderColor = colorToRgba(displayClear, 0.30);
+        
+        // Apply charge button preview
+        let chargeBgStart = mixColors(displayCharge, 'black', 0.80);
+        previewBtnCharge.style.background = `linear-gradient(135deg, ${chargeBgStart}, ${displayCharge})`;
+        previewBtnCharge.style.boxShadow = `0 4px 20px ${colorToRgba(displayCharge, 0.30)}`;
+    }
+    
+    // Bind listeners
+    window.triggerUpdatePreview = updatePreview;
+    
+    // Color inputs listeners
+    primaryPicker.addEventListener('input', function() {
+        primaryText.value = primaryPicker.value;
+        primaryHidden.value = primaryPicker.value;
+        updatePreview();
+    });
+    primaryText.addEventListener('input', updatePreview);
+    
+    accentPicker.addEventListener('input', function() {
+        accentText.value = accentPicker.value;
+        accentHidden.value = accentPicker.value;
+        updatePreview();
+    });
+    accentText.addEventListener('input', updatePreview);
+    
+    clearPicker.addEventListener('input', function() {
+        clearText.value = clearPicker.value;
+        clearHidden.value = clearPicker.value;
+        updatePreview();
+    });
+    clearText.addEventListener('input', updatePreview);
+    
+    chargePicker.addEventListener('input', function() {
+        chargeText.value = chargePicker.value;
+        chargeHidden.value = chargePicker.value;
+        updatePreview();
+    });
+    chargeText.addEventListener('input', updatePreview);
+    
+    // Dropdowns listeners
+    bgSelect.addEventListener('change', updatePreview);
+    fontSelect.addEventListener('change', updatePreview);
+    sizeSelect.addEventListener('change', updatePreview);
+    
+    // Initialize
+    updatePreview();
+});
+</script>
+{% endblock %}
+
