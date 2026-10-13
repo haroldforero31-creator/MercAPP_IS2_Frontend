@@ -137,6 +137,10 @@
  <div class="settings-section">
  <h3>🎨 Diseño y Tema Visual</h3>
  
+ <div style="background: rgba(255, 143, 0, 0.08); border-left: 4px solid var(--accent); padding: 12px 16px; border-radius: 6px; margin-bottom: 20px; font-size: 0.88rem; color: var(--text-secondary); line-height: 1.5;">
+     <strong style="color: var(--accent-light);">🛡️ Protección de Contraste y Legibilidad:</strong> Las letras del sistema son blancas. Para garantizar que los textos, botones y menús no desaparezcan ni se vuelvan ilegibles, el sistema <strong>bloquea cualquier tono claro o blanco</strong>, ajustándolo automáticamente a una variante oscura de ese mismo color. Puedes usar las paletas recomendadas o el selector libre.
+ </div>
+ 
  <!-- Inputs hidden to post parameters -->
  <input type="hidden" name="theme_color_primary" id="theme_color_primary" value="{{ store.theme_color_primary or 'default' }}">
  <input type="hidden" name="theme_color_accent" id="theme_color_accent" value="{{ store.theme_color_accent or 'default' }}">
@@ -156,6 +160,19 @@
  <input type="color" id="theme_color_primary_picker" class="form-control" style="width: 50px; height: 38px; padding: 2px; cursor: pointer;" value="{% if store.theme_color_primary and store.theme_color_primary != 'default' %}{{ store.theme_color_primary }}{% else %}#1b5e20{% endif %}">
  <input type="text" id="theme_color_primary_text" class="form-control" style="font-family: monospace; font-size: 0.9rem;" placeholder="#1b5e20" value="{% if store.theme_color_primary and store.theme_color_primary != 'default' %}{{ store.theme_color_primary }}{% else %}#1b5e20{% endif %}">
  </div>
+ <div style="margin-top: 8px;">
+     <div style="font-size: 0.78rem; color: var(--text-muted); margin-bottom: 6px;">Paleta recomendada con alto contraste:</div>
+     <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center;">
+         <button type="button" onclick="selectPreset('primary', '#1B5E20')" style="background: #1B5E20; width: 28px; height: 28px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.3); cursor: pointer;" title="Verde Corporativo"></button>
+         <button type="button" onclick="selectPreset('primary', '#0D47A1')" style="background: #0D47A1; width: 28px; height: 28px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.3); cursor: pointer;" title="Azul Marino"></button>
+         <button type="button" onclick="selectPreset('primary', '#4A148C')" style="background: #4A148C; width: 28px; height: 28px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.3); cursor: pointer;" title="Púrpura Real"></button>
+         <button type="button" onclick="selectPreset('primary', '#880E4F')" style="background: #880E4F; width: 28px; height: 28px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.3); cursor: pointer;" title="Rojo Borgoña"></button>
+         <button type="button" onclick="selectPreset('primary', '#004D40')" style="background: #004D40; width: 28px; height: 28px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.3); cursor: pointer;" title="Verde Petróleo"></button>
+         <button type="button" onclick="selectPreset('primary', '#263238')" style="background: #263238; width: 28px; height: 28px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.3); cursor: pointer;" title="Grafito Elegante"></button>
+         <button type="button" onclick="selectPreset('primary', '#3E2723')" style="background: #3E2723; width: 28px; height: 28px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.3); cursor: pointer;" title="Cacao Oscuro"></button>
+     </div>
+ </div>
+ <div id="primary_warning" style="display: none; font-size: 0.8rem; color: #FFA726; margin-top: 6px; padding: 4px 8px; background: rgba(255, 167, 38, 0.1); border-radius: 4px;"></div>
  </div>
 
  <!-- 2. Accent Color -->
@@ -168,6 +185,7 @@
  <input type="color" id="theme_color_accent_picker" class="form-control" style="width: 50px; height: 38px; padding: 2px; cursor: pointer;" value="{% if store.theme_color_accent and store.theme_color_accent != 'default' %}{{ store.theme_color_accent }}{% else %}#ff8f00{% endif %}">
  <input type="text" id="theme_color_accent_text" class="form-control" style="font-family: monospace; font-size: 0.9rem;" placeholder="#ff8f00" value="{% if store.theme_color_accent and store.theme_color_accent != 'default' %}{{ store.theme_color_accent }}{% else %}#ff8f00{% endif %}">
  </div>
+ <div id="accent_warning" style="display: none; font-size: 0.8rem; color: #FFA726; margin-top: 6px; padding: 4px 8px; background: rgba(255, 167, 38, 0.1); border-radius: 4px;"></div>
  </div>
 
  <!-- 3. Clean Button Color -->
@@ -180,6 +198,14 @@
  <input type="color" id="theme_btn_clear_picker" class="form-control" style="width: 50px; height: 38px; padding: 2px; cursor: pointer;" value="{% if store.theme_btn_clear_color and store.theme_btn_clear_color != 'default' %}{{ store.theme_btn_clear_color }}{% else %}#e53935{% endif %}">
  <input type="text" id="theme_btn_clear_text" class="form-control" style="font-family: monospace; font-size: 0.9rem;" placeholder="#e53935" value="{% if store.theme_btn_clear_color and store.theme_btn_clear_color != 'default' %}{{ store.theme_btn_clear_color }}{% else %}#e53935{% endif %}">
  </div>
+ <div style="margin-top: 8px;">
+     <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+         <button type="button" onclick="selectPreset('btn_clear', '#E53935')" style="background: #E53935; width: 28px; height: 28px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.3); cursor: pointer;" title="Rojo Carmesí"></button>
+         <button type="button" onclick="selectPreset('btn_clear', '#D84315')" style="background: #D84315; width: 28px; height: 28px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.3); cursor: pointer;" title="Naranja Fuego"></button>
+         <button type="button" onclick="selectPreset('btn_clear', '#880E4F')" style="background: #880E4F; width: 28px; height: 28px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.3); cursor: pointer;" title="Vino Tinto"></button>
+     </div>
+ </div>
+ <div id="clear_warning" style="display: none; font-size: 0.8rem; color: #FFA726; margin-top: 6px; padding: 4px 8px; background: rgba(255, 167, 38, 0.1); border-radius: 4px;"></div>
  </div>
 
  <!-- 4. Charge Button Color -->
@@ -192,6 +218,17 @@
  <input type="color" id="theme_btn_charge_picker" class="form-control" style="width: 50px; height: 38px; padding: 2px; cursor: pointer;" value="{% if store.theme_btn_charge_color and store.theme_btn_charge_color != 'default' %}{{ store.theme_btn_charge_color }}{% else %}#ff8f00{% endif %}">
  <input type="text" id="theme_btn_charge_text" class="form-control" style="font-family: monospace; font-size: 0.9rem;" placeholder="#ff8f00" value="{% if store.theme_btn_charge_color and store.theme_btn_charge_color != 'default' %}{{ store.theme_btn_charge_color }}{% else %}#ff8f00{% endif %}">
  </div>
+ <div style="margin-top: 8px;">
+     <div style="font-size: 0.78rem; color: var(--text-muted); margin-bottom: 6px;">Paleta recomendada con alto contraste:</div>
+     <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+         <button type="button" onclick="selectPreset('charge', '#FF8F00')" style="background: #FF8F00; width: 28px; height: 28px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.3); cursor: pointer;" title="Ámbar Original"></button>
+         <button type="button" onclick="selectPreset('charge', '#2E7D32')" style="background: #2E7D32; width: 28px; height: 28px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.3); cursor: pointer;" title="Verde Esmeralda"></button>
+         <button type="button" onclick="selectPreset('charge', '#1565C0')" style="background: #1565C0; width: 28px; height: 28px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.3); cursor: pointer;" title="Azul Cobalto"></button>
+         <button type="button" onclick="selectPreset('charge', '#C62828')" style="background: #C62828; width: 28px; height: 28px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.3); cursor: pointer;" title="Rojo Carmesí"></button>
+         <button type="button" onclick="selectPreset('charge', '#6A1B9A')" style="background: #6A1B9A; width: 28px; height: 28px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.3); cursor: pointer;" title="Amatista Púrpura"></button>
+     </div>
+ </div>
+ <div id="charge_warning" style="display: none; font-size: 0.8rem; color: #FFA726; margin-top: 6px; padding: 4px 8px; background: rgba(255, 167, 38, 0.1); border-radius: 4px;"></div>
  </div>
 
  <!-- 5. Background Color -->
@@ -202,6 +239,9 @@
  <option value="#090d16" {% if store.theme_color_background == '#090d16' %}selected{% endif %}>Medianoche Profundo</option>
  <option value="#111827" {% if store.theme_color_background == '#111827' %}selected{% endif %}>Pizarra Oscuro</option>
  <option value="#000000" {% if store.theme_color_background == '#000000' %}selected{% endif %}>Negro Absoluto</option>
+ <option value="#08170e" {% if store.theme_color_background == '#08170e' %}selected{% endif %}>Esmeralda Nocturno</option>
+ <option value="#08111d" {% if store.theme_color_background == '#08111d' %}selected{% endif %}>Marino Nocturno</option>
+ <option value="#13091b" {% if store.theme_color_background == '#13091b' %}selected{% endif %}>Ciruela Nocturno</option>
  </select>
  </div>
 
@@ -278,24 +318,81 @@
 </div>
 
 <script>
+// Helper: Calculate brightness and clamp to safe darkness for white text contrast
+function clampToSafeDarkness(hexColor, maxBrightness = 140) {
+    if (!hexColor || !hexColor.startsWith('#') || hexColor.length !== 7) return hexColor;
+    let r = parseInt(hexColor.substring(1, 3), 16);
+    let g = parseInt(hexColor.substring(3, 5), 16);
+    let b = parseInt(hexColor.substring(5, 7), 16);
+    let brightness = 0.299 * r + 0.587 * g + 0.114 * b;
+    if (brightness > maxBrightness && brightness > 0) {
+        let factor = maxBrightness / brightness;
+        r = Math.min(255, Math.max(0, Math.round(r * factor)));
+        g = Math.min(255, Math.max(0, Math.round(g * factor)));
+        b = Math.min(255, Math.max(0, Math.round(b * factor)));
+        return '#' + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
+    }
+    return hexColor;
+}
+
 // Global function to reset color values to default
 window.resetColor = function(type, defaultHex) {
     if (type === 'primary') {
         document.getElementById('theme_color_primary').value = 'default';
         document.getElementById('theme_color_primary_picker').value = defaultHex;
         document.getElementById('theme_color_primary_text').value = 'default';
+        const w = document.getElementById('primary_warning');
+        if (w) w.style.display = 'none';
     } else if (type === 'accent') {
         document.getElementById('theme_color_accent').value = 'default';
         document.getElementById('theme_color_accent_picker').value = defaultHex;
         document.getElementById('theme_color_accent_text').value = 'default';
+        const w = document.getElementById('accent_warning');
+        if (w) w.style.display = 'none';
     } else if (type === 'btn_clear') {
         document.getElementById('theme_btn_clear_color').value = 'default';
         document.getElementById('theme_btn_clear_picker').value = defaultHex;
         document.getElementById('theme_btn_clear_text').value = 'default';
+        const w = document.getElementById('clear_warning');
+        if (w) w.style.display = 'none';
     } else if (type === 'btn_charge') {
         document.getElementById('theme_btn_charge_color').value = 'default';
         document.getElementById('theme_btn_charge_picker').value = defaultHex;
         document.getElementById('theme_btn_charge_text').value = 'default';
+        const w = document.getElementById('charge_warning');
+        if (w) w.style.display = 'none';
+    }
+    if (window.triggerUpdatePreview) {
+        window.triggerUpdatePreview();
+    }
+};
+
+// Global function to select a curated preset
+window.selectPreset = function(type, hex) {
+    if (type === 'primary') {
+        document.getElementById('theme_color_primary_picker').value = hex;
+        document.getElementById('theme_color_primary_text').value = hex;
+        document.getElementById('theme_color_primary').value = hex;
+        const w = document.getElementById('primary_warning');
+        if (w) w.style.display = 'none';
+    } else if (type === 'accent') {
+        document.getElementById('theme_color_accent_picker').value = hex;
+        document.getElementById('theme_color_accent_text').value = hex;
+        document.getElementById('theme_color_accent').value = hex;
+        const w = document.getElementById('accent_warning');
+        if (w) w.style.display = 'none';
+    } else if (type === 'btn_clear') {
+        document.getElementById('theme_btn_clear_picker').value = hex;
+        document.getElementById('theme_btn_clear_text').value = hex;
+        document.getElementById('theme_btn_clear_color').value = hex;
+        const w = document.getElementById('clear_warning');
+        if (w) w.style.display = 'none';
+    } else if (type === 'charge') {
+        document.getElementById('theme_btn_charge_picker').value = hex;
+        document.getElementById('theme_btn_charge_text').value = hex;
+        document.getElementById('theme_btn_charge_color').value = hex;
+        const w = document.getElementById('charge_warning');
+        if (w) w.style.display = 'none';
     }
     if (window.triggerUpdatePreview) {
         window.triggerUpdatePreview();
@@ -336,24 +433,40 @@ document.addEventListener('DOMContentLoaded', function() {
         return /^#[0-9A-F]{6}$/i.test(hex);
     }
     
-    // Core function to update colors
-    function syncColor(picker, text, hidden, defaultVal) {
+    // Core function to update colors with contrast protection
+    function syncColor(picker, text, hidden, defaultVal, maxBrightness = 140, warningId = null) {
         let val = text.value.trim();
+        const warningEl = warningId ? document.getElementById(warningId) : null;
+        
         if (val === 'default') {
             hidden.value = 'default';
             picker.value = defaultVal;
-        } else if (isValidHex(val)) {
-            hidden.value = val;
-            picker.value = val;
-        } else {
-            // Check if user is typing a hex but hasn't finished, or if picker value changed
-            if (val.startsWith('#') && val.length === 7) {
-                hidden.value = val;
-                picker.value = val;
-            } else if (!val.startsWith('#') && val.length === 6 && isValidHex('#' + val)) {
-                text.value = '#' + val;
-                hidden.value = '#' + val;
-                picker.value = '#' + val;
+            if (warningEl) warningEl.style.display = 'none';
+            return;
+        }
+        
+        let targetHex = null;
+        if (isValidHex(val)) {
+            targetHex = val;
+        } else if (!val.startsWith('#') && val.length === 6 && isValidHex('#' + val)) {
+            targetHex = '#' + val;
+        } else if (val.startsWith('#') && val.length === 7) {
+            targetHex = val;
+        }
+        
+        if (targetHex) {
+            let clamped = clampToSafeDarkness(targetHex, maxBrightness);
+            if (clamped.toLowerCase() !== targetHex.toLowerCase()) {
+                hidden.value = clamped;
+                picker.value = clamped;
+                if (warningEl) {
+                    warningEl.textContent = `🛡️ Tono claro ajustado a ${clamped} para asegurar que las letras blancas no desaparezcan.`;
+                    warningEl.style.display = 'block';
+                }
+            } else {
+                hidden.value = targetHex;
+                picker.value = targetHex;
+                if (warningEl) warningEl.style.display = 'none';
             }
         }
     }
@@ -397,10 +510,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function updatePreview() {
         // Sync color controls
-        syncColor(primaryPicker, primaryText, primaryHidden, '#1B5E20');
-        syncColor(accentPicker, accentText, accentHidden, '#FF8F00');
-        syncColor(clearPicker, clearText, clearHidden, '#E53935');
-        syncColor(chargePicker, chargeText, chargeHidden, '#FF8F00');
+        syncColor(primaryPicker, primaryText, primaryHidden, '#1B5E20', 140, 'primary_warning');
+        syncColor(accentPicker, accentText, accentHidden, '#FF8F00', 165, 'accent_warning');
+        syncColor(clearPicker, clearText, clearHidden, '#E53935', 140, 'clear_warning');
+        syncColor(chargePicker, chargeText, chargeHidden, '#FF8F00', 140, 'charge_warning');
         
         // Resolve display values
         let displayPrimary = primaryHidden.value === 'default' ? '#1B5E20' : primaryHidden.value;
@@ -424,7 +537,6 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Apply styling to Preview Card
         let displayBorder = mixColors(displayBg, 'white', 0.80);
-        let displayInput = mixColors(displayBg, 'white', 0.96);
         
         previewCard.style.backgroundColor = displayBg;
         previewCard.style.fontFamily = `'${displayFont}', sans-serif`;
@@ -448,32 +560,45 @@ document.addEventListener('DOMContentLoaded', function() {
     // Bind listeners
     window.triggerUpdatePreview = updatePreview;
     
+    // Helper to handle color picker with live clamping
+    function handlePickerInput(picker, text, hidden, maxB, warningId) {
+        let val = picker.value;
+        let clamped = clampToSafeDarkness(val, maxB);
+        const w = warningId ? document.getElementById(warningId) : null;
+        if (clamped.toLowerCase() !== val.toLowerCase()) {
+            picker.value = clamped;
+            text.value = clamped;
+            hidden.value = clamped;
+            if (w) {
+                w.textContent = `🛡️ Tono claro ajustado a ${clamped} para asegurar que las letras blancas se lean perfectamente.`;
+                w.style.display = 'block';
+            }
+        } else {
+            text.value = val;
+            hidden.value = val;
+            if (w) w.style.display = 'none';
+        }
+        updatePreview();
+    }
+    
     // Color inputs listeners
     primaryPicker.addEventListener('input', function() {
-        primaryText.value = primaryPicker.value;
-        primaryHidden.value = primaryPicker.value;
-        updatePreview();
+        handlePickerInput(primaryPicker, primaryText, primaryHidden, 140, 'primary_warning');
     });
     primaryText.addEventListener('input', updatePreview);
     
     accentPicker.addEventListener('input', function() {
-        accentText.value = accentPicker.value;
-        accentHidden.value = accentPicker.value;
-        updatePreview();
+        handlePickerInput(accentPicker, accentText, accentHidden, 165, 'accent_warning');
     });
     accentText.addEventListener('input', updatePreview);
     
     clearPicker.addEventListener('input', function() {
-        clearText.value = clearPicker.value;
-        clearHidden.value = clearPicker.value;
-        updatePreview();
+        handlePickerInput(clearPicker, clearText, clearHidden, 140, 'clear_warning');
     });
     clearText.addEventListener('input', updatePreview);
     
     chargePicker.addEventListener('input', function() {
-        chargeText.value = chargePicker.value;
-        chargeHidden.value = chargePicker.value;
-        updatePreview();
+        handlePickerInput(chargePicker, chargeText, chargeHidden, 140, 'charge_warning');
     });
     chargeText.addEventListener('input', updatePreview);
     
