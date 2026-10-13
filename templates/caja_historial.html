@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+
+{% block title %}Historial de Caja - MercAPP{% endblock %}
+
+{% block content %}
+<div class="header-actions" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+ <h2>Historial de Sesiones de Caja</h2>
+</div>
+
+<div class="card" style="padding: 0; overflow-x: auto;">
+ <table class="data-table">
+ <thead>
+ <tr>
+ <th>Apertura</th>
+ <th>Cierre</th>
+ <th>Estado</th>
+ <th>Base Inicial</th>
+ <th>Ventas Sist. (Efec)</th>
+ <th>Efectivo Esperado</th>
+ <th>Efectivo Físico Contado</th>
+ <th>Diferencia</th>
+ <th style="text-align: right;">Acciones</th>
+ </tr>
+ </thead>
+ <tbody>
+ {% for session in sessions %}
+ <tr>
+ <td>{{ session.opened_at.strftime('%Y-%m-%d %H:%M') }}</td>
+ <td>{{ session.closed_at.strftime('%Y-%m-%d %H:%M') if session.closed_at else '--:--' }}</td>
+ <td>
+ {% if session.status == 'abierta' %}
+ <span style="background-color: var(--success); color: white; padding: 3px 8px; border-radius: 4px; font-size: 0.85em;">Abierta</span>
+ {% else %}
+ <span style="background-color: var(--text-secondary); color: white; padding: 3px 8px; border-radius: 4px; font-size: 0.85em;">Cerrada</span>
+ {% endif %}
+ </td>
+ <td>{{ session.base_amount | cop }}</td>
+ <td>{{ session.cash_sales | cop }}</td>
+ <td>{{ session.expected_cash | cop }}</td>
+ <td style="font-weight: bold;">
+ {% if session.actual_cash is not none %}
+ {{ session.actual_cash | cop }}
+ {% else %}
+ --
+ {% endif %}
+ </td>
+ <td>
+ {% if session.actual_cash is not none %}
+ {% set diff = session.actual_cash - session.expected_cash %}
+ {% if diff > 0 %}
+ <span style="color: #e67e22; font-weight: bold;">+ {{ diff | cop }}</span>
+ {% elif diff < 0 %}
+ <span style="color: var(--danger); font-weight: bold;">- {{ diff|abs | cop }}</span>
+ {% else %}
+ <span style="color: var(--success); font-weight: bold;">$0</span>
+ {% endif %}
+ {% else %}
+ --
+ {% endif %}
+ </td>
+ <td style="text-align: right;">
+ {% if session.status == 'abierta' %}
+ <a href="{{ url_for('session_close', session_id=session.id) }}" class="btn btn-outline btn-sm" style="color: var(--danger); border-color: var(--danger);"> Cerrar</a>
+ {% endif %}
+ <a href="{{ url_for('session_detail', session_id=session.id) }}" class="btn btn-outline btn-sm"> Ver Audit</a>
+ </td>
+ </tr>
+ {% else %}
+ <tr>
+ <td colspan="8" style="text-align: center; padding: 20px; color: var(--text-secondary);">
+ No hay sesiones de caja registradas.
+ </td>
+ </tr>
+ {% endfor %}
+ </tbody>
+ </table>
+</div>
+{% endblock %}

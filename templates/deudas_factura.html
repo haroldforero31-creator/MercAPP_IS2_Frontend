@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+ <meta charset="UTF-8">
+ <title>Estado de Cuenta — {{ client.name }} — {{ settings.store_name }}</title>
+ <style>
+ @import url('https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;700&display=swap');
+ 
+ * { margin: 0; padding: 0; box-sizing: border-box; }
+ 
+ body {
+ font-family: 'Roboto Mono', 'Courier New', monospace;
+ font-size: 12px;
+ line-height: 1.4;
+ color: #000;
+ background: #f0f0f0;
+ }
+ 
+ .receipt-wrapper {
+ display: flex;
+ justify-content: center;
+ padding: 20px;
+ }
+ 
+ .receipt {
+ width: 80mm;
+ background: #fff;
+ padding: 8mm 5mm;
+ box-shadow: 0 2px 20px rgba(0,0,0,0.15);
+ }
+ 
+ .text-center { text-align: center; }
+ .text-right { text-align: right; }
+ .bold { font-weight: 700; }
+ .separator {
+ border: none;
+ border-top: 1px dashed #000;
+ margin: 6px 0;
+ }
+ .double-separator {
+ border: none;
+ border-top: 2px solid #000;
+ margin: 6px 0;
+ }
+ 
+ .store-name {
+ font-size: 18px;
+ font-weight: 700;
+ text-align: center;
+ margin-bottom: 2px;
+ letter-spacing: 1px;
+ }
+ .store-type {
+ font-size: 11px;
+ text-align: center;
+ margin-bottom: 6px;
+ }
+ .store-info {
+ text-align: center;
+ font-size: 10px;
+ line-height: 1.5;
+ }
+ 
+ .client-header {
+ text-align: center;
+ padding: 8px;
+ border: 2px solid #000;
+ margin: 8px 0;
+ }
+ .client-header .client-label {
+ font-size: 10px;
+ text-transform: uppercase;
+ }
+ .client-header .client-name {
+ font-size: 16px;
+ font-weight: 700;
+ }
+ .client-header .client-phone {
+ font-size: 10px;
+ color: #444;
+ }
+ 
+ .invoice-title {
+ font-weight: 700;
+ font-size: 12px;
+ text-align: center;
+ margin: 6px 0;
+ }
+ 
+ .section-label {
+ font-weight: 700;
+ font-size: 11px;
+ text-align: center;
+ margin: 8px 0 4px 0;
+ padding: 3px;
+ background: #f5f5f5;
+ border: 1px solid #ddd;
+ }
+ .section-label.pending { background: #fff0f0; border-color: #e0c0c0; color: #C62828; }
+ .section-label.paid { background: #f0fff0; border-color: #c0e0c0; color: #2E7D32; }
+ 
+ .sale-block {
+ margin: 6px 0;
+ }
+ .sale-date {
+ font-size: 10px;
+ font-weight: 700;
+ background: #eee;
+ padding: 2px 4px;
+ margin-bottom: 2px;
+ }
+ .item-row {
+ display: flex;
+ justify-content: space-between;
+ padding: 1px 0;
+ font-size: 11px;
+ }
+ .item-name {
+ flex: 1;
+ overflow: hidden;
+ text-overflow: ellipsis;
+ white-space: nowrap;
+ }
+ .item-detail {
+ font-size: 9px;
+ color: #666;
+ padding-left: 12px;
+ }
+ 
+ .total-row {
+ display: flex;
+ justify-content: space-between;
+ padding: 2px 0;
+ }
+ .grand-total {
+ font-size: 16px;
+ font-weight: 700;
+ padding: 6px 0;
+ }
+ 
+ .payment-entry {
+ font-size: 10px;
+ padding: 2px 0;
+ display: flex;
+ justify-content: space-between;
+ }
+ .payment-entry .pay-amount {
+ color: #006600;
+ font-weight: 700;
+ }
+ 
+ .status-box {
+ text-align: center;
+ padding: 8px;
+ margin: 8px 0;
+ border: 2px solid #000;
+ font-size: 14px;
+ font-weight: 700;
+ }
+ .status-box.pending { background: #fff0f0; }
+ .status-box.paid { background: #f0fff0; }
+ 
+ .receipt-footer {
+ text-align: center;
+ font-size: 10px;
+ margin-top: 8px;
+ }
+ 
+ .print-actions {
+ text-align: center;
+ padding: 20px;
+ }
+ .print-btn {
+ padding: 14px 32px;
+ background: #2E7D32;
+ color: #fff;
+ border: none;
+ border-radius: 8px;
+ font-size: 16px;
+ font-weight: 700;
+ cursor: pointer;
+ font-family: 'Inter', sans-serif;
+ margin: 0 8px;
+ }
+ .print-btn:hover { background: #1B5E20; }
+ .print-btn.secondary { background: #555; }
+ .print-btn.danger { background: #C62828; }
+ 
+ .no-items-msg {
+ text-align: center;
+ font-size: 10px;
+ color: #999;
+ padding: 6px;
+ font-style: italic;
+ }
+ 
+ @media print {
+ body { background: #fff; }
+ .receipt-wrapper { padding: 0; }
+ .receipt { box-shadow: none; padding: 2mm; }
+ .print-actions { display: none; }
+ }
+ </style>
+</head>
+<body>
+ <div class="print-actions">
+ <button class="print-btn" onclick="window.print()">🖨 Imprimir Estado de Cuenta</button>
+ <button class="print-btn secondary" onclick="window.close()">✕ Cerrar</button>
+ </div>
+
+ <div class="receipt-wrapper">
+ <div class="receipt">
+ <!-- Store Header -->
+ <div class="store-name">{{ settings.store_name }}</div>
+ <div class="store-type">SUPERMERCADO</div>
+ 
+ <hr class="separator">
+ 
+ <div class="store-info">
+ {% if settings.nit and settings.nit != '000.000.000-0' %}
+ <div>NIT: {{ settings.nit }}</div>
+ {% endif %}
+ {% if settings.direccion %}
+ <div>{{ settings.direccion }}</div>
+ {% endif %}
+ {% if settings.telefono %}
+ <div>Tel: {{ settings.telefono }}</div>
+ {% endif %}
+ </div>
+ 
+ <hr class="double-separator">
+ 
+ <!-- Client Info -->
+ <div class="client-header">
+ <div class="client-label">Estado de Cuenta — Cliente Fiado</div>
+ <div class="client-name">{{ client.name }}</div>
+ {% if client.phone %}
+ <div class="client-phone">Tel: {{ client.phone }}</div>
+ {% endif %}
+ </div>
+ 
+ <div class="text-center" style="font-size: 10px; margin-bottom: 6px;">
+ Generado: {{ now.strftime('%d/%m/%Y %H:%M') }}
+ </div>
+ 
+ <hr class="separator">
+ 
+ <!-- ===== PENDING SALES (what the client currently owes) ===== -->
+ {% if pending_sales %}
+ <div class="section-label pending">⚠ COMPRAS PENDIENTES DE PAGO</div>
+ 
+ {% for cs in pending_sales %}
+ <div class="sale-block">
+ <div class="sale-date">
+ {{ cs.created_at.strftime('%d/%m/%Y %H:%M') }} | {{ cs.sale.receipt_number }}
+ </div>
+ {% for item in cs.sale.items %}
+ <div>
+ <div class="item-row">
+ <span class="item-name">{{ item.product.name if item.product else 'Producto' }}</span>
+ <span class="bold">{{ item.subtotal | cop }}</span>
+ </div>
+ <div class="item-detail">
+ {% if item.weight_grams and item.weight_unit %}
+ {{ item.weight_grams | format_weight(item.weight_unit) }} x {{ item.unit_price | cop }} / {{ item.weight_unit }}
+ {% elif item.quantity > 1 %}
+ {{ item.quantity }} x {{ item.unit_price | cop }}
+ {% endif %}
+ </div>
+ </div>
+ {% endfor %}
+ <div class="item-row bold" style="border-top: 1px dotted #ccc; margin-top: 2px; padding-top: 2px;">
+ <span>Total compra:</span>
+ <span>{{ cs.amount | cop }}</span>
+ </div>
+ {% if cs.balance > 0 and cs.balance != cs.amount %}
+ <div class="item-row" style="font-size: 10px; color: #C62828;">
+ <span>Pendiente:</span>
+ <span>{{ cs.balance | cop }}</span>
+ </div>
+ {% endif %}
+ </div>
+ {% endfor %}
+ 
+ {% else %}
+ <div class="section-label paid">✓ SIN COMPRAS PENDIENTES</div>
+ <div class="no-items-msg">Este cliente no tiene compras sin pagar.</div>
+ {% endif %}
+ 
+ <hr class="double-separator">
+ 
+ <!-- ===== PAYMENTS ===== -->
+ <div class="invoice-title" style="margin-top: 4px;">PAGOS REGISTRADOS</div>
+ {% if payments %}
+ {% for payment in payments %}
+ <div class="payment-entry">
+ <span>{{ payment.payment_date.strftime('%d/%m/%Y') }} — 
+ {% if payment.payment_method == 'efectivo' %}💵{% elif payment.payment_method == 'tarjeta' %}💳{% else %}📱{% endif %}
+ {{ payment.payment_method | capitalize }}
+ </span>
+ <span class="pay-amount">-{{ payment.amount | cop }}</span>
+ </div>
+ {% if payment.notes %}
+ <div style="font-size: 9px; color: #666; padding-left: 12px;">{{ payment.notes }}</div>
+ {% endif %}
+ {% endfor %}
+ {% else %}
+ <div class="no-items-msg">Sin pagos registrados</div>
+ {% endif %}
+ 
+ <div class="total-row" style="margin-top: 4px;">
+ <span>Total Pagado:</span>
+ <span class="bold" style="color: #006600;">{{ client.total_paid | cop }}</span>
+ </div>
+ 
+ <hr class="double-separator">
+ 
+ <!-- ===== RESUMEN FINAL ===== -->
+ <div class="total-row">
+ <span>Total Comprado:</span>
+ <span class="bold">{{ client.total_purchased | cop }}</span>
+ </div>
+ <div class="total-row">
+ <span>Total Pagado:</span>
+ <span class="bold" style="color: #006600;">-{{ client.total_paid | cop }}</span>
+ </div>
+ 
+ <hr class="separator">
+ 
+ <div class="total-row grand-total">
+ <span>SALDO PENDIENTE:</span>
+ <span{% if client.total_debt > 0 %} style="color: #C62828;"{% else %} style="color: #006600;"{% endif %}>{{ client.total_debt | cop }}</span>
+ </div>
+ 
+ <!-- Status -->
+ <div class="status-box {% if client.total_debt <= 0 %}paid{% else %}pending{% endif %}">
+ {% if client.total_debt <= 0 %}
+ ✅ CUENTA AL DÍA
+ {% else %}
+ ⚠ PENDIENTE DE PAGO
+ {% endif %}
+ </div>
+ 
+ </div>
+ 
+ <hr class="separator">
+ 
+ <!-- Footer -->
+ <div class="receipt-footer">
+ <div style="font-weight: 700; margin-bottom: 4px;">{{ settings.store_name }}</div>
+ <div>Documento informativo de cuenta fiado</div>
+ <div>Este no es una factura fiscal</div>
+ </div>
+ </div>
+ </div>
+
+ <script>
+ window.onload = function() {
+ setTimeout(function() {
+ window.print();
+ }, 500);
+ };
+ </script>
+</body>
+</html>
