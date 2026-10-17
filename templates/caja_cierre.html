@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
+ <title>MercAPP — Cierre de Caja</title>
+ <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+ <link rel="icon"
+ href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'></text></svg>">
+ <style>
+ .summary-box {
+ background-color: var(--background-light);
+ border-radius: 8px;
+ padding: 15px;
+ margin-bottom: 20px;
+ text-align: left;
+ }
+
+ .summary-row {
+ display: flex;
+ justify-content: space-between;
+ margin-bottom: 10px;
+ font-size: 1rem;
+ color: var(--text-secondary);
+ }
+
+ .summary-row.total {
+ font-weight: 700;
+ color: var(--text-color);
+ border-top: 2px dashed var(--border);
+ padding-top: 10px;
+ font-size: 1.2rem;
+ margin-top: 10px;
+ }
+ </style>
+</head>
+
+<body>
+ <nav class="navbar">
+ <div class="nav-brand">
+ <span class="nav-logo"></span>
+ <span class="nav-name">MercAPP - Cierre de Caja</span>
+ </div>
+ <div class="nav-actions">
+ <a href="{{ url_for('pos') }}" class="btn btn-outline"> Volver a Caja</a>
+ </div>
+ </nav>
+
+ {% with messages = get_flashed_messages(with_categories=true) %}
+ {% if messages %}
+ <div class="flash-container">
+ {% for category, message in messages %}
+ <div class="flash-message {{ category }}" onclick="this.remove()">
+ {% if category == 'success' %}{% elif category == 'error' %}{% else %}{% endif %}
+ <span>{{ message }}</span>
+ </div>
+ {% endfor %}
+ </div>
+ {% endif %}
+ {% endwith %}
+
+ <div class="login-wrapper">
+ <div class="login-card" style="max-width: 500px;">
+ <div class="login-logo">
+ <span class="logo-icon"></span>
+ <h1>Ventas del dia y Cierre</h1>
+ <p>Verifica los totales de tu turno</p>
+ </div>
+
+ <div class="summary-box">
+ <div class="summary-row">
+ <span>Base Inicial:</span>
+ <span>{{ base | cop }}</span>
+ </div>
+ <div class="summary-row">
+ <span>Ventas en Efectivo:</span>
+ <span>+ {{ cash_sales | cop }}</span>
+ </div>
+ <div class="summary-row">
+ <span>Ventas con Tarjeta:</span>
+ <span>{{ card | cop }}</span>
+ </div>
+ <div class="summary-row">
+ <span>Ventas Transferencia:</span>
+ <span>{{ transfer | cop }}</span>
+ </div>
+
+ <div class="summary-row total">
+ <span>Efectivo Esperado en Cajón:</span>
+ <span style="color: var(--primary);">{{ expected_cash | cop }}</span>
+ </div>
+ </div>
+
+ <!-- List of sales in current session -->
+ <div style="margin-bottom: 20px;">
+ <details>
+ <summary style="cursor: pointer; color: var(--primary); font-weight: bold; margin-bottom: 10px;">
+ Ver detalle de ventas de hoy</summary>
+ <div
+ style="max-height: 200px; overflow-y: auto; background: var(--bg-card-hover); border-radius: 4px; padding: 10px; font-size: 0.85rem;">
+ <table style="width: 100%; border-collapse: collapse;">
+ <thead style="border-bottom: 1px solid var(--border);">
+ <tr>
+ <th style="padding: 5px; text-align: left;">Hora</th>
+ <th style="padding: 5px; text-align: left;">Método</th>
+ <th style="padding: 5px; text-align: right;">Total</th>
+ </tr>
+ </thead>
+ <tbody>
+
+ {% if active_session %}
+ {% for s in active_session.sales %}
+ <tr style="border-bottom: 1px solid var(--border);">
+ <td style="padding: 5px;">{{ s.sale_date.strftime('%H:%M') }}</td>
+ <td style="padding: 5px;">
+ {% if s.payment_method == 'efectivo' %} Efectivo
+ {% elif s.payment_method == 'tarjeta' %} Tarjeta {% if s.payment_ref %}({{ s.payment_ref }}){% endif %}
+ {% elif s.payment_method == 'fiado' %} Fiado
+ {% else %} Transferencia {% if s.payment_ref %}({{ s.payment_ref }}){% endif %}{% endif %}
+ </td>
+ <td style="padding: 5px; text-align: right;">{{ s.total | cop }}</td>
+ </tr>
+ {% endfor %}
+ {% endif %}
+ </tbody>
+ </table>
+ </div>
+ </details>
+ </div>
+
+ <form method="POST" action="{% if active_session %}{{ url_for('session_close', session_id=active_session.id) }}{% else %}{{ url_for('session_close') }}{% endif %}" class="login-form">
+ <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+ <div class="form-group">
+ <label class="form-label" for="actual_cash">Efectivo Físico Contado (Monedas y Billetes)</label>
+ <input type="number" id="actual_cash" name="actual_cash" class="form-control" placeholder="0"
+ min="0" step="50" required autofocus
+ style="font-size: 1.5rem; font-weight: bold; text-align: center;">
+ <div id="montoError"
+ style="color: var(--danger); font-size: 0.85rem; margin-top: 5px; text-align: center; display: none;">
+ Solo se permiten divisas válidas (Múltiplo de $50).
+ </div>
+ </div>
+
+ <div class="quick-money-buttons"
+ style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 15px;">
+ <button type="button" class="btn btn-outline money-btn" data-val="100000">+ $100.000</button>
+ <button type="button" class="btn btn-outline money-btn" data-val="50000">+ $50.000</button>
+ <button type="button" class="btn btn-outline money-btn" data-val="20000">+ $20.000</button>
+ <button type="button" class="btn btn-outline money-btn" data-val="10000">+ $10.000</button>
+ <button type="button" class="btn btn-outline money-btn" data-val="5000">+ $5.000</button>
+ <button type="button" class="btn btn-outline money-btn" data-val="2000">+ $2.000</button>
+ <button type="button" class="btn btn-outline money-btn" data-val="1000">+ $1.000</button>
+ <button type="button" class="btn btn-outline money-btn" data-val="500">+ $500</button>
+ <button type="button" class="btn btn-outline money-btn" data-val="200">+ $200</button>
+ <button type="button" class="btn btn-outline money-btn" data-val="100">+ $100</button>
+ <button type="button" class="btn btn-outline money-btn" data-val="50">+ $50</button>
+ <button type="button" class="btn btn-outline"
+ style="background-color: var(--background-dark); color: var(--text-color); border: none;"
+ onclick="document.getElementById('actual_cash').value=''; document.getElementById('actual_cash').dispatchEvent(new Event('input'))">Borrar
+ todo</button>
+ </div>
+
+ <div id="diffText" style="text-align: center; margin-bottom: 15px; font-weight: bold;"></div>
+
+ <button type="submit" class="btn btn-primary" id="submitBtn"
+ style="background-color: var(--warning); border-color: var(--warning); font-size: 1.1rem; padding: 12px; width: 100%;">
+ Guardar ventas del Turno
+ </button>
+ </form>
+ </div>
+ </div>
+
+ <script>
+ const expected = parseInt('{{ expected_cash }}', 10);
+ const actualInput = document.getElementById('actual_cash');
+ const diffText = document.getElementById('diffText');
+ const submitBtn = document.getElementById('submitBtn');
+ const montoError = document.getElementById('montoError');
+
+ function validateAmount() {
+ let actual = parseInt(actualInput.value, 10);
+ if (isNaN(actual) || actual < 0) {
+ actualInput.value = '';
+ actual = 0;
+ }
+
+ // Check multiples of 50
+ if (actual > 0 && actual % 50 !== 0) {
+ montoError.style.display = 'block';
+ submitBtn.disabled = true;
+ diffText.innerText = '';
+ return;
+ } else {
+ montoError.style.display = 'none';
+ submitBtn.disabled = false;
+ }
+
+ if (isNaN(actual) || actualInput.value === '') {
+ diffText.innerText = '';
+ return;
+ }
+
+ const diff = actual - expected;
+ if (diff === 0) {
+ diffText.innerText = ' Cuadre Perfecto';
+ diffText.style.color = 'var(--success)';
+ } else if (diff > 0) {
+ diffText.innerText = ` Sobrante: + $${diff.toLocaleString()}`;
+ diffText.style.color = '#e67e22';
+ } else {
+ diffText.innerText = ` Faltante: - $${Math.abs(diff).toLocaleString()}`;
+ diffText.style.color = 'var(--danger)';
+ }
+ }
+
+ actualInput.addEventListener('input', validateAmount);
+
+ document.querySelectorAll('.money-btn').forEach(btn => {
+ btn.addEventListener('click', () => {
+ let current = parseInt(actualInput.value, 10) || 0;
+ let add = parseInt(btn.getAttribute('data-val'), 10);
+ actualInput.value = current + add;
+ validateAmount();
+ });
+ });
+ </script>
+</body>
+
+</html>

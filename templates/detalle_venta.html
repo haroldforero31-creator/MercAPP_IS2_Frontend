@@ -1,0 +1,234 @@
+{% extends "base.html" %}
+{% block title %}MercAPP — Venta {{ sale.receipt_number }}{% endblock %}
+
+{% block content %}
+<div class="page-container" style="max-width: 900px;">
+ <div class="page-header">
+ <h1 class="page-title">
+ <span class="title-icon"></span> Detalle de Venta
+ </h1>
+ <div class="d-flex gap-1">
+ <button onclick="printSaleHardware({{ sale.id }})" class="btn btn-primary">
+ Imprimir Factura
+ </button>
+ <a href="{{ url_for('sales_history') }}" class="btn btn-outline">
+ ← Volver
+ </a>
+ </div>
+ </div>
+
+ <!-- Sale Info -->
+ <div class="stats-grid" style="grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));">
+ <div class="stat-card">
+ <div class="stat-info">
+ <div class="stat-label">Factura No.</div>
+ <div class="stat-value" style="font-size: 1rem;">{{ sale.receipt_number }}</div>
+ </div>
+ </div>
+ <div class="stat-card">
+ <div class="stat-info">
+ <div class="stat-label">Fecha</div>
+ <div class="stat-value" style="font-size: 1rem;">{{ sale.sale_date.strftime('%d/%m/%Y %H:%M') }}</div>
+ </div>
+ </div>
+ <div class="stat-card">
+ <div class="stat-info">
+ <div class="stat-label">Cajero</div>
+ <div class="stat-value" style="font-size: 1rem;">{{ sale.cashier.name }}</div>
+ </div>
+ </div>
+ <div class="stat-card">
+ <div class="stat-info">
+ <div class="stat-label">Estado</div>
+ <div>
+ {% if sale.status == 'completada' %}
+ <span class="badge badge-success"> Completada</span>
+ {% else %}
+ <span class="badge badge-error"> Anulada</span>
+ {% endif %}
+ </div>
+ </div>
+ </div>
+ </div>
+
+ <!-- Items -->
+ <div class="card mt-2">
+ <div class="card-header">
+ <span class="card-title"> Productos ({{ sale.items_count }} artículos)</span>
+ </div>
+ <div class="table-container" style="border: none;">
+ <table>
+ <thead>
+ <tr>
+ <th>#</th>
+ <th>Producto</th>
+ <th style="text-align: center;">Cantidad</th>
+ <th style="text-align: right;">V/Unitario</th>
+ <th style="text-align: right;">Subtotal</th>
+ </tr>
+ </thead>
+ <tbody>
+ {% for item in sale.items %}
+ <tr>
+ <td>{{ loop.index }}</td>
+ <td>
+ <strong>{{ item.product.name if item.product else 'Producto eliminado' }}</strong>
+ {% if item.product and item.product.barcode %}
+ <br><small class="text-muted">{{ item.product.barcode }}</small>
+ {% endif %}
+ </td>
+ <td style="text-align: center;">
+ {% if item.weight_grams and item.weight_unit %}
+ {{ item.weight_grams | format_weight(item.weight_unit) }}
+ {% else %}
+ {{ item.quantity }}
+ {% endif %}
+ </td>
+ <td style="text-align: right;">{{ item.unit_price | cop }}</td>
+ <td style="text-align: right; font-weight: 700; color: var(--accent-light);">{{ item.subtotal | cop }}</td>
+ </tr>
+ {% endfor %}
+ </tbody>
+ <tfoot>
+ <tr>
+ <td colspan="4" style="text-align: right; font-weight: 700; padding-top: 16px;">SUBTOTAL:</td>
+ <td style="text-align: right; font-weight: 700; padding-top: 16px;">{{ sale.subtotal | cop }}</td>
+ </tr>
+ <tr>
+ <td colspan="4" style="text-align: right; color: var(--text-secondary);">IVA INCLUIDO</td>
+ <td style="text-align: right; color: var(--text-secondary);">✓</td>
+ </tr>
+ <tr>
+ <td colspan="4" style="text-align: right; font-weight: 700; font-size: 1.1rem; padding-top: 8px;">TOTAL:</td>
+ <td style="text-align: right; font-weight: 700; font-size: 1.1rem; color: var(--accent-light); padding-top: 8px;">{{ sale.total | cop }}</td>
+ </tr>
+ </tfoot>
+ </table>
+ </div>
+ </div>
+
+ <!-- Payment Info -->
+ <div class="card mt-2">
+ <div class="card-header">
+ <span class="card-title"> Información de Pago</span>
+ </div>
+ <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+ <div>
+ <div class="form-label">Método de Pago</div>
+ <div style="font-weight: 700; font-size: 1.1rem;">
+ {% if sale.payment_method == 'efectivo' %} Efectivo
+ {% elif sale.payment_method == 'tarjeta' %} Tarjeta
+ {% elif sale.payment_method == 'transferencia' %} Transferencia
+ {% elif sale.payment_method == 'fiado' %} Fiado
+ {% elif sale.payment_method == 'mixto' %} Mixto
+ {% else %} {{ sale.payment_method.capitalize() }} {% endif %}
+ </div>
+ </div>
+ {% if sale.payment_ref %}
+ <div>
+ <div class="form-label">Referencia</div>
+ <div style="font-weight: 600;">{{ sale.payment_ref }}</div>
+ </div>
+ {% endif %}
+ {% if sale.payment_method == 'efectivo' or sale.payment_method == 'mixto' %}
+ <div>
+ <div class="form-label">Efectivo Recibido</div>
+ <div style="font-weight: 700; font-size: 1.1rem;">{{ sale.amount_received | cop }}</div>
+ </div>
+ <div>
+ <div class="form-label">Cambio Devuelto</div>
+ <div style="font-weight: 700; font-size: 1.1rem; color: var(--accent-light);">{{ sale.change_given | cop }}</div>
+ </div>
+ {% endif %}
+ {% if sale.payment_method == 'mixto' %}
+ <div style="grid-column: span 2; margin-top: 10px; padding: 12px; background: var(--bg-input, rgba(255,255,255,0.05)); border-radius: 8px;">
+   <div class="form-label" style="margin-bottom: 8px;">Desglose del Pago Mixto:</div>
+   <div style="display: flex; gap: 20px; font-weight: 600; flex-wrap: wrap;">
+     {% if sale.amount_cash %} <span>💵 Efectivo: {{ sale.amount_cash | cop }}</span> {% endif %}
+     {% if sale.amount_card %} <span>💳 Tarjeta: {{ sale.amount_card | cop }}</span> {% endif %}
+     {% if sale.amount_transfer %} <span>📲 Transferencia: {{ sale.amount_transfer | cop }}</span> {% endif %}
+   </div>
+ </div>
+ {% endif %}
+ </div>
+ </div>
+
+ <!-- Void Sale -->
+ {% if sale.status == 'completada' %}
+ <div class="card mt-2" style="border-color: rgba(229, 57, 53, 0.3);">
+ <div class="card-header">
+ <span class="card-title text-error"> Anular Venta</span>
+ </div>
+ <p class="text-muted mb-2">Esta acción marcará la venta como anulada. Ingresa tu contraseña de administrador para confirmar.</p>
+ <div class="d-flex gap-1 align-center">
+ <input type="password" id="voidPassword" class="form-control" placeholder="Contraseña del administrador" style="max-width: 300px;">
+ <button class="btn btn-danger" onclick="voidSale({{ sale.id }})">
+ Anular Venta
+ </button>
+ </div>
+ </div>
+ {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<meta name="csrf-token" content="{{ csrf_token() }}">
+<script>
+function printSaleHardware(saleId) {
+    let hwPrinter = localStorage.getItem('mercapp_hw_printer');
+    if (hwPrinter) {
+        const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+        fetch('/api/hardware/print', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json', 'X-CSRFToken': csrfToken},
+            body: JSON.stringify({printer_name: hwPrinter, sale_id: saleId})
+        }).then(r => r.json()).then(res => {
+            if (res.success) {
+                alert('✅ Factura enviada a la impresora.');
+            } else {
+                alert('Error al imprimir: ' + (res.message || 'Desconocido'));
+            }
+        }).catch(() => {
+            alert('Error de conexión al imprimir.');
+        });
+    } else {
+        window.open('/sales/' + saleId + '/receipt', '_blank');
+    }
+}
+
+function voidSale(saleId) {
+ const password = document.getElementById('voidPassword').value;
+ if (!password) {
+ alert('Ingresa tu contraseña de administrador.');
+ return;
+ }
+ 
+ if (!confirm('¿Estás seguro de anular esta venta? Esta acción no se puede deshacer.')) return;
+ 
+ const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+ 
+ fetch(`/api/sale/${saleId}/void`, {
+ method: 'POST',
+ headers: {
+ 'Content-Type': 'application/json',
+ 'X-CSRFToken': csrfToken
+ },
+ body: JSON.stringify({ password: password })
+ })
+ .then(res => res.json())
+ .then(data => {
+ if (data.success) {
+ alert(data.message);
+ location.reload();
+ } else {
+ alert(data.message || 'Error al anular la venta.');
+ }
+ })
+ .catch(() => {
+ alert('Error de conexión.');
+ });
+}
+</script>
+{% endblock %}
+
+

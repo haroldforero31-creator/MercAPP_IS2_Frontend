@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
+ <title>MercAPP — Apertura de Caja</title>
+ <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+ <link rel="icon"
+ href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'></text></svg>">
+</head>
+
+<body>
+ <!-- Navbar -->
+ <nav class="navbar">
+ <div class="nav-brand">
+ <span class="nav-logo"></span>
+ <span class="nav-name">MercAPP - Apertura de Caja</span>
+ </div>
+ <div class="nav-user">
+ <span class="user-greeting">👋 Hola, {{ current_user.name }}</span>
+ <a href="{{ url_for('logout') }}" class="btn btn-outline btn-sm">Cerrar Sesión</a>
+ </div>
+ </nav>
+
+ <!-- Flash Messages -->
+ {% with messages = get_flashed_messages(with_categories=true) %}
+ {% if messages %}
+ <div class="flash-container">
+ {% for category, message in messages %}
+ <div class="flash-message {{ category }}" onclick="this.remove()">
+ {% if category == 'success' %}{% elif category == 'error' %}{% else %}{% endif %}
+ <span>{{ message }}</span>
+ </div>
+ {% endfor %}
+ </div>
+ {% endif %}
+ {% endwith %}
+
+ <div class="login-wrapper">
+ <div class="login-card" style="max-width: 450px;">
+ <div class="login-logo">
+ <span class="logo-icon"></span>
+ <h1>Apertura de Caja</h1>
+ <p>Ingresa la base en efectivo para iniciar el día</p>
+ </div>
+
+ <form method="POST" action="{{ url_for('session_open') }}" class="login-form">
+ <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+ <div class="form-group">
+ <label class="form-label" for="base_amount">Monto Base o Sencillo (Efectivo)</label>
+ <input type="number" id="base_amount" name="base_amount" class="form-control" placeholder="0"
+ min="0" step="50" required autofocus
+ style="font-size: 1.8rem; font-weight: bold; text-align: center;">
+ <div id="montoError"
+ style="color: var(--danger); font-size: 0.85rem; margin-top: 5px; text-align: center; display: none;">
+ Solo se permiten divisas válidas (Múltiplo de $50).
+ </div>
+ </div>
+
+ <div class="quick-money-buttons"
+ style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 15px;">
+ <button type="button" class="btn btn-outline money-btn" data-val="100000">+ $100.000</button>
+ <button type="button" class="btn btn-outline money-btn" data-val="50000">+ $50.000</button>
+ <button type="button" class="btn btn-outline money-btn" data-val="20000">+ $20.000</button>
+ <button type="button" class="btn btn-outline money-btn" data-val="10000">+ $10.000</button>
+ <button type="button" class="btn btn-outline money-btn" data-val="5000">+ $5.000</button>
+ <button type="button" class="btn btn-outline money-btn" data-val="2000">+ $2.000</button>
+ <button type="button" class="btn btn-outline money-btn" data-val="1000">+ $1.000</button>
+ <button type="button" class="btn btn-outline money-btn" data-val="500">+ $500</button>
+ <button type="button" class="btn btn-outline money-btn" data-val="200">+ $200</button>
+ <button type="button" class="btn btn-outline money-btn" data-val="100">+ $100</button>
+ <button type="button" class="btn btn-outline money-btn" data-val="50">+ $50</button>
+ <button type="button" class="btn btn-outline"
+ style="background-color: var(--background-dark); color: var(--text-color); border: none;"
+ onclick="document.getElementById('base_amount').value=''">Borrar todo</button>
+ </div>
+
+ <button type="submit" class="btn btn-primary" id="submitBtn"
+ style="margin-top: 10px; font-size: 1.1rem; padding: 12px; width: 100%;">
+ 🔓 Abrir Caja y Comenzar a Vender
+ </button>
+ </form>
+ </div>
+ </div>
+
+ <script>
+ document.querySelectorAll('.flash-message').forEach(msg => {
+ setTimeout(() => {
+ msg.style.opacity = '0';
+ msg.style.transform = 'translateX(100%)';
+ setTimeout(() => msg.remove(), 300);
+ }, 5000);
+ });
+
+ const baseInput = document.getElementById('base_amount');
+ const submitBtn = document.getElementById('submitBtn');
+ const montoError = document.getElementById('montoError');
+
+ function validateAmount() {
+ let val = parseInt(baseInput.value, 10);
+ if (isNaN(val) || val < 0) {
+ baseInput.value = '';
+ val = 0;
+ }
+ if (val > 0 && val % 50 !== 0) {
+ montoError.style.display = 'block';
+ submitBtn.disabled = true;
+ } else {
+ montoError.style.display = 'none';
+ submitBtn.disabled = false;
+ }
+ }
+
+ baseInput.addEventListener('input', validateAmount);
+
+ document.querySelectorAll('.money-btn').forEach(btn => {
+ btn.addEventListener('click', () => {
+ let current = parseInt(baseInput.value, 10) || 0;
+ let add = parseInt(btn.getAttribute('data-val'), 10);
+ baseInput.value = current + add;
+ validateAmount();
+ });
+ });
+ </script>
+</body>
+
+</html>
