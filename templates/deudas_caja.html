@@ -1,0 +1,573 @@
+{% extends "base.html" %}
+{% block title %}MercAPP — Fiado: {{ client.name }}{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='caja.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='deudas.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="pos-wrapper">
+ <!-- ===== LEFT PANEL: CART ===== -->
+ <div class="pos-cart-panel">
+ <!-- Client Banner (RED) -->
+ <div class="fiado-banner">
+ <div class="fiado-banner-content">
+ <a href="{{ url_for('debts') }}" class="fiado-back-btn">← Deudas</a>
+ <div class="fiado-client-info">
+ <span class="fiado-label">VENTA FIADO</span>
+ <span class="fiado-client-name">{{ client.name }}</span>
+ </div>
+ <div class="fiado-debt-display">
+ <span class="fiado-debt-label">Deuda actual:</span>
+ <span class="fiado-debt-value" id="clientDebtValue">{{ client.total_debt | cop }}</span>
+ </div>
+ </div>
+ </div>
+
+ <!-- Smart Search Input (same as caja) -->
+ <div class="scanner-area">
+ <div class="scanner-input-wrapper">
+ <span id="searchModeIndicator" class="scanner-icon search-mode-indicator mode-idle"
+ title="Escribe un código de barras o nombre de producto"></span>
+ <input type="text" id="barcodeInput" class="scanner-input"
+ placeholder="Código de barras o nombre del producto..." autocomplete="off" autofocus>
+ <div class="smart-dropdown" id="smartDropdown"></div>
+ </div>
+ </div>
+
+ <!-- Cart Items -->
+ <div class="cart-items" id="cartItemsContainer">
+ <div class="cart-empty" id="cartEmpty">
+ <span class="empty-cart-icon"></span>
+ <p>Escanea un producto para agregar<br>a la venta fiada de <strong>{{ client.name }}</strong></p>
+ </div>
+ <table class="cart-table" id="cartTable" style="display: none;">
+ <thead>
+ <tr>
+ <th>Producto</th>
+ <th style="text-align: center;">Cant.</th>
+ <th style="text-align: right;">V/Unit</th>
+ <th style="text-align: right;">Subtotal</th>
+ <th></th>
+ </tr>
+ </thead>
+ <tbody id="cartTableBody">
+ </tbody>
+ </table>
+ </div>
+
+ <!-- Cart Footer -->
+ <div class="cart-footer">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+     <div class="cart-items-count" id="cartItemsCount">0 artículos en el carrito</div>
+     <div style="display: flex; align-items: center; gap: 10px;">
+      <button onclick="openCustomProductModal()" class="btn btn-outline btn-sm" style="color: var(--warning, #FFA726); border-color: var(--warning, #FFA726); padding: 5px 10px; font-size: 0.85rem; font-weight: 700;" title="Agregar producto sin código">
+       + Varios
+      </button>
+     </div>
+    </div>
+ <div class="cart-totals">
+ <div class="cart-total-row">
+ <span class="label">Subtotal</span>
+ <span class="value" id="cartSubtotal">$0</span>
+ </div>
+ <div class="cart-total-row" style="font-size: 0.85rem;">
+ <span class="label">IVA incluido</span>
+ <span class="value text-muted">✓</span>
+ </div>
+ <div class="cart-total-row grand-total">
+ <span class="label">TOTAL FIADO</span>
+ <span class="value" id="cartTotal">$0</span>
+ </div>
+ </div>
+ <div class="cart-actions" style="grid-template-columns: 1fr 1fr 2fr;">
+ <button class="btn-clear-cart" onclick="clearCart()" id="btnClearCart" disabled>
+ Limpiar
+ </button>
+ <button class="btn btn-outline" onclick="openPaymentPanel()" style="padding: 16px; font-weight: 700; border-color: var(--success); color: var(--success);" {% if client.total_debt <= 0 %}disabled{% endif %}>
+ Pago
+ </button>
+ <button class="btn-charge fiado-charge-btn" onclick="openFiarConfirmationModal()" id="btnCharge" disabled>
+ FIAR $0
+ </button>
+ </div>
+ </div>
+ </div>
+
+ <!-- ===== RIGHT PANEL: CATEGORIES & PRODUCTS / DEBT INFO ===== -->
+ <div class="pos-products-panel">
+ <div class="panel-header">
+ <span class="panel-title" id="panelTitle">
+ Categorías
+ </span>
+ <button class="panel-back-btn" id="panelBackBtn" onclick="showCategories()">
+ ← Volver
+ </button>
+ </div>
+ <div class="panel-search">
+ <input type="text" id="panelSearchInput" placeholder="Buscar producto por nombre..."
+ oninput="searchProducts(this.value)">
+ </div>
+ <div class="panel-content" id="panelContent">
+ <!-- Categories Grid -->
+ <div class="category-grid" id="categoriesGrid">
+ {% for cat in categories %}
+ <button class="category-btn" onclick="loadCategoryProducts({{ cat.id }}, '{{ cat.name }}')"
+ data-category-id="{{ cat.id }}">
+ <div class="cat-img-wrapper">
+ <img src="{{ url_for('user_images', filename='categories/' + cat.image) }}" 
+ alt="{{ cat.name }}" loading="lazy">
+ <div class="cat-img-overlay"></div>
+ </div>
+ <span class="cat-name">{{ cat.name }}</span>
+ </button>
+ {% endfor %}
+ </div>
+
+ <!-- Products Grid (hidden by default) -->
+ <div class="product-grid" id="productsGrid" style="display: none;">
+ </div>
+
+ <!-- Search Results (hidden by default) -->
+ <div class="product-grid" id="searchResults" style="display: none;">
+ </div>
+ </div>
+ </div>
+</div>
+
+<!-- ===== WEIGHT MODAL ===== -->
+<div class="modal-overlay" id="weightModal">
+ <div class="modal" style="max-width: 480px;">
+ <div class="modal-header">
+ <span class="modal-title">Ingresar Peso</span>
+ <button class="modal-close" onclick="closeWeightModal()">✕</button>
+ </div>
+ 
+ <div class="modal-body" style="padding: 12px 20px;">
+ <div style="text-align: center; margin-bottom: 12px;">
+ <h3 id="weightProductName" style="font-size: 1.2rem; margin-bottom: 4px;">Tomate Chonto</h3>
+ <div id="weightProductPrice" style="color: var(--text-secondary); font-weight: 600; font-size: 0.95rem;">$4.500 / kg</div>
+ </div>
+
+ <!-- Scale Auto-Read Section -->
+ <div id="scaleReadSection" style="display: none; margin-bottom: 12px;">
+ <div style="display: flex; gap: 10px; align-items: center;">
+ <button class="btn btn-primary btn-sm" onclick="readScaleWeight()" id="btnReadScale" style="flex: 1; padding: 8px; font-weight: 700;">
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="vertical-align: middle; margin-right: 6px;"><path d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707"/><circle cx="12" cy="12" r="4"/></svg>
+  Leer Báscula
+ </button>
+ <div id="scaleStatus" style="flex: 1; text-align: center; padding: 8px; border: 2px solid var(--border); border-radius: var(--radius-sm); font-weight: 700; font-size: 1rem; color: var(--text-muted); background: var(--bg-input);">
+  — g
+ </div>
+ </div>
+ <div id="scaleStatusMsg" style="text-align: center; font-size: 0.8rem; margin-top: 6px; color: var(--text-muted);">
+  Báscula SAT CS30 conectada
+ </div>
+ </div>
+ 
+ <div class="form-group" style="margin-top: 12px;">
+ <label class="form-label" style="margin-bottom: 4px;">Ingresar gramos manualmente</label>
+ <div style="display: flex; gap: 12px; align-items: stretch;">
+ <input type="text" id="manualWeightInput" class="form-control" style="font-size: 1.2rem; padding: 8px; font-weight: 700; text-align: center;" placeholder="Gramos (ej: 1400)">
+ <div style="display: flex; align-items: center; padding: 0 16px; background: var(--bg-card); border: 2px solid var(--border); border-radius: var(--radius-sm); font-weight: 700;">
+ g
+ </div>
+ </div>
+ </div>
+ 
+ <div class="payment-total-display" style="margin-top: 12px; margin-bottom: 0; padding: 12px;">
+ <div class="payment-total-label" style="font-size: 0.8rem;">Subtotal Calculado</div>
+ <div class="payment-total-value" id="weightSubtotal" style="font-size: 1.8rem;">$0</div>
+ </div>
+ </div>
+ 
+ <div class="modal-footer">
+ <button class="btn btn-outline" onclick="closeWeightModal()">Cancelar</button>
+ <button class="btn btn-accent" id="btnConfirmWeight" onclick="confirmWeight()">
+ Agregar al Carrito
+ </button>
+ </div>
+ </div>
+</div>
+
+<!-- ===== CUSTOM PRODUCT MODAL ===== -->
+<div class="modal-overlay" id="customProductModal">
+ <div class="modal" style="max-width: 400px;">
+  <div class="modal-header">
+   <span class="modal-title">Producto Varios</span>
+   <button class="modal-close" onclick="closeCustomProductModal()">✕</button>
+  </div>
+  <div class="modal-body" style="padding-top: 20px;">
+   <div class="form-group">
+    <label class="form-label">Nombre o descripción breve</label>
+    <input type="text" id="customProductName" class="form-control" placeholder="Ej: Bolsa, Recargo..." value="Varios">
+   </div>
+   <div class="form-group">
+    <label class="form-label">Precio ($)</label>
+    <input type="number" id="customProductPrice" class="form-control" placeholder="Monto" style="font-size: 1.5rem; font-weight: bold; text-align: center;">
+   </div>
+  </div>
+  <div class="modal-footer">
+   <button class="btn btn-outline" onclick="closeCustomProductModal()">Cancelar</button>
+   <button class="btn btn-accent" onclick="confirmCustomProduct()">Agregar al Carrito</button>
+  </div>
+ </div>
+</div>
+
+<!-- ===== PRODUCT NOT FOUND — BLOCKING ALERT ===== -->
+<div class="modal-overlay" id="productNotFoundModal" style="z-index: 10000;">
+ <div class="modal" style="max-width: 440px; border: 2px solid var(--error, #e53935); animation: shake 0.4s ease;">
+  <div class="modal-header" style="background: #C62828; color: white;">
+   <span class="modal-title" style="display: flex; align-items: center; gap: 10px;">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+    ¡Producto No Registrado!
+   </span>
+   <button class="modal-close" onclick="closeNotFoundModal()" style="color: white;">✕</button>
+  </div>
+  <div class="modal-body" style="padding: 24px; text-align: center;">
+   <p style="font-size: 1.1rem; margin-bottom: 8px; color: var(--text-primary);">No se encontró producto con código:</p>
+   <p id="notFoundBarcode" style="font-size: 1.4rem; font-weight: 700; color: var(--warning, #FFA726); letter-spacing: 1px; margin-bottom: 16px; font-family: monospace;"></p>
+   <p style="font-size: 0.9rem; color: var(--text-secondary); margin: 0;">Este producto <strong>NO fue sumado</strong> al carrito. Puedes registrarlo en el inventario o agregarlo como "Varios".</p>
+  </div>
+  <div class="modal-footer" style="justify-content: center; gap: 12px; flex-wrap: wrap;">
+   <button class="btn btn-outline" onclick="closeNotFoundModal()" style="min-width: 110px;">Cancelar</button>
+   <button class="btn btn-primary" onclick="notFoundAddToInventory()" style="min-width: 180px;">📦 Agregar a Inventario</button>
+   <button class="btn btn-accent" onclick="notFoundAddAsVarios()" style="min-width: 160px;">+ Agregar como Varios</button>
+  </div>
+ </div>
+</div>
+
+<style>
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-8px); }
+  40% { transform: translateX(8px); }
+  60% { transform: translateX(-5px); }
+  80% { transform: translateX(5px); }
+}
+</style>
+
+<!-- ===== FIAR CONFIRMATION MODAL WITH EMAIL OPTION ===== -->
+<div class="modal-overlay" id="fiarConfirmationModal">
+ <div class="modal" style="max-width: 440px;">
+  <div class="modal-header">
+   <span class="modal-title">Confirmar Venta Fiada</span>
+   <button class="modal-close" onclick="closeFiarConfirmationModal()">✕</button>
+  </div>
+  <div class="modal-body" style="padding: 20px;">
+   <p style="font-size: 1rem; margin-bottom: 16px; color: var(--text-primary);">
+    ¿Está seguro de fiar esta venta a <strong>{{ client.name }}</strong> por un total de <strong id="confirmFiarAmount" style="color: var(--warning, #FFA726);"></strong>?
+   </p>
+   
+   <div style="margin: 16px 0; padding: 12px; background: var(--bg-input, #111827); border-radius: var(--radius-sm); border: 1px solid var(--border); display: flex; flex-direction: column; gap: 12px;">
+    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; user-select: none; font-weight: 600;">
+     <input type="checkbox" id="chkSendEmail" onchange="toggleFiarEmailInput()" style="width: 18px; height: 18px; cursor: pointer;">
+     <span>Enviar factura al correo electrónico</span>
+    </label>
+    
+    <div id="fiarEmailInputContainer" style="display: none; transition: all 0.3s ease;">
+     <label class="form-label" style="font-size: 0.85rem; margin-bottom: 4px; color: var(--text-secondary);">Dirección de Correo</label>
+     <input type="email" id="fiarEmailInput" class="form-control" placeholder="ejemplo@correo.com" style="font-size: 1rem; padding: 8px;">
+    </div>
+   </div>
+  </div>
+  <div class="modal-footer">
+   <button class="btn btn-outline" onclick="closeFiarConfirmationModal()">Cancelar</button>
+   <button class="btn btn-accent" onclick="confirmAndProcessCreditSale()">Confirmar y Fiar</button>
+  </div>
+ </div>
+</div>
+
+<!-- ===== CREDIT SALE SUCCESS MODAL ===== -->
+<div class="modal-overlay" id="successModal">
+ <div class="modal" style="max-width: 440px;">
+ <div class="modal-body">
+ <div class="success-animation">
+ <div class="success-icon"></div>
+ <div class="success-message">¡Venta Fiada Registrada!</div>
+ <div class="success-receipt" id="successReceipt">Factura: MRC-00000000-0000</div>
+ <div style="margin: 16px 0; padding: 16px; background: var(--error-bg); border: 1px solid rgba(229,57,53,0.3); border-radius: var(--radius-sm);">
+ <div style="font-size: 0.85rem; color: var(--text-secondary);">Nueva deuda total de {{ client.name }}:</div>
+ <div style="font-size: 1.4rem; font-weight: 700; color: var(--error);" id="successNewDebt"></div>
+ </div>
+ <div class="success-actions">
+ <button class="btn btn-primary" onclick="printReceipt()" id="btnPrintReceipt">
+ Imprimir Factura
+ </button>
+ <button class="btn btn-accent" onclick="newCreditSale()">
+ Otra Venta Fiada
+ </button>
+ </div>
+ </div>
+ </div>
+ </div>
+</div>
+
+<!-- ===== PAYMENT MODAL (for recording debt payments) ===== -->
+<div class="modal-overlay" id="paymentPanel">
+ <div class="modal" style="max-width: 480px;">
+ <div class="modal-header">
+ <span class="modal-title"> Registrar Pago de Deuda</span>
+ <button class="modal-close" onclick="closePaymentPanel()">✕</button>
+ </div>
+ <div class="modal-body">
+ <div style="text-align: center; margin-bottom: 20px;">
+ <div style="font-size: 0.85rem; color: var(--text-secondary);">Deuda total de {{ client.name }}</div>
+ <div style="font-size: 1.7rem; font-weight: 700; color: var(--error);" id="paymentDebtDisplay">{{ client.total_debt | cop }}</div>
+ </div>
+
+ <div class="form-group">
+ <label class="form-label">Monto a abonar (COP)</label>
+ <input type="text" id="paymentAmount" class="form-control" placeholder="Ej: 50000"
+ style="font-size: 1.3rem; font-weight: 700; text-align: center;">
+ </div>
+
+ <div class="denomination-grid">
+ <button class="denom-btn" onclick="setPaymentAmount(5000)">$5.000</button>
+ <button class="denom-btn" onclick="setPaymentAmount(10000)">$10.000</button>
+ <button class="denom-btn" onclick="setPaymentAmount(20000)">$20.000</button>
+ <button class="denom-btn" onclick="setPaymentAmount(50000)">$50.000</button>
+ <button class="denom-btn exact-btn" onclick="setPaymentAmount({{ client.total_debt }})"> Pago Total</button>
+ <button class="denom-btn clear-btn" onclick="document.getElementById('paymentAmount').value=''"> Limpiar</button>
+ </div>
+
+ <div class="form-group">
+ <label class="form-label">Método de pago</label>
+ <select id="paymentMethod" class="form-control" onchange="toggleQR(this.value)">
+ <option value="efectivo"> Efectivo</option>
+ <option value="tarjeta"> Tarjeta</option>
+ <option value="transferencia"> Transferencia</option>
+ </select>
+ </div>
+
+ {% if settings and settings.qr_transferencia %}
+ <div id="qrTransferenciaWrapper" style="display: none; text-align: center; margin-bottom: 15px; padding: 10px; background: var(--bg-input); border-radius: 8px;">
+    <p style="font-size: 0.85rem; margin-bottom: 8px; font-weight: 500; color: var(--text-muted);">Escanea para abonar con Nequi, Daviplata...</p>
+    <img src="{{ url_for('user_images', filename='' + settings.qr_transferencia) }}" alt="QR Transferencia" style="width: 150px; height: 150px; object-fit: contain; border-radius: 8px; border: 2px solid var(--border); box-shadow: var(--shadow-sm);">
+ </div>
+ {% endif %}
+
+ <div class="form-group">
+ <label class="form-label">Nota (opcional)</label>
+ <input type="text" id="paymentNotes" class="form-control" placeholder="Nota del pago...">
+ </div>
+
+ <button class="btn btn-primary btn-lg" style="width: 100%; margin-top: 8px;" onclick="processPayment()">
+ Registrar Pago
+ </button>
+ </div>
+ </div>
+</div>
+
+<!-- Toast Notification -->
+<div class="pos-toast" id="posToast">
+ <span id="toastIcon"></span>
+ <span id="toastMessage">Producto agregado</span>
+</div>
+
+<!-- CSRF Token for API calls -->
+<meta name="csrf-token" content="{{ csrf_token() }}">
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/caja.js') }}?v=2.3"></script>
+<script>
+ // Credit/Fiado specific configuration
+ const CREDIT_CLIENT_ID = {{ client.id }};
+ const CREDIT_CLIENT_NAME = '{{ client.name }}';
+
+ // Override the charge button text
+ const origUpdateCartDisplay = updateCartDisplay;
+ updateCartDisplay = function() {
+ origUpdateCartDisplay();
+ const btnCharge = document.getElementById('btnCharge');
+ btnCharge.textContent = ` FIAR ${formatCOP(currentTotal)}`;
+ };
+
+ // Process credit sale (instead of regular sale)
+ function openFiarConfirmationModal() {
+     if (cart.length === 0) return;
+     document.getElementById('confirmFiarAmount').textContent = formatCOP(currentTotal);
+     document.getElementById('chkSendEmail').checked = false;
+     document.getElementById('fiarEmailInputContainer').style.display = 'none';
+     document.getElementById('fiarEmailInput').value = '';
+     document.getElementById('fiarConfirmationModal').classList.add('active');
+ }
+
+ function closeFiarConfirmationModal() {
+     document.getElementById('fiarConfirmationModal').classList.remove('active');
+ }
+
+ function toggleFiarEmailInput() {
+     const chk = document.getElementById('chkSendEmail');
+     const container = document.getElementById('fiarEmailInputContainer');
+     if (chk.checked) {
+         container.style.display = 'block';
+         document.getElementById('fiarEmailInput').focus();
+     } else {
+         container.style.display = 'none';
+     }
+ }
+
+ function confirmAndProcessCreditSale() {
+     const sendEmail = document.getElementById('chkSendEmail').checked;
+     const email = document.getElementById('fiarEmailInput').value.trim();
+     
+     if (sendEmail) {
+         if (!email) {
+             showToast('', 'Por favor, ingrese un correo electrónico válido', 'error');
+             return;
+         }
+         // basic regex check
+         const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+         if (!re.test(email)) {
+             showToast('', 'El correo electrónico ingresado no es válido', 'error');
+             return;
+         }
+     }
+     
+     closeFiarConfirmationModal();
+     processCreditSale(sendEmail, email);
+ }
+
+ function processCreditSale(sendEmail = false, email = '') {
+ if (cart.length === 0) return;
+
+ const payload = {
+ client_id: CREDIT_CLIENT_ID,
+ send_email: sendEmail,
+ email: email,
+ items: cart.map(item => {
+ if (item.is_custom) {
+  return {
+  is_custom: true,
+  custom_name: item.name,
+  custom_price: item.unit_price,
+  quantity: item.quantity
+  };
+ }
+ const data = {
+  product_id: item.product_id,
+  quantity: item.quantity
+ };
+ if (item.sell_by_weight) {
+  data.weight_grams = item.weight_grams;
+ }
+ return data;
+ })
+ };
+
+ // Disable button
+ document.getElementById('btnCharge').disabled = true;
+
+ fetch('/api/credit-sale', {
+ method: 'POST',
+ headers: {
+ 'Content-Type': 'application/json',
+ 'X-CSRFToken': CSRF_TOKEN
+ },
+ body: JSON.stringify(payload)
+ })
+ .then(res => res.json())
+ .then(data => {
+ if (data.success) {
+ lastSaleId = data.sale.id;
+ lastReceiptNumber = data.sale.receipt_number;
+
+ document.getElementById('successReceipt').textContent = `Factura: ${data.sale.receipt_number}`;
+ document.getElementById('successNewDebt').textContent = formatCOP(data.sale.new_total_debt);
+ document.getElementById('clientDebtValue').textContent = formatCOP(data.sale.new_total_debt);
+ 
+ document.getElementById('successModal').classList.add('active');
+ } else {
+ showToast('', data.message || 'Error procesando la venta', 'error');
+ }
+ })
+ .catch(() => {
+ showToast('', 'Error de conexión con el servidor', 'error');
+ })
+ .finally(() => {
+ document.getElementById('btnCharge').disabled = false;
+ });
+ }
+
+ function newCreditSale() {
+ document.getElementById('successModal').classList.remove('active');
+ cart.length = 0;
+ currentTotal = 0;
+ lastSaleId = null;
+ lastReceiptNumber = null;
+ updateCartDisplay();
+ document.getElementById('barcodeInput').focus();
+ }
+
+ // Payment panel for recording debt payments
+ function openPaymentPanel() {
+ document.getElementById('paymentPanel').classList.add('active');
+ setTimeout(() => document.getElementById('paymentAmount').focus(), 100);
+ }
+
+ function closePaymentPanel() {
+ document.getElementById('paymentPanel').classList.remove('active');
+ }
+
+ function setPaymentAmount(amount) {
+ document.getElementById('paymentAmount').value = amount;
+ }
+
+ function toggleQR(method) {
+    const qrWrapper = document.getElementById('qrTransferenciaWrapper');
+    if (qrWrapper) {
+        qrWrapper.style.display = (method === 'transferencia') ? 'block' : 'none';
+    }
+ }
+
+ function processPayment() {
+ const amount = parseInt(document.getElementById('paymentAmount').value) || 0;
+ const method = document.getElementById('paymentMethod').value;
+ const notes = document.getElementById('paymentNotes').value.trim();
+
+ if (amount < 100) {
+ showToast('', 'El monto mínimo de pago es $100', 'error');
+ return;
+ }
+
+ fetch('/api/credit-payment', {
+ method: 'POST',
+ headers: {
+ 'Content-Type': 'application/json',
+ 'X-CSRFToken': CSRF_TOKEN
+ },
+ body: JSON.stringify({
+ client_id: CREDIT_CLIENT_ID,
+ amount: amount,
+ payment_method: method,
+ notes: notes
+ })
+ })
+ .then(res => res.json())
+ .then(data => {
+ if (data.success) {
+ showToast('', data.message, 'success');
+ document.getElementById('clientDebtValue').textContent = data.new_total_debt_formatted;
+ document.getElementById('paymentDebtDisplay').textContent = data.new_total_debt_formatted;
+ closePaymentPanel();
+
+ // Reset payment form
+ document.getElementById('paymentAmount').value = '';
+ document.getElementById('paymentNotes').value = '';
+ } else {
+ showToast('', data.message || 'Error registrando el pago', 'error');
+ }
+ })
+ .catch(() => {
+ showToast('', 'Error de conexión', 'error');
+ });
+ }
+
+ // Payment amount: digits only
+ document.getElementById('paymentAmount').addEventListener('input', function() {
+ this.value = this.value.replace(/\D/g, '');
+ });
+</script>
+{% endblock %}

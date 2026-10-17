@@ -1,0 +1,201 @@
+{% extends "base.html" %}
+{% block title %}MercAPP — Deudas / Fiados{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='deudas.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="page-container">
+ <div class="page-header">
+ <h1 class="page-title">
+ <span class="title-icon"></span> Deudas / Fiados
+ </h1>
+ <button class="btn btn-accent" onclick="openNewClientModal()">
+ Nuevo Cliente Fiado
+ </button>
+ </div>
+
+ <!-- Stats -->
+ <div class="stats-grid">
+ <div class="stat-card">
+ <div class="stat-icon red"></div>
+ <div class="stat-info">
+ <div class="stat-value">{{ total_debt | cop }}</div>
+ <div class="stat-label">Deuda Total</div>
+ </div>
+ </div>
+ <div class="stat-card">
+ <div class="stat-icon orange">👥</div>
+ <div class="stat-info">
+ <div class="stat-value">{{ clients | length }}</div>
+ <div class="stat-label">Clientes con Crédito</div>
+ </div>
+ </div>
+ <div class="stat-card">
+ <div class="stat-icon blue"></div>
+ <div class="stat-info">
+ <div class="stat-value">{{ pending_count }}</div>
+ <div class="stat-label">Con Deuda Pendiente</div>
+ </div>
+ </div>
+ </div>
+
+ <!-- Filters -->
+ <div class="card" style="margin-bottom: 20px; padding: 16px;">
+ <form method="GET" class="debt-filters">
+ <input type="text" name="search" class="form-control" placeholder=" Buscar por nombre o teléfono..." value="{{ search }}" style="max-width: 350px;">
+ <select name="status" class="form-control" style="max-width: 200px;" onchange="this.form.submit()">
+ <option value="">Todos los estados</option>
+ <option value="pendiente" {% if status_filter == 'pendiente' %}selected{% endif %}> Pendientes</option>
+ <option value="pagado" {% if status_filter == 'pagado' %}selected{% endif %}> Pagados</option>
+ </select>
+ <button type="submit" class="btn btn-primary btn-sm">Filtrar</button>
+ </form>
+ </div>
+
+ <!-- Clients List -->
+ {% if clients %}
+ <div class="table-container">
+ <table>
+ <thead>
+ <tr>
+ <th>Cliente</th>
+ <th>Teléfono</th>
+ <th>Total Comprado</th>
+ <th>Total Pagado</th>
+ <th style="text-align: right;">Deuda Actual</th>
+ <th style="text-align: center;">Estado</th>
+ <th style="text-align: center;">Acciones</th>
+ </tr>
+ </thead>
+ <tbody>
+ {% for client in clients %}
+ <tr class="debt-client-row" onclick="window.location.href='{{ url_for('debt_client_pos', client_id=client.id) }}'" style="cursor: pointer;">
+ <td>
+ <div style="font-weight: 700;">{{ client.name }}</div>
+ <div style="font-size: 0.78rem; color: var(--text-muted);">Desde {{ client.created_at.strftime('%d/%m/%Y') }}</div>
+ </td>
+ <td>{{ client.phone or '—' }}</td>
+ <td>{{ client.total_purchased | cop }}</td>
+ <td style="color: var(--success);">{{ client.total_paid | cop }}</td>
+ <td style="text-align: right; font-weight: 700; font-size: 1.05rem;">
+ <span class="{% if client.debt_status == 'pendiente' %}debt-amount-pending{% else %}debt-amount-paid{% endif %}">
+ {{ client.total_debt | cop }}
+ </span>
+ </td>
+ <td style="text-align: center;">
+ {% if client.debt_status == 'pendiente' %}
+ <span class="badge badge-error"> Pendiente</span>
+ {% else %}
+ <span class="badge badge-success"> Pagado</span>
+ {% endif %}
+ </td>
+ <td onclick="event.stopPropagation();" style="white-space: nowrap; width: 140px;">
+  <div style="display: flex; gap: 6px; justify-content: center; align-items: center; flex-wrap: nowrap;">
+  <a href="{{ url_for('debt_client_pos', client_id=client.id) }}" class="btn btn-primary btn-sm" title="Abrir Caja">
+  Vender
+  </a>
+  <button type="button" class="btn btn-outline btn-sm" onclick="printDebtHardware({{ client.id }})" title="Imprimir Estado de Cuenta Hardware" style="display: flex; align-items: center; justify-content: center; padding: 6px;">
+     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
+  </button>
+  </div>
+ </td>
+ </tr>
+ {% endfor %}
+ </tbody>
+ </table>
+ </div>
+ {% else %}
+ <div class="card" style="text-align: center; padding: 60px 40px;">
+ <div style="font-size: 3.5rem; margin-bottom: 16px;"></div>
+ <h3 style="margin-bottom: 8px;">No hay clientes con crédito</h3>
+ <p style="color: var(--text-secondary); margin-bottom: 20px;">Crea un nuevo cliente para empezar a fiar productos</p>
+ <button class="btn btn-accent" onclick="openNewClientModal()"> Nuevo Cliente Fiado</button>
+ </div>
+ {% endif %}
+</div>
+
+<!-- New Client Modal -->
+<div class="modal-overlay" id="newClientModal">
+ <div class="modal" style="max-width: 460px;">
+ <div class="modal-header">
+ <span class="modal-title"> Nuevo Cliente Fiado</span>
+ <button class="modal-close" onclick="closeNewClientModal()">✕</button>
+ </div>
+ <form method="POST" action="{{ url_for('debt_new_client') }}">
+ <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+ <div class="modal-body">
+ <div class="form-group">
+ <label class="form-label" for="clientName">Nombre del Cliente</label>
+ <input type="text" id="clientName" name="name" class="form-control" 
+ placeholder="Nombre completo del cliente" required minlength="2" autofocus>
+ </div>
+ <div class="form-group">
+ <label class="form-label" for="clientPhone">Teléfono (opcional)</label>
+ <input type="text" id="clientPhone" name="phone" class="form-control" 
+ placeholder="Ej: 3001234567">
+ </div>
+ </div>
+ <div class="modal-footer">
+ <button type="button" class="btn btn-outline" onclick="closeNewClientModal()">Cancelar</button>
+ <button type="submit" class="btn btn-accent"> Crear y Abrir Caja</button>
+ </div>
+ </form>
+ </div>
+</div>
+
+<meta name="csrf-token" content="{{ csrf_token() }}">
+{% endblock %}
+
+{% block extra_js %}
+<script>
+ function openNewClientModal() {
+ document.getElementById('newClientModal').classList.add('active');
+ setTimeout(() => document.getElementById('clientName').focus(), 100);
+ }
+ function closeNewClientModal() {
+ document.getElementById('newClientModal').classList.remove('active');
+ }
+ 
+ // Phone input: digits only
+ const phoneInput = document.getElementById('clientPhone');
+ if (phoneInput) {
+ phoneInput.addEventListener('input', function() {
+ this.value = this.value.replace(/\D/g, '');
+ });
+ }
+ 
+ // Close modal on Escape
+ document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeNewClientModal();
+ });
+
+ function printDebtHardware(clientId) {
+    let printer = localStorage.getItem('mercapp_hw_printer');
+    if (!printer) {
+        alert("No hay impresora térmica configurada. Por favor ve al Centro de Configuración -> Hardware para seleccionarla.");
+        return;
+    }
+    
+    // Disable button visually if needed
+    fetch('/api/hardware/print-debt', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': document.querySelector('meta[name="csrf-token"]').content
+        },
+        body: JSON.stringify({ printer_name: printer, client_id: clientId })
+    })
+    .then(r => r.json())
+    .then(res => {
+        if(!res.success) {
+            alert("Error al imprimir: " + res.message);
+        }
+    })
+    .catch(e => {
+        alert("Error de conexión con el hardware de impresión.");
+        console.error(e);
+    });
+ }
+</script>
+{% endblock %}

@@ -1,0 +1,239 @@
+{% extends "base.html" %}
+{% block title %}MercAPP - Hardware{% endblock %}
+
+{% block content %}
+<div class="page-container" style="max-width: 700px;">
+ <div class="page-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+ <h1 class="page-title">
+ <span class="title-icon">
+  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle; margin-right: 8px; margin-top: -4px;"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+ </span> Configuración de Hardware
+ </h1>
+ <a href="{{ url_for('settings') }}" class="btn btn-outline"> Volver</a>
+ </div>
+
+ <form method="POST">
+ <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+ 
+ <div class="settings-section" style="margin-bottom: 30px;">
+ <h3>
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 8px; vertical-align: text-bottom;"><path d="m16 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/><path d="m2 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/><path d="M7 21h10"/><path d="M12 3v18"/><path d="M3 7h2c2 0 5-1 7-2 2 1 5 2 7 2h2"/></svg>
+  Modo de Báscula Digital
+ </h3>
+ <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 20px;">
+  Elige cómo funciona la báscula al pesar productos. La configuración del puerto COM y la impresora 
+  se hacen desde el botón <strong>Hardware</strong> dentro de la Caja.
+ </p>
+ 
+ <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+  <!-- Manual Mode Card -->
+  <label class="card" style="cursor: pointer; padding: 24px; text-align: center; border: 2px solid {{ 'var(--primary)' if settings.scale_mode == 'manual' else 'var(--border)' }}; transition: all 0.2s;">
+   <input type="radio" name="scale_mode" value="manual" {{ 'checked' if settings.scale_mode == 'manual' }} style="display: none;" onchange="this.form.submit()">
+   <div style="margin-bottom: 12px; color: var(--accent);">
+    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 11V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v0"/><path d="M14 10V4a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v0"/><path d="M10 10.5V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v0"/><path d="M18 8a2 2 0 1 1 4 0v6a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.86-5.99-2.34l-3.6-3.6a2 2 0 0 1 2.83-2.82L7 15"/></svg>
+   </div>
+   <h3 style="margin-bottom: 8px; color: {{ 'var(--primary)' if settings.scale_mode == 'manual' else 'var(--text-color)' }};">Manual</h3>
+   <p style="color: var(--text-secondary); font-size: 0.85rem; line-height: 1.5;">
+    La báscula lee el peso y lo muestra, pero el <strong>cajero decide</strong> si ingresa ese peso 
+    o vuelve a pesar. Ideal para verificar antes de cobrar.
+   </p>
+   {% if settings.scale_mode == 'manual' %}
+   <div style="margin-top: 12px; color: var(--primary); font-weight: 700; font-size: 0.9rem;">✓ Activo</div>
+   {% endif %}
+  </label>
+
+  <!-- Auto Mode Card -->
+  <label class="card" style="cursor: pointer; padding: 24px; text-align: center; border: 2px solid {{ 'var(--primary)' if settings.scale_mode == 'auto' else 'var(--border)' }}; transition: all 0.2s;">
+   <input type="radio" name="scale_mode" value="auto" {{ 'checked' if settings.scale_mode == 'auto' }} style="display: none;" onchange="this.form.submit()">
+   <div style="margin-bottom: 12px; color: #FFA726;">
+    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+   </div>
+   <h3 style="margin-bottom: 8px; color: {{ 'var(--primary)' if settings.scale_mode == 'auto' else 'var(--text-color)' }};">Automático</h3>
+   <p style="color: var(--text-secondary); font-size: 0.85rem; line-height: 1.5;">
+    La báscula lee el peso y lo <strong>ingresa automáticamente</strong> al carrito. 
+    Más rápido pero sin verificación previa.
+   </p>
+   {% if settings.scale_mode == 'auto' %}
+   <div style="margin-top: 12px; color: var(--primary); font-weight: 700; font-size: 0.9rem;">✓ Activo</div>
+   {% endif %}
+  </label>
+ </div>
+ </div>
+
+ <div class="settings-section" style="margin-bottom: 30px;">
+  <h3>
+   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 8px; vertical-align: text-bottom;"><rect x="4" y="4" width="16" height="16" rx="2" ry="2"/><rect x="9" y="9" width="6" height="6"/></svg>
+   Periféricos Conectados
+  </h3>
+  <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 20px;">
+   Configura el puerto de tu báscula y el nombre de tu impresora térmica (SAT). Esto se guarda localmente en esta computadora.
+  </p>
+
+  <div class="form-group" style="margin-bottom: 20px;">
+   <label class="form-label">Impresora Térmica (SAT)</label>
+   <div style="display: flex; gap: 10px;">
+    <select id="hwPrinterSelect" class="form-control" style="font-size: 0.95rem; flex: 1;" onchange="saveHardwareConfig()">
+     <option value="">Cargando impresoras...</option>
+    </select>
+    <button type="button" class="btn btn-outline btn-sm" onclick="testDrawer()">Abrir Cajón</button>
+   </div>
+  </div>
+
+  <div class="form-group">
+   <label class="form-label">Balanza Digital (Puerto COM)</label>
+   <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+    <select id="hwScaleSelect" class="form-control" style="font-size: 0.95rem; flex: 1;" onchange="saveHardwareConfig()">
+     <option value="">Cargando puertos...</option>
+    </select>
+    <button type="button" class="btn btn-outline btn-sm" onclick="autoDetectScale()">Auto-detectar</button>
+   </div>
+  </div>
+  
+  <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+   <button type="button" class="btn btn-outline btn-sm" style="flex: 1;" onclick="testScale()">Pesar Prueba</button>
+   <div id="testScaleResult" style="flex: 1; text-align: center; border: 1px solid var(--border); border-radius: 6px; line-height: 38px; font-weight: bold; color: var(--accent);">0 g</div>
+  </div>
+ </div>
+
+ <div class="settings-section" style="margin-bottom: 30px;">
+ <h3>
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 8px; vertical-align: text-bottom;"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+  Notas Importantes
+ </h3>
+ <ul style="color: var(--text-secondary); font-size: 0.9rem; line-height: 1.8; padding-left: 20px;">
+  <li>Si la báscula lee un peso mayor a <strong>50 kg</strong>, será rechazado automáticamente como lectura errónea.</li>
+  <li>
+   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 8px; vertical-align: text-bottom;"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+   <strong>Nota:</strong> En modo automático, la caja no permite pesar productos mayores a 50kg para evitar errores humanos.
+  </li>
+  <li>En modo <strong>Manual</strong>, el peso se carga en el campo pero debes presionar <strong>"Agregar al Carrito"</strong> para confirmar.</li>
+ </ul>
+ </div>
+
+ <div style="text-align: center;">
+ <button type="submit" class="btn btn-primary btn-lg">
+  Guardar Configuración
+ </button>
+ </div>
+ </form>
+</div>
+
+<style>
+ .settings-section label.card:hover {
+  border-color: var(--primary) !important;
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+ }
+ .settings-section label.card input[type="radio"]:checked + div + h3 {
+  color: var(--primary);
+ }
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    loadHardwareConfig();
+});
+
+function loadHardwareConfig() {
+    // Load Printers
+    fetch('/api/hardware/printers').then(r=>r.json()).then(res => {
+        let sel = document.getElementById('hwPrinterSelect');
+        sel.innerHTML = '<option value="">(Imprimir por navegador)</option>';
+        if(res.success && res.printers) {
+            res.printers.forEach(p => {
+                sel.innerHTML += `<option value="${p}">${p}</option>`;
+            });
+            let savedPrinter = localStorage.getItem('mercapp_hw_printer');
+            if(savedPrinter) sel.value = savedPrinter;
+        }
+    }).catch(e => console.error(e));
+
+    // Load Ports
+    fetch('/api/hardware/ports').then(r=>r.json()).then(res => {
+        let sel = document.getElementById('hwScaleSelect');
+        sel.innerHTML = '<option value="">(Ingresar peso manual)</option>';
+        if(res.success && res.ports) {
+            res.ports.forEach(p => {
+                const desc = p.description ? ` (${p.description})` : '';
+                sel.innerHTML += `<option value="${p.device}">${p.device}${desc}</option>`;
+            });
+            let savedPort = localStorage.getItem('mercapp_hw_scale');
+            if(savedPort) sel.value = savedPort;
+        }
+    }).catch(e => console.error(e));
+}
+
+function saveHardwareConfig() {
+    let printer = document.getElementById('hwPrinterSelect').value;
+    let scale = document.getElementById('hwScaleSelect').value;
+    localStorage.setItem('mercapp_hw_printer', printer);
+    localStorage.setItem('mercapp_hw_scale', scale);
+    
+    // Also save printer to DB so it persists across exe updates
+    fetch('/api/settings/printer', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json', 'X-CSRFToken': document.querySelector('meta[name="csrf-token"]').getAttribute('content')},
+        body: JSON.stringify({printer_name: printer})
+    }).then(r => r.json()).then(res => {
+        if(res.success) alert('Configuración guardada correctamente.');
+        else alert('Guardado local OK, pero error en BD: ' + res.message);
+    }).catch(() => {
+        alert('Configuración guardada localmente.');
+    });
+}
+
+function testDrawer() {
+    let printer = document.getElementById('hwPrinterSelect').value;
+    if(!printer) return alert('Selecciona una impresora primero.');
+    fetch('/api/hardware/open-drawer', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json', 'X-CSRFToken': document.querySelector('meta[name="csrf-token"]').getAttribute('content')},
+        body: JSON.stringify({printer_name: printer})
+    }).then(r=>r.json()).then(res => {
+        if(res.success) alert('Señal enviada al cajón.');
+        else alert('Error: ' + res.message);
+    });
+}
+
+function testScale() {
+    let port = document.getElementById('hwScaleSelect').value;
+    if(!port) return alert('Selecciona un puerto COM primero.');
+    let resDiv = document.getElementById('testScaleResult');
+    resDiv.innerText = 'Leyendo...';
+    resDiv.style.color = '#FFA726';
+    fetch('/api/hardware/weight?port=' + port)
+    .then(r=>r.json()).then(res => {
+        if(res.success) {
+            resDiv.innerText = res.weight_grams + ' g';
+            resDiv.style.color = '#2E7D32';
+        } else {
+            resDiv.innerText = 'Error';
+            resDiv.style.color = 'var(--error)';
+            alert('Error leyendo balanza: ' + res.message);
+        }
+    }).catch(e => {
+        resDiv.innerText = 'Timeout';
+        resDiv.style.color = 'var(--error)';
+    });
+}
+
+function autoDetectScale(isSilent = false) {
+    if (!isSilent) alert('Buscando báscula... Esto puede tomar unos segundos.');
+    fetch('/api/hardware/detect-scale')
+    .then(r => r.json())
+    .then(res => {
+        if (res.success && res.port) {
+            localStorage.setItem('mercapp_hw_scale', res.port);
+            const sel = document.getElementById('hwScaleSelect');
+            if (sel) sel.value = res.port;
+            if (!isSilent) alert(`Báscula detectada y conectada en ${res.port}${res.description ? ' ('+res.description+')' : ''}`);
+        } else {
+            if (!isSilent) alert('No se encontró ninguna báscula activa.');
+        }
+    })
+    .catch(err => {
+        if (!isSilent) console.error('Error en auto-detección:', err);
+    });
+}
+</script>
+{% endblock %}

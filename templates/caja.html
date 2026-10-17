@@ -1,0 +1,716 @@
+{% extends "base.html" %}
+{% block title %}MercAPP — Punto de Venta{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='caja.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="pos-wrapper">
+ <!-- ===== LEFT PANEL: CART ===== -->
+ <div class="pos-cart-panel">
+ <!-- Smart Search Input -->
+ <div class="scanner-area" style="flex-direction: column; align-items: stretch; padding: 0;">
+  <div class="pos-tabs-container">
+   <div class="pos-tabs" id="posTabs">
+    <!-- Tabs will be dynamically rendered here -->
+   </div>
+   <button type="button" class="btn-add-tab" onclick="addPosTab()" title="Nueva Venta (Pestaña)">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+   </button>
+  </div>
+  <div class="scanner-input-wrapper" style="margin: 16px 20px;">
+    <span id="searchModeIndicator" class="scanner-icon search-mode-indicator mode-idle"
+    title="Escribe un código de barras o nombre de producto"></span>
+    <input type="text" id="barcodeInput" class="scanner-input"
+    placeholder="Código de barras o nombre del producto..." autocomplete="off" autofocus>
+    <!-- Autocomplete Dropdown -->
+    <div class="smart-dropdown" id="smartDropdown"></div>
+  </div>
+ </div>
+
+ <!-- Cart Items -->
+ <div class="cart-items" id="cartItemsContainer">
+ <div class="cart-empty" id="cartEmpty">
+ <span class="empty-cart-icon"></span>
+ <p>Escanea un producto o selecciona<br>una categoría para comenzar</p>
+ </div>
+ <table class="cart-table" id="cartTable" style="display: none;">
+ <thead>
+ <tr>
+ <th>Producto</th>
+ <th style="text-align: center;">Cant.</th>
+ <th style="text-align: right;">V/Unit</th>
+ <th style="text-align: right;">Subtotal</th>
+ <th></th>
+ </tr>
+ </thead>
+ <tbody id="cartTableBody">
+ </tbody>
+ </table>
+ </div>
+
+ <!-- Cart Footer -->
+ <div class="cart-footer">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+     <div class="cart-items-count" id="cartItemsCount">0 artículos en el carrito</div>
+     <div style="display: flex; align-items: center; gap: 10px;">
+      <label class="voice-toggle" title="Anunciar total por voz al cobrar">
+       <input type="checkbox" id="chkVoiceAnnounce" onchange="setVoiceEnabled(this.checked)">
+       <span class="voice-toggle-label">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/><path d="M15.54 8.46a5 5 0 0 1 0 7.08"/></svg>
+       </span>
+      </label>
+      <button onclick="openCustomProductModal()" class="btn btn-outline btn-sm" style="color: var(--warning, #FFA726); border-color: var(--warning, #FFA726); padding: 5px 10px; font-size: 0.85rem; font-weight: 700;" title="Agregar producto sin código">
+       + Varios
+      </button>
+      <button onclick="openCashDrawer()" class="btn btn-outline btn-sm d-flex align-items-center" style="color: var(--accent-light); border-color: var(--accent-light); padding: 5px 10px; font-size: 0.85rem;" title="Abrir cajón de dinero">
+       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 6px;"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M2 8h20"/><path d="M12 12v4"/><path d="M8 16h8"/></svg>
+       Abrir Caja
+      </button>
+      <a href="{{ url_for('session_close') }}" class="btn btn-outline btn-sm" style="color: var(--error); border-color: var(--error); padding: 5px 10px; font-size: 0.85rem;">Cerrar Caja</a>
+     </div>
+    </div>
+ <div class="cart-totals">
+ <div class="cart-total-row">
+ <span class="label">Subtotal</span>
+ <span class="value" id="cartSubtotal">$0</span>
+ </div>
+ <div class="cart-total-row" style="font-size: 0.85rem;">
+ <span class="label">IVA incluido</span>
+ <span class="value text-muted">✓</span>
+ </div>
+ <div class="cart-total-row grand-total">
+ <span class="label">TOTAL</span>
+ <span class="value" id="cartTotal">$0</span>
+ </div>
+ </div>
+ <div class="cart-actions" style="display: flex; flex-direction: column; gap: 8px;">
+     <button class="btn-clear-cart" onclick="clearCart()" id="btnClearCart" disabled style="width: 100%;">
+         Limpiar
+     </button>
+     <button class="btn-charge" onclick="openPaymentModal()" id="btnCharge" disabled style="width: 100%;">
+         COBRAR $0
+     </button>
+ </div>
+ </div>
+ </div>
+
+ <!-- ===== RIGHT PANEL: CATEGORIES & PRODUCTS ===== -->
+ <div class="pos-products-panel">
+ <div class="panel-header">
+ <span class="panel-title" id="panelTitle">
+ Categorías
+ </span>
+ <button class="panel-back-btn" id="panelBackBtn" onclick="showCategories()">
+ ← Volver
+ </button>
+ </div>
+ <div class="panel-search">
+ <input type="text" id="panelSearchInput" placeholder="Buscar producto por nombre..."
+ oninput="searchProducts(this.value)">
+ </div>
+ <div class="panel-content" id="panelContent">
+ <!-- Categories Grid -->
+ <div class="category-grid" id="categoriesGrid">
+ {% for cat in categories %}
+ <button class="category-btn" onclick="loadCategoryProducts({{ cat.id }}, '{{ cat.name }}')"
+ data-category-id="{{ cat.id }}">
+ <div class="cat-img-wrapper">
+ <img src="{{ url_for('user_images', filename='categories/' + cat.image) }}" 
+ alt="{{ cat.name }}" loading="lazy">
+ <div class="cat-img-overlay"></div>
+ </div>
+ <span class="cat-name">{{ cat.name }}</span>
+ </button>
+ {% endfor %}
+ </div>
+
+ <!-- Products Grid (hidden by default) -->
+ <div class="product-grid" id="productsGrid" style="display: none;">
+ </div>
+
+ <!-- Search Results (hidden by default) -->
+ <div class="product-grid" id="searchResults" style="display: none;">
+ </div>
+ </div>
+ </div>
+</div>
+
+<!-- ===== PAYMENT MODAL ===== -->
+<div class="modal-overlay" id="paymentModal">
+ <div class="modal" style="max-width: 520px;">
+ <div class="modal-header">
+ <span class="modal-title">Procesar Pago</span>
+ <button class="modal-close" onclick="closePaymentModal()">✕</button>
+ </div>
+
+ <!-- Payment Method Tabs -->
+ <div class="payment-tabs">
+ <button class="payment-tab active" onclick="switchPaymentTab('efectivo')" id="tabEfectivo">
+ <span class="payment-tab-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg></span>
+ Efectivo
+ </button>
+ <button class="payment-tab" onclick="switchPaymentTab('tarjeta')" id="tabTarjeta">
+ <span class="payment-tab-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg></span>
+ Tarjeta
+ </button>
+ <button class="payment-tab" onclick="switchPaymentTab('transferencia')" id="tabTransferencia">
+ <span class="payment-tab-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l4-4 4 4"/><path d="M7 5v14"/><path d="M21 15l-4 4-4-4"/><path d="M17 19V5"/></svg></span>
+ Transferencia
+ </button>
+ <button class="payment-tab" onclick="switchPaymentTab('mixto')" id="tabMixto">
+ <span class="payment-tab-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="12" y="1" width="3" height="22" rx="1.5"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></span>
+ Mixto
+ </button>
+ </div>
+
+ <!-- EFECTIVO -->
+ <div class="payment-content active" id="contentEfectivo">
+ <div class="payment-total-display">
+ <div class="payment-total-label">Total a pagar</div>
+ <div class="payment-total-value" id="payTotalEfectivo">$0</div>
+ </div>
+
+ <div class="form-group">
+ <label class="form-label">Monto Recibido (COP)</label>
+ <input type="text" id="amountReceived" class="form-control" placeholder="Ej: 20000"
+ oninput="calculateChange()" style="font-size: 1.3rem; font-weight: 700; text-align: center;">
+ </div>
+
+ <div class="denomination-grid">
+ <button class="denom-btn" onclick="addDenomination(1000)">$1.000</button>
+ <button class="denom-btn" onclick="addDenomination(2000)">$2.000</button>
+ <button class="denom-btn" onclick="addDenomination(5000)">$5.000</button>
+ <button class="denom-btn" onclick="addDenomination(10000)">$10.000</button>
+ <button class="denom-btn" onclick="addDenomination(20000)">$20.000</button>
+ <button class="denom-btn" onclick="addDenomination(50000)">$50.000</button>
+ <button class="denom-btn" onclick="addDenomination(100000)">$100.000</button>
+ <button class="denom-btn" onclick="addDenomination(200)">$200</button>
+ <button class="denom-btn exact-btn" onclick="setExactAmount()">Pago Exacto</button>
+ <button class="denom-btn clear-btn" onclick="clearAmount()">Limpiar</button>
+ </div>
+
+ <div class="change-display" id="changeDisplay" style="display: none;">
+ <div class="change-label">CAMBIO A DEVOLVER</div>
+ <div class="change-value" id="changeValue">$0</div>
+ </div>
+
+ <!-- Print toggle -->
+ <label class="print-toggle" id="printToggleEfectivo">
+ <input type="checkbox" id="chkPrintReceipt">
+ <span class="print-toggle-label">Imprimir recibo</span>
+ </label>
+
+ <button class="btn btn-accent btn-lg" style="width: 100%; margin-top: 12px;"
+ onclick="processSale('efectivo')" id="btnPayEfectivo" disabled>
+ Confirmar Pago en Efectivo
+ </button>
+ </div>
+
+ <!-- TARJETA -->
+ <div class="payment-content" id="contentTarjeta">
+ <div class="payment-total-display">
+ <div class="payment-total-label">Total a pagar</div>
+ <div class="payment-total-value" id="payTotalTarjeta">$0</div>
+ </div>
+
+ 
+
+ 
+
+ <label class="print-toggle">
+ <input type="checkbox" class="chk-print-mirror">
+ <span class="print-toggle-label">Imprimir recibo</span>
+ </label>
+
+ <button class="btn btn-accent btn-lg" style="width: 100%; margin-top: 8px;" onclick="processSale('tarjeta')"
+ id="btnPayTarjeta">
+ Confirmar Pago con Tarjeta
+ </button>
+ </div>
+
+ <!-- TRANSFERENCIA -->
+ <div class="payment-content" id="contentTransferencia">
+ <div class="payment-total-display">
+ <div class="payment-total-label">Total a pagar</div>
+ <div class="payment-total-value" id="payTotalTransferencia">$0</div>
+ </div>
+
+ {% if settings and settings.qr_transferencia %}
+ <div style="text-align: center; margin-bottom: 15px; padding: 10px; background: var(--bg-input); border-radius: 8px;">
+    <p style="font-size: 0.85rem; margin-bottom: 8px; font-weight: 500; color: var(--text-muted);">Escanea para pagar con Nequi, Daviplata o Bancolombia</p>
+    <img src="{{ url_for('user_images', filename='' + settings.qr_transferencia) }}" alt="QR Transferencia" style="width: 180px; height: 180px; object-fit: contain; border-radius: 8px; border: 2px solid var(--border); box-shadow: var(--shadow-sm);">
+ </div>
+ {% endif %}
+
+ <div class="form-group">
+ <label class="form-label">Plataforma / Banco</label>
+ <select id="transferBank" class="form-control">
+ <option value="">-- Seleccionar --</option>
+ <option value="Nequi">Nequi</option>
+ <option value="Daviplata">Daviplata</option>
+ <option value="Bancolombia">Bancolombia</option>
+ <option value="Davivienda">Davivienda</option>
+ <option value="BBVA">BBVA</option>
+ <option value="Banco de Bogotá">Banco de Bogotá</option>
+ <option value="Banco de Occidente">Banco de Occidente</option>
+ <option value="Otro">Otro</option>
+ </select>
+ </div>
+
+ 
+
+ 
+
+ <label class="print-toggle">
+ <input type="checkbox" class="chk-print-mirror">
+ <span class="print-toggle-label">Imprimir recibo</span>
+ </label>
+
+ <button class="btn btn-accent btn-lg" style="width: 100%; margin-top: 8px;"
+ onclick="processSale('transferencia')" id="btnPayTransferencia">
+ Confirmar Pago por Transferencia
+ </button>
+ </div>
+
+ <!-- MIXTO -->
+ <div class="payment-content" id="contentMixto">
+ <div class="payment-total-display">
+ <div class="payment-total-label">Total a pagar</div>
+ <div class="payment-total-value" id="payTotalMixto">$0</div>
+ </div>
+
+ <div class="form-group" style="margin-bottom: 12px;">
+ <label class="form-label" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+   <span>Efectivo Recibido (Cliente)</span>
+   <button type="button" class="btn btn-outline btn-sm" style="padding: 2px 6px; font-size: 0.75rem; color: var(--accent-light); border-color: var(--accent-light);" onclick="fillMixtoField('efectivo')">Restante</button>
+ </label>
+ <input type="number" id="mixtoEfectivoRecibido" class="form-control mixto-input" placeholder="0" oninput="calculateMixto()" style="font-size: 1.2rem; font-weight: 700; text-align: right;">
+ </div>
+
+ <div class="form-group" style="margin-bottom: 12px;">
+ <label class="form-label" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+   <span>Transferencia</span>
+   <button type="button" class="btn btn-outline btn-sm" style="padding: 2px 6px; font-size: 0.75rem; color: var(--accent-light); border-color: var(--accent-light);" onclick="fillMixtoField('transferencia')">Restante</button>
+ </label>
+ <div style="display: flex; gap: 8px; align-items: center;">
+   <select id="mixtoTransferBank" class="form-control" style="width: 140px;">
+     <option value="Nequi">Nequi</option>
+     <option value="Daviplata">Daviplata</option>
+     <option value="Bancolombia">Bancolombia</option>
+     <option value="Davivienda">Davivienda</option>
+     <option value="BBVA">BBVA</option>
+     <option value="Otro">Otro</option>
+   </select>
+   <input type="number" id="mixtoTransferencia" class="form-control mixto-input" placeholder="0" oninput="calculateMixto()" style="flex: 1; font-size: 1.2rem; font-weight: 700; text-align: right;">
+ </div>
+ </div>
+
+ <div class="change-display invalid" id="mixtoDisplay" style="margin-top: 15px; padding: 12px; border-radius: 8px;">
+ <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+   <span class="change-label" style="font-size: 0.8rem; font-weight: bold; color: var(--text-muted);">TOTAL ASIGNADO:</span>
+   <span class="change-value" id="mixtoAssigned" style="font-size: 1rem; font-weight: bold;">$0</span>
+ </div>
+ <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+   <span class="change-label" id="mixtoStatusLabel" style="font-size: 0.8rem; font-weight: bold;">FALTANTE:</span>
+   <span class="change-value" id="mixtoStatusValue" style="font-size: 1rem; font-weight: bold;">$0</span>
+ </div>
+ <div style="display: none; justify-content: space-between;" id="mixtoChangeContainer">
+   <span class="change-label" style="font-size: 0.8rem; font-weight: bold; color: var(--text-muted);">CAMBIO A DEVOLVER:</span>
+   <span class="change-value" id="mixtoChangeValue" style="font-size: 1rem; font-weight: bold; color: #4caf50;">$0</span>
+ </div>
+ </div>
+
+ <label class="print-toggle" style="margin-top: 12px; display: block;">
+ <input type="checkbox" class="chk-print-mirror">
+ <span class="print-toggle-label">Imprimir recibo</span>
+ </label>
+
+ <button class="btn btn-accent btn-lg" style="width: 100%; margin-top: 12px;"
+ onclick="processSale('mixto')" id="btnPayMixto" disabled>
+ Confirmar Pago Mixto
+ </button>
+ </div>
+ </div>
+</div>
+
+<!-- ===== WEIGHT MODAL ===== -->
+<div class="modal-overlay" id="weightModal">
+ <div class="modal" style="max-width: 480px;">
+ <div class="modal-header">
+ <span class="modal-title">Ingresar Peso</span>
+ <button class="modal-close" onclick="closeWeightModal()">✕</button>
+ </div>
+ 
+ <div class="modal-body" style="padding: 12px 20px;">
+ <div style="text-align: center; margin-bottom: 12px;">
+ <h3 id="weightProductName" style="font-size: 1.2rem; margin-bottom: 4px;">Tomate Chonto</h3>
+ <div id="weightProductPrice" style="color: var(--text-secondary); font-weight: 600; font-size: 0.95rem;">$4.500 / kg</div>
+ </div>
+
+ <!-- Scale Auto-Read Section -->
+ <div id="scaleReadSection" style="display: none; margin-bottom: 12px;">
+ <div style="display: flex; gap: 10px; align-items: center;">
+ <button class="btn btn-primary btn-sm" onclick="readScaleWeight()" id="btnReadScale" style="flex: 1; padding: 8px; font-weight: 700;">
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="vertical-align: middle; margin-right: 6px;"><path d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707"/><circle cx="12" cy="12" r="4"/></svg>
+  Leer Báscula
+ </button>
+ <div id="scaleStatus" style="flex: 1; text-align: center; padding: 8px; border: 2px solid var(--border); border-radius: var(--radius-sm); font-weight: 700; font-size: 1rem; color: var(--text-muted); background: var(--bg-input);">
+  — g
+ </div>
+ </div>
+ <div id="scaleStatusMsg" style="text-align: center; font-size: 0.8rem; margin-top: 6px; color: var(--text-muted);">
+  Báscula SAT CS30 conectada
+ </div>
+ </div>
+ 
+ <div class="form-group" style="margin-top: 12px;">
+ <label class="form-label" style="margin-bottom: 4px;">Ingresar gramos manualmente</label>
+ <div style="display: flex; gap: 12px; align-items: stretch;">
+ <input type="text" id="manualWeightInput" class="form-control" style="font-size: 1.2rem; padding: 8px; font-weight: 700; text-align: center;" placeholder="Gramos (ej: 1400)">
+ <div style="display: flex; align-items: center; padding: 0 16px; background: var(--bg-card); border: 2px solid var(--border); border-radius: var(--radius-sm); font-weight: 700;">
+ g
+ </div>
+ </div>
+ </div>
+ 
+ <div class="payment-total-display" style="margin-top: 12px; margin-bottom: 0; padding: 12px;">
+ <div class="payment-total-label" style="font-size: 0.8rem;">Subtotal Calculado</div>
+ <div class="payment-total-value" id="weightSubtotal" style="font-size: 1.8rem;">$0</div>
+ </div>
+ </div>
+ 
+ <div class="modal-footer">
+ <button class="btn btn-outline" onclick="closeWeightModal()">Cancelar</button>
+ <button class="btn btn-accent" id="btnConfirmWeight" onclick="confirmWeight()">
+ Agregar al Carrito
+ </button>
+ </div>
+ </div>
+</div>
+
+<!-- ===== CUSTOM PRODUCT MODAL ===== -->
+<div class="modal-overlay" id="customProductModal">
+ <div class="modal" style="max-width: 400px;">
+  <div class="modal-header">
+   <span class="modal-title">Producto Varios</span>
+   <button class="modal-close" onclick="closeCustomProductModal()">✕</button>
+  </div>
+  <div class="modal-body" style="padding-top: 20px;">
+   <div class="form-group">
+    <label class="form-label">Nombre o descripción breve</label>
+    <input type="text" id="customProductName" class="form-control" placeholder="Ej: Bolsa, Recargo..." value="Varios">
+   </div>
+   <div class="form-group">
+    <label class="form-label">Precio ($)</label>
+    <input type="number" id="customProductPrice" class="form-control" placeholder="Monto" style="font-size: 1.5rem; font-weight: bold; text-align: center;">
+   </div>
+  </div>
+  <div class="modal-footer">
+   <button class="btn btn-outline" onclick="closeCustomProductModal()">Cancelar</button>
+   <button class="btn btn-accent" onclick="confirmCustomProduct()">Agregar al Carrito</button>
+  </div>
+ </div>
+</div>
+
+<!-- ===== PRODUCT NOT FOUND — BLOCKING ALERT ===== -->
+<div class="modal-overlay" id="productNotFoundModal" style="z-index: 10000;">
+ <div class="modal" style="max-width: 440px; border: 2px solid var(--error, #e53935); animation: shake 0.4s ease;">
+  <div class="modal-header" style="background: #C62828; color: white;">
+   <span class="modal-title" style="display: flex; align-items: center; gap: 10px;">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+    ¡Producto No Registrado!
+   </span>
+   <button class="modal-close" onclick="closeNotFoundModal()" style="color: white;">✕</button>
+  </div>
+  <div class="modal-body" style="padding: 24px; text-align: center;">
+   <p style="font-size: 1.1rem; margin-bottom: 8px; color: var(--text-primary);">No se encontró producto con código:</p>
+   <p id="notFoundBarcode" style="font-size: 1.4rem; font-weight: 700; color: var(--warning, #FFA726); letter-spacing: 1px; margin-bottom: 16px; font-family: monospace;"></p>
+   <p style="font-size: 0.9rem; color: var(--text-secondary); margin: 0;">Este producto <strong>NO fue sumado</strong> al carrito. Puedes registrarlo en el inventario o agregarlo como "Varios".</p>
+  </div>
+  <div class="modal-footer" style="justify-content: center; gap: 12px; flex-wrap: wrap;">
+   <button class="btn btn-outline" onclick="closeNotFoundModal()" style="min-width: 110px;">Cancelar</button>
+   <button class="btn btn-primary" onclick="notFoundAddToInventory()" style="min-width: 180px;"> Agregar a Inventario</button>
+   <button class="btn btn-accent" onclick="notFoundAddAsVarios()" style="min-width: 160px;">+ Agregar como Varios</button>
+  </div>
+ </div>
+</div>
+
+<style>
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-8px); }
+  40% { transform: translateX(8px); }
+  60% { transform: translateX(-5px); }
+  80% { transform: translateX(5px); }
+}
+</style>
+
+<!-- ===== SUCCESS MODAL ===== -->
+<div class="modal-overlay" id="successModal">
+ <div class="modal" style="max-width: 440px;">
+ <div class="modal-body">
+ <div class="success-animation">
+ <div class="success-icon"><svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="var(--success)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div>
+ <div class="success-message">Venta Exitosa</div>
+ <div class="success-receipt" id="successReceipt">Factura: MRC-00000000-0000</div>
+ <div class="success-change" id="successChangeContainer" style="display: none;">
+ <div class="success-change-label">CAMBIO A DEVOLVER</div>
+ <div class="success-change-value" id="successChangeValue">$0</div>
+ </div>
+ <div class="success-actions">
+ <button class="btn btn-primary" onclick="printReceipt()" id="btnPrintReceipt">
+ Re-imprimir
+ </button>
+ <button class="btn btn-accent" onclick="newSale()">
+ Nueva Venta
+ </button>
+ </div>
+ </div>
+ </div>
+ </div>
+</div>
+
+<!-- Toast Notification -->
+<div class="pos-toast" id="posToast">
+ <span id="toastIcon"></span>
+ <span id="toastMessage">Producto agregado</span>
+</div>
+
+
+<!-- CSRF Token for API calls -->
+<meta name="csrf-token" content="{{ csrf_token() }}">
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/caja.js') }}?v=2.3"></script>
+<!-- ===== ORDER MODAL ===== -->
+<div class="modal-overlay" id="orderModal">
+ <div class="modal" style="max-width: 480px;">
+  <div class="modal-header">
+   <span class="modal-title">Guardar como Pedido</span>
+   <button class="modal-close" onclick="closeOrderModal()">✕</button>
+  </div>
+  <div class="modal-body" style="padding: 24px;">
+   
+   <div class="form-group" style="margin-bottom: 16px;">
+    <label class="form-label">Nombre del Cliente *</label>
+    <input type="text" id="orderCustomerName" class="form-control" placeholder="Ej: Juan Pérez" required>
+   </div>
+   
+   <div class="form-group" style="margin-bottom: 16px;">
+    <label class="form-label">Celular (WhatsApp) *</label>
+    <div style="display: flex; gap: 8px;">
+     <input type="text" class="form-control" value="+57" style="width: 60px; text-align: center;" disabled>
+     <input type="tel" id="orderCustomerPhone" class="form-control" placeholder="3001234567" style="flex: 1;" required>
+    </div>
+   </div>
+   
+   <div style="display: flex; gap: 16px; margin-bottom: 16px;">
+    <div class="form-group" style="flex: 1;">
+     <label class="form-label">Tipo de Pedido</label>
+     <select id="orderType" class="form-control" onchange="toggleOrderAddress()">
+      <option value="domicilio">Domicilio</option>
+      <option value="recoger">Recoger en Tienda</option>
+     </select>
+    </div>
+    <div class="form-group" style="flex: 1;">
+     <label class="form-label">Costo de Envío</label>
+     <input type="number" id="orderDeliveryCost" class="form-control" value="0" min="0" step="50">
+    </div>
+   </div>
+
+   <div class="form-group" id="orderAddressGroup" style="margin-bottom: 16px;">
+    <label class="form-label">Dirección de Entrega</label>
+    <input type="text" id="orderCustomerAddress" class="form-control" placeholder="Ej: Calle 10 #20-30">
+   </div>
+   
+   <div class="form-group" style="margin-bottom: 16px;">
+    <label class="form-label">Método de Pago Provisional</label>
+    <select id="orderPaymentMethod" class="form-control">
+     <option value="efectivo">Efectivo</option>
+     <option value="nequi">Nequi</option>
+     <option value="daviplata">Daviplata</option>
+     <option value="transferencia">Transferencia</option>
+    </select>
+   </div>
+   
+   <div class="form-group">
+    <label class="form-label">Notas / Observaciones</label>
+    <textarea id="orderNotes" class="form-control" rows="2" placeholder="Opcional"></textarea>
+   </div>
+
+  </div>
+  <div class="modal-footer">
+   <button class="btn btn-outline" onclick="closeOrderModal()">Cancelar</button>
+   <button class="btn btn-primary" onclick="submitOrder()" style="background: #ffb300; color: #000;">Guardar y Avisar</button>
+  </div>
+ </div>
+</div>
+
+<script>
+window.currentOrderId = null;
+
+// Intercept fetch to append order_id to sales
+const originalFetch = window.fetch;
+window.fetch = function(url, options) {
+    if ((url === '/api/sale' || url === '/api/credit-sale') && options && options.body && window.currentOrderId) {
+        try {
+            const body = JSON.parse(options.body);
+            body.order_id = window.currentOrderId;
+            options.body = JSON.stringify(body);
+        } catch (e) {
+            console.error("Error injectando order_id:", e);
+        }
+    }
+    return originalFetch.apply(this, arguments);
+};
+
+// Override newSale to redirect back to orders if we are billing a customer order
+const originalNewSale = window.newSale;
+window.newSale = function() {
+    if (window.currentOrderId) {
+        window.location.href = '/orders';
+        return;
+    }
+    if (typeof originalNewSale === 'function') {
+        originalNewSale();
+    }
+};
+
+// Check if loaded with order_id
+document.addEventListener('DOMContentLoaded', () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const orderId = urlParams.get('order_id');
+    if (orderId) {
+        loadOrderIntoPOS(orderId);
+    }
+    
+    // Check if voice is enabled
+    const voiceChk = document.getElementById('chkVoiceAnnounce');
+    if (voiceChk) {
+        voiceChk.checked = isVoiceEnabled();
+    }
+    // Preload voices (some browsers need this)
+    if ('speechSynthesis' in window) {
+        speechSynthesis.getVoices();
+    }
+    // Set scale mode from server config
+    scaleMode = '{{ scale_mode }}';
+});
+
+function toggleOrderAddress() {
+    const type = document.getElementById('orderType').value;
+    const addressGroup = document.getElementById('orderAddressGroup');
+    if (type === 'domicilio') {
+        addressGroup.style.display = 'block';
+    } else {
+        addressGroup.style.display = 'none';
+    }
+}
+
+function openOrderModal() {
+    if (cart.length === 0) {
+        alert('El carrito está vacío');
+        return;
+    }
+    document.getElementById('orderModal').classList.add('active');
+}
+
+function closeOrderModal() {
+    document.getElementById('orderModal').classList.remove('active');
+}
+
+function submitOrder() {
+    const customerName = document.getElementById('orderCustomerName').value.trim();
+    let customerPhone = document.getElementById('orderCustomerPhone').value.trim();
+    if (!customerName || !customerPhone) {
+        alert('Nombre y celular son obligatorios');
+        return;
+    }
+    
+    const orderType = document.getElementById('orderType').value;
+    const deliveryCost = parseInt(document.getElementById('orderDeliveryCost').value) || 0;
+    const customerAddress = document.getElementById('orderCustomerAddress').value.trim();
+    const paymentMethod = document.getElementById('orderPaymentMethod').value;
+    const notes = document.getElementById('orderNotes').value.trim();
+    
+    // items from global cart (cart variable is in caja.js)
+    const payload = {
+        customer_name: customerName,
+        customer_phone: '+57' + customerPhone.replace(/\D/g, ''),
+        order_type: orderType,
+        delivery_cost: deliveryCost,
+        customer_address: customerAddress,
+        payment_method: paymentMethod,
+        notes: notes,
+        items: cart
+    };
+    
+    fetch('/api/order', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': '{{ csrf_token() }}'
+        },
+        body: JSON.stringify(payload)
+    }).then(res => res.json()).then(data => {
+        if (data.success) {
+            closeOrderModal();
+            clearCart();
+            
+            // Build WhatsApp Message
+            let waMsg = `¡Hola ${customerName}! Confirmamos tu pedido de {{ settings.store_name if settings else 'nuestra tienda' }}:\n\n`;
+            waMsg += `*Total:* ${data.total_formatted}\n`;
+            waMsg += `*Método de Pago:* ${paymentMethod}\n`;
+            if (orderType === 'domicilio') waMsg += `*Dirección:* ${customerAddress}\n`;
+            waMsg += `\nEstaremos preparándolo. ¡Gracias!`;
+            
+            const waLink = `https://wa.me/57${customerPhone.replace(/\D/g, '')}?text=${encodeURIComponent(waMsg)}`;
+            window.open(waLink, '_blank');
+            
+            alert('Pedido guardado.');
+        } else {
+            alert('Error: ' + data.message);
+        }
+    }).catch(err => alert('Error de conexión'));
+}
+
+function loadOrderIntoPOS(orderId) {
+    fetch(`/api/order/${orderId}`)
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                window.currentOrderId = data.order.id;
+                cart.length = 0;
+                data.order.items.forEach(item => {
+                    cart.push({
+                        product_id: item.product_id,
+                        name: item.name,
+                        barcode: item.barcode || '',
+                        unit_price: item.price,
+                        quantity: item.quantity,
+                        subtotal: item.subtotal,
+                        weight_grams: item.weight_grams,
+                        weight_unit: item.weight_unit,
+                        sell_by_weight: item.sell_by_weight,
+                        is_custom: item.is_custom
+                    });
+                });
+                updateCartDisplay();
+                if (typeof saveTabs === 'function') saveTabs();
+                if (typeof renderTabs === 'function') renderTabs();
+                
+                // Show banner
+                const banner = document.createElement('div');
+                banner.style = "background: rgba(33, 150, 243, 0.2); color: #64b5f6; padding: 12px; border-radius: 8px; margin-bottom: 16px; font-weight: 700; display: flex; justify-content: space-between; align-items: center;";
+                banner.innerHTML = `<span>Facturando Pedido #${data.order.id} - ${data.order.customer_name}</span> <a href="/orders" style="color: #64b5f6; font-size: 0.8rem; text-decoration: none;">✕ Cancelar</a>`;
+                document.querySelector('.cart-container').insertBefore(banner, document.getElementById('cartItemsList'));
+                
+            } else {
+                alert('No se pudo cargar el pedido');
+            }
+        });
+}
+</script>
+{% endblock %}
