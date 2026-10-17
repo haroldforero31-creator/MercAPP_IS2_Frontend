@@ -57,91 +57,150 @@
  {% if clients %}
  <div class="table-container">
  <table>
- <thead>
- <tr>
- <th>Cliente</th>
- <th>Teléfono</th>
- <th>Total Comprado</th>
- <th>Total Pagado</th>
- <th style="text-align: right;">Deuda Actual</th>
- <th style="text-align: center;">Estado</th>
- <th style="text-align: center;">Acciones</th>
- </tr>
- </thead>
- <tbody>
- {% for client in clients %}
- <tr class="debt-client-row" onclick="window.location.href='{{ url_for('debt_client_pos', client_id=client.id) }}'" style="cursor: pointer;">
- <td>
- <div style="font-weight: 700;">{{ client.name }}</div>
- <div style="font-size: 0.78rem; color: var(--text-muted);">Desde {{ client.created_at.strftime('%d/%m/%Y') }}</div>
- </td>
- <td>{{ client.phone or '—' }}</td>
- <td>{{ client.total_purchased | cop }}</td>
- <td style="color: var(--success);">{{ client.total_paid | cop }}</td>
- <td style="text-align: right; font-weight: 700; font-size: 1.05rem;">
- <span class="{% if client.debt_status == 'pendiente' %}debt-amount-pending{% else %}debt-amount-paid{% endif %}">
- {{ client.total_debt | cop }}
- </span>
- </td>
- <td style="text-align: center;">
- {% if client.debt_status == 'pendiente' %}
- <span class="badge badge-error"> Pendiente</span>
- {% else %}
- <span class="badge badge-success"> Pagado</span>
- {% endif %}
- </td>
- <td onclick="event.stopPropagation();" style="white-space: nowrap; width: 140px;">
-  <div style="display: flex; gap: 6px; justify-content: center; align-items: center; flex-wrap: nowrap;">
-  <a href="{{ url_for('debt_client_pos', client_id=client.id) }}" class="btn btn-primary btn-sm" title="Abrir Caja">
-  Vender
-  </a>
-  <button type="button" class="btn btn-outline btn-sm" onclick="printDebtHardware({{ client.id }})" title="Imprimir Estado de Cuenta Hardware" style="display: flex; align-items: center; justify-content: center; padding: 6px;">
-     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
-  </button>
+      <thead>
+        <tr>
+          <th>Cliente</th>
+          <th>Teléfono</th>
+          <th>Total Comprado</th>
+          <th>Total Pagado</th>
+          <th style="text-align: right;">Deuda Actual</th>
+          <th style="text-align: center;">Estado</th>
+          <th style="text-align: center;">Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for client in clients %}
+        <tr class="debt-client-row" onclick="window.location.href='{{ url_for('debt_client_pos', client_id=client.id) }}'" style="cursor: pointer;">
+          <td>
+            <div style="font-weight: 700; color: #FFFFFF;">{{ client.name }}</div>
+            <div style="font-size: 0.78rem; color: #60A5FA; display: flex; align-items: center; gap: 4px; margin-top: 2px;">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+              {{ client.email or 'Sin correo registrado' }}
+            </div>
+            <div style="font-size: 0.75rem; color: var(--text-muted);">Desde {{ client.created_at.strftime('%d/%m/%Y') }}</div>
+          </td>
+          <td>{{ client.phone or '—' }}</td>
+          <td>{{ client.total_purchased | cop }}</td>
+          <td style="color: var(--success);">{{ client.total_paid | cop }}</td>
+          <td style="text-align: right; font-weight: 700; font-size: 1.05rem;">
+            <span class="{% if client.debt_status == 'pendiente' %}debt-amount-pending{% else %}debt-amount-paid{% endif %}">
+              {{ client.total_debt | cop }}
+            </span>
+          </td>
+          <td style="text-align: center;">
+            {% if client.is_blocked %}
+              <span class="badge" style="background: rgba(239, 68, 68, 0.2); color: #EF4444; border: 1px solid rgba(239, 68, 68, 0.5); font-weight: 700; padding: 4px 8px;" title="Lleva {{ client.days_without_payment }} días sin realizar abonos. Prohibido fiar hasta liquidar deuda total.">
+                ⛔ BLOQUEADO (>2m)
+              </span>
+            {% elif client.debt_status == 'pendiente' %}
+              <span class="badge badge-error"> Pendiente</span>
+            {% else %}
+              <span class="badge badge-success"> Pagado</span>
+            {% endif %}
+          </td>
+          <td onclick="event.stopPropagation();" style="white-space: nowrap; width: 170px;">
+            <div style="display: flex; gap: 6px; justify-content: center; align-items: center; flex-wrap: nowrap;">
+              {% if client.is_blocked %}
+                <button type="button" class="btn btn-secondary btn-sm" disabled style="opacity: 0.5; cursor: not-allowed; background: #374151; color: #9CA3AF;" title="Cliente bloqueado por mora (>60 días sin abonos). Debe saldar su deuda total para volver a fiar.">
+                  Bloqueado
+                </button>
+              {% else %}
+                <a href="{{ url_for('debt_client_pos', client_id=client.id) }}" class="btn btn-primary btn-sm" title="Abrir Caja Fiado">
+                  Vender
+                </a>
+              {% endif %}
+              <button type="button" class="btn btn-outline btn-sm" onclick="openEditClientModal({{ client.id }}, '{{ client.name | escape }}', '{{ client.phone or '' }}', '{{ client.email or '' }}')" title="Editar Cliente / Correo" style="display: flex; align-items: center; justify-content: center; padding: 6px;">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+              </button>
+              <button type="button" class="btn btn-outline btn-sm" onclick="printDebtHardware({{ client.id }})" title="Imprimir Estado de Cuenta Hardware" style="display: flex; align-items: center; justify-content: center; padding: 6px;">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
+              </button>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
   </div>
- </td>
- </tr>
- {% endfor %}
- </tbody>
- </table>
- </div>
- {% else %}
- <div class="card" style="text-align: center; padding: 60px 40px;">
- <div style="font-size: 3.5rem; margin-bottom: 16px;"></div>
- <h3 style="margin-bottom: 8px;">No hay clientes con crédito</h3>
- <p style="color: var(--text-secondary); margin-bottom: 20px;">Crea un nuevo cliente para empezar a fiar productos</p>
- <button class="btn btn-accent" onclick="openNewClientModal()"> Nuevo Cliente Fiado</button>
- </div>
- {% endif %}
+  {% else %}
+  <div class="card" style="text-align: center; padding: 60px 40px;">
+    <div style="font-size: 3.5rem; margin-bottom: 16px;"></div>
+    <h3 style="margin-bottom: 8px;">No hay clientes con crédito</h3>
+    <p style="color: var(--text-secondary); margin-bottom: 20px;">Crea un nuevo cliente para empezar a fiar productos</p>
+    <button class="btn btn-accent" onclick="openNewClientModal()"> Nuevo Cliente Fiado</button>
+  </div>
+  {% endif %}
 </div>
 
 <!-- New Client Modal -->
 <div class="modal-overlay" id="newClientModal">
- <div class="modal" style="max-width: 460px;">
- <div class="modal-header">
- <span class="modal-title"> Nuevo Cliente Fiado</span>
- <button class="modal-close" onclick="closeNewClientModal()">✕</button>
- </div>
- <form method="POST" action="{{ url_for('debt_new_client') }}">
- <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
- <div class="modal-body">
- <div class="form-group">
- <label class="form-label" for="clientName">Nombre del Cliente</label>
- <input type="text" id="clientName" name="name" class="form-control" 
- placeholder="Nombre completo del cliente" required minlength="2" autofocus>
- </div>
- <div class="form-group">
- <label class="form-label" for="clientPhone">Teléfono (opcional)</label>
- <input type="text" id="clientPhone" name="phone" class="form-control" 
- placeholder="Ej: 3001234567">
- </div>
- </div>
- <div class="modal-footer">
- <button type="button" class="btn btn-outline" onclick="closeNewClientModal()">Cancelar</button>
- <button type="submit" class="btn btn-accent"> Crear y Abrir Caja</button>
- </div>
- </form>
- </div>
+  <div class="modal" style="max-width: 480px;">
+    <div class="modal-header">
+      <span class="modal-title"> Nuevo Cliente Fiado</span>
+      <button class="modal-close" onclick="closeNewClientModal()">✕</button>
+    </div>
+    <form method="POST" action="{{ url_for('debt_new_client') }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label" for="clientName">Nombre del Cliente *</label>
+          <input type="text" id="clientName" name="name" class="form-control" 
+                 placeholder="Nombre completo del cliente" required minlength="2" autofocus>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="clientEmail">Correo Electrónico * <span style="color: var(--accent); font-weight: normal; font-size: 0.8rem;">(para facturas automáticas)</span></label>
+          <input type="email" id="clientEmail" name="email" class="form-control" 
+                 placeholder="cliente@ejemplo.com" required>
+          <small style="color: var(--text-muted); font-size: 0.78rem; display: block; margin-top: 4px;">
+            Se enviará automáticamente la factura de lo fiado y los recibos de abono a este correo.
+          </small>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="clientPhone">Teléfono (opcional)</label>
+          <input type="text" id="clientPhone" name="phone" class="form-control" 
+                 placeholder="Ej: 3001234567">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline" onclick="closeNewClientModal()">Cancelar</button>
+        <button type="submit" class="btn btn-accent"> Guardar y Abrir Caja</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Edit Client Modal -->
+<div class="modal-overlay" id="editClientModal">
+  <div class="modal" style="max-width: 480px;">
+    <div class="modal-header">
+      <span class="modal-title">✏️ Editar Cliente Fiado</span>
+      <button class="modal-close" onclick="closeEditClientModal()">✕</button>
+    </div>
+    <form method="POST" id="editClientForm" action="">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label" for="editClientName">Nombre del Cliente *</label>
+          <input type="text" id="editClientName" name="name" class="form-control" required minlength="2">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="editClientEmail">Correo Electrónico *</label>
+          <input type="email" id="editClientEmail" name="email" class="form-control" placeholder="cliente@ejemplo.com" required>
+          <small style="color: var(--text-muted); font-size: 0.78rem; display: block; margin-top: 4px;">
+            Las facturas de ventas fiadas y los comprobantes de abono se enviarán a este correo.
+          </small>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="editClientPhone">Teléfono</label>
+          <input type="text" id="editClientPhone" name="phone" class="form-control" placeholder="Ej: 3001234567">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline" onclick="closeEditClientModal()">Cancelar</button>
+        <button type="submit" class="btn btn-primary"> Actualizar Datos</button>
+      </div>
+    </form>
+  </div>
 </div>
 
 <meta name="csrf-token" content="{{ csrf_token() }}">
@@ -149,26 +208,48 @@
 
 {% block extra_js %}
 <script>
- function openNewClientModal() {
- document.getElementById('newClientModal').classList.add('active');
- setTimeout(() => document.getElementById('clientName').focus(), 100);
- }
- function closeNewClientModal() {
- document.getElementById('newClientModal').classList.remove('active');
- }
- 
- // Phone input: digits only
- const phoneInput = document.getElementById('clientPhone');
- if (phoneInput) {
- phoneInput.addEventListener('input', function() {
- this.value = this.value.replace(/\D/g, '');
- });
- }
- 
- // Close modal on Escape
- document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') closeNewClientModal();
- });
+  function openNewClientModal() {
+    document.getElementById('newClientModal').classList.add('active');
+    setTimeout(() => document.getElementById('clientName').focus(), 100);
+  }
+  function closeNewClientModal() {
+    document.getElementById('newClientModal').classList.remove('active');
+  }
+
+  function openEditClientModal(id, name, phone, email) {
+    const form = document.getElementById('editClientForm');
+    form.action = `/debts/client/${id}/edit`;
+    document.getElementById('editClientName').value = name;
+    document.getElementById('editClientPhone').value = phone;
+    document.getElementById('editClientEmail').value = email;
+    document.getElementById('editClientModal').classList.add('active');
+    setTimeout(() => document.getElementById('editClientEmail').focus(), 100);
+  }
+  function closeEditClientModal() {
+    document.getElementById('editClientModal').classList.remove('active');
+  }
+  
+  // Phone input: digits only
+  const phoneInput = document.getElementById('clientPhone');
+  if (phoneInput) {
+    phoneInput.addEventListener('input', function() {
+      this.value = this.value.replace(/\D/g, '');
+    });
+  }
+  const editPhoneInput = document.getElementById('editClientPhone');
+  if (editPhoneInput) {
+    editPhoneInput.addEventListener('input', function() {
+      this.value = this.value.replace(/\D/g, '');
+    });
+  }
+  
+  // Close modal on Escape
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      closeNewClientModal();
+      closeEditClientModal();
+    }
+  });
 
  function printDebtHardware(clientId) {
     let printer = localStorage.getItem('mercapp_hw_printer');
