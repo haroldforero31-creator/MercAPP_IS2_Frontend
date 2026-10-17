@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="MercAPP - Verificación de Correo de Cliente">
+    <title>MercAPP — Verificar Correo Cliente</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'></text></svg>">
+    <style>
+        .code-inputs {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin: 24px 0;
+        }
+        .code-input {
+            width: 52px;
+            height: 64px;
+            text-align: center;
+            font-size: 1.8rem;
+            font-weight: 700;
+            background: var(--bg-input);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            color: var(--accent-light);
+            font-family: var(--font);
+            transition: var(--transition);
+            caret-color: var(--accent);
+        }
+        .code-input:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 2px rgba(255, 143, 0, 0.15);
+        }
+        .code-input.filled {
+            border-color: var(--success);
+            background: rgba(67, 160, 71, 0.08);
+        }
+        .email-display {
+            text-align: center;
+            margin-bottom: 16px;
+        }
+        .email-display .email-label {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-bottom: 4px;
+        }
+        .email-display .email-value {
+            font-weight: 700;
+            color: var(--accent-light);
+            font-size: 1.05rem;
+        }
+        .timer-bar {
+            text-align: center;
+            padding: 12px;
+            background: rgba(255, 143, 0, 0.08);
+            border: 1px solid rgba(255, 143, 0, 0.2);
+            border-radius: var(--radius-sm);
+            margin: 16px 0;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+        .timer-bar .timer-value {
+            font-weight: 700;
+            color: var(--accent-light);
+            font-size: 1.1rem;
+        }
+        .timer-bar.expired {
+            background: var(--error-bg);
+            border-color: rgba(229, 57, 53, 0.3);
+        }
+        .timer-bar.expired .timer-value {
+            color: var(--error);
+        }
+        .resend-section {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .resend-btn {
+            background: transparent;
+            border: 2px solid var(--border-light);
+            color: var(--text);
+            padding: 12px 24px;
+            border-radius: var(--radius-sm);
+            font-family: var(--font);
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        .resend-btn:hover {
+            border-color: var(--primary-light);
+            background: rgba(46, 125, 50, 0.1);
+        }
+        .verify-icon-animate {
+            font-size: 3.5rem;
+            display: block;
+            margin-bottom: 12px;
+            animation: mailBounce 2s infinite;
+        }
+        @keyframes mailBounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-8px); }
+        }
+    </style>
+</head>
+<body>
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    <div class="flash-container">
+        {% for category, message in messages %}
+        <div class="flash-message {{ category }}" onclick="this.remove()">
+            <span>{{ message }}</span>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+    {% endwith %}
+
+    <div class="login-wrapper">
+        <div class="login-card" style="max-width: 480px;">
+            <div class="login-logo">
+                <span class="verify-icon-animate">📧</span>
+                <h1>Verifica tu Correo</h1>
+                <p>Activa tu cuenta de cliente para realizar pedidos</p>
+            </div>
+
+            <div class="email-display">
+                <div class="email-label">Código enviado a:</div>
+                <div class="email-value">{{ email }}</div>
+            </div>
+
+            {% if expired %}
+            <div class="timer-bar expired">
+                <span class="timer-value">⏰ Código expirado</span>
+                <div style="margin-top: 4px;">Solicita un nuevo código</div>
+            </div>
+            {% else %}
+            <div class="timer-bar" id="timerBar">
+                <span>Expira en </span>
+                <span class="timer-value" id="timerValue">10:00</span>
+            </div>
+            {% endif %}
+
+            <form method="POST" action="{{ url_for('customer_verify_email') }}" id="verifyForm">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <input type="hidden" name="code" id="codeHidden" value="">
+                
+                <div class="code-inputs" id="codeInputs">
+                    <input type="text" class="code-input" maxlength="1" data-index="0" inputmode="numeric" autocomplete="off" autofocus>
+                    <input type="text" class="code-input" maxlength="1" data-index="1" inputmode="numeric" autocomplete="off">
+                    <input type="text" class="code-input" maxlength="1" data-index="2" inputmode="numeric" autocomplete="off">
+                    <input type="text" class="code-input" maxlength="1" data-index="3" inputmode="numeric" autocomplete="off">
+                    <input type="text" class="code-input" maxlength="1" data-index="4" inputmode="numeric" autocomplete="off">
+                    <input type="text" class="code-input" maxlength="1" data-index="5" inputmode="numeric" autocomplete="off">
+                </div>
+
+                <button type="submit" class="btn btn-primary" id="verifyBtn" style="width: 100%; margin-top: 8px;" {% if expired %}disabled{% endif %}>
+                    Verificar Código
+                </button>
+            </form>
+
+            <div class="resend-section">
+                <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 12px;">¿No recibiste el código? Revisa tu spam</p>
+                <form method="POST" action="{{ url_for('customer_resend_code') }}" style="display: inline;">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button type="submit" class="resend-btn">
+                        🔄 Reenviar Código
+                    </button>
+                </form>
+            </div>
+
+            <div style="text-align: center; margin-top: 20px;">
+                <a href="{{ url_for('customer_register') }}" style="color: var(--text-muted); font-size: 0.85rem;">← Volver al registro</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Flash message auto-dismiss
+        document.querySelectorAll('.flash-message').forEach(msg => {
+            setTimeout(() => {
+                msg.style.opacity = '0';
+                msg.style.transform = 'translateX(100%)';
+                setTimeout(() => msg.remove(), 300);
+            }, 5000);
+        });
+
+        // Code input logic
+        const inputs = document.querySelectorAll('.code-input');
+        const hiddenCode = document.getElementById('codeHidden');
+        const verifyBtn = document.getElementById('verifyBtn');
+
+        function updateHiddenCode() {
+            let code = '';
+            inputs.forEach(input => {
+                code += input.value;
+                input.classList.toggle('filled', input.value !== '');
+            });
+            hiddenCode.value = code;
+            verifyBtn.disabled = code.length !== 6;
+        }
+
+        inputs.forEach((input, index) => {
+            input.addEventListener('input', (e) => {
+                const val = e.target.value.replace(/\D/g, '');
+                e.target.value = val;
+                
+                if (val && index < inputs.length - 1) {
+                    inputs[index + 1].focus();
+                }
+                updateHiddenCode();
+            });
+
+            input.addEventListener('keydown', (e) => {
+                if (e.key === 'Backspace' && !e.target.value && index > 0) {
+                    inputs[index - 1].focus();
+                    inputs[index - 1].value = '';
+                    updateHiddenCode();
+                }
+            });
+
+            // Handle paste
+            input.addEventListener('paste', (e) => {
+                e.preventDefault();
+                const pasted = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, 6);
+                pasted.split('').forEach((char, i) => {
+                    if (inputs[i]) {
+                        inputs[i].value = char;
+                    }
+                });
+                if (inputs[pasted.length - 1]) inputs[pasted.length - 1].focus();
+                updateHiddenCode();
+            });
+        });
+
+        // Timer (only if not expired)
+        {% if not expired %}
+        const timerBar = document.getElementById('timerBar');
+        const timerValue = document.getElementById('timerValue');
+        let timeLeft = 10 * 60; // 10 minutes in seconds
+
+        function updateTimer() {
+            if (timeLeft <= 0) {
+                timerBar.classList.add('expired');
+                timerValue.textContent = '⏰ Código expirado';
+                verifyBtn.disabled = true;
+                return;
+            }
+            const mins = Math.floor(timeLeft / 60);
+            const secs = timeLeft % 60;
+            timerValue.textContent = `${mins}:${secs.toString().padStart(2, '0')}`;
+            timeLeft--;
+            setTimeout(updateTimer, 1000);
+        }
+        updateTimer();
+        {% endif %}
+
+        // Auto-submit when all 6 digits entered
+        document.getElementById('verifyForm').addEventListener('submit', (e) => {
+            if (hiddenCode.value.length !== 6) {
+                e.preventDefault();
+            }
+        });
+    </script>
+</body>
+</html>

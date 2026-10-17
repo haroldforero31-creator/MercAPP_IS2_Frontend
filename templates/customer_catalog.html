@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ store.name }} - Catálogo</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <style>
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            font-family: var(--font);
+        }
+        .header {
+            background-color: var(--bg-card);
+            border-bottom: 1px solid var(--border);
+            padding: 1rem 2rem;
+            color: var(--text);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+            display: flex;
+            gap: 2rem;
+        }
+        .main-content {
+            width: calc(60% - 1rem);
+            flex-shrink: 0;
+        }
+        .sidebar {
+            width: calc(40% - 1rem);
+            flex-shrink: 0;
+            box-sizing: border-box;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 20px;
+            box-shadow: var(--shadow);
+            height: fit-content;
+            position: sticky;
+            top: 80px;
+        }
+        .search-bar {
+            width: 100%;
+            padding: 12px 15px;
+            background-color: var(--bg-input);
+            border: 1px solid var(--border);
+            color: var(--text);
+            border-radius: var(--radius-sm);
+            font-size: 16px;
+            margin-bottom: 20px;
+            box-sizing: border-box;
+            outline: none;
+            transition: var(--transition);
+        }
+        .search-bar:focus {
+            border-color: var(--primary);
+            box-shadow: var(--shadow-glow);
+        }
+        .category-tabs {
+            display: flex;
+            gap: 10px;
+            overflow-x: auto;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+        .category-tab {
+            padding: 8px 16px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            color: var(--text-secondary);
+            border-radius: var(--radius-xl);
+            cursor: pointer;
+            white-space: nowrap;
+            transition: var(--transition);
+        }
+        .category-tab:hover {
+            color: var(--text);
+            background: var(--bg-card-hover);
+        }
+        .category-tab.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 20px;
+        }
+        .product-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 20px;
+            box-shadow: var(--shadow);
+            display: flex;
+            flex-direction: column;
+            transition: var(--transition);
+        }
+        .product-card:hover {
+            transform: translateY(-4px);
+            border-color: var(--primary);
+            box-shadow: var(--shadow-glow);
+        }
+        .product-name {
+            font-weight: 600;
+            margin-bottom: 5px;
+            font-size: 1.1rem;
+            color: var(--text);
+        }
+        .product-price {
+            color: var(--success);
+            font-weight: bold;
+            font-size: 1.25rem;
+            margin-bottom: 15px;
+        }
+        .add-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            width: 100%;
+            font-weight: bold;
+            margin-top: auto;
+            transition: var(--transition);
+        }
+        .add-btn:hover {
+            background: var(--primary-light);
+        }
+        
+        /* Cart Styles */
+        .cart-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border);
+        }
+        .cart-item-info {
+            flex: 1;
+        }
+        .cart-item-name {
+            font-weight: 500;
+            font-size: 0.95rem;
+            color: var(--text);
+        }
+        .cart-item-price {
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+        }
+        .cart-item-controls {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .qty-btn {
+            background: var(--border);
+            border: none;
+            color: var(--text);
+            width: 26px;
+            height: 26px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition);
+        }
+        .qty-btn:hover {
+            background: var(--border-light);
+        }
+        .cart-total {
+            font-size: 1.5rem;
+            font-weight: bold;
+            text-align: right;
+            margin: 20px 0;
+            color: var(--text);
+        }
+        .checkout-btn {
+            background: var(--success);
+            color: white;
+            border: none;
+            padding: 14px;
+            width: 100%;
+            border-radius: var(--radius-sm);
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        .checkout-btn:hover {
+            background: var(--primary-light);
+        }
+        .checkout-btn:disabled {
+            background: var(--border);
+            color: var(--text-muted);
+            cursor: not-allowed;
+        }
+        .nav-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            margin-left: 20px;
+            transition: var(--transition);
+        }
+        .nav-links a:hover {
+            color: var(--text);
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            background-color: var(--bg-input);
+            border: 1px solid var(--border);
+            color: var(--text);
+            border-radius: var(--radius-sm);
+            box-sizing: border-box;
+            outline: none;
+        }
+        .form-control:focus {
+            border-color: var(--primary);
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div style="font-size: 1.5rem; font-weight: bold;">
+            <a href="{{ url_for('customer_stores') }}" style="color:var(--text); text-decoration:none;">← Volver</a>
+            <span style="margin-left:20px;">{{ store.name }}</span>
+        </div>
+        <div class="nav-links">
+            <a href="{{ url_for('customer_orders') }}">Mis Pedidos</a>
+            <a href="{{ url_for('customer_logout') }}">Salir</a>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- Main Content (Products) -->
+        <div class="main-content">
+            <input type="text" id="searchInput" class="search-bar" placeholder="Buscar producto por nombre...">
+            
+            <div class="category-tabs" id="categoryTabs">
+                <div class="category-tab active" onclick="filterCategory('all')">Todos</div>
+                {% for cat in categories %}
+                <div class="category-tab" onclick="filterCategory('{{ cat.id }}')">{{ cat.name }}</div>
+                {% endfor %}
+            </div>
+
+            <div class="products-grid" id="productsGrid">
+                {% for prod in products %}
+                <div class="product-card" data-category="{{ prod.category_id }}" data-name="{{ prod.name.lower() }}">
+                    <div class="product-name">{{ prod.name }}</div>
+                    <div style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 5px;">
+                        {% if prod.sell_by_weight %}Granel (por {{ prod.weight_unit }}){% else %}Unidad{% endif %}
+                    </div>
+                    <div class="product-price">${{ "{:,.0f}".format(prod.price) }}</div>
+                    
+                    {% if not prod.sell_by_weight %}
+                        <button class="add-btn" onclick="addToCart({{ prod.id }}, '{{ prod.name }}', {{ prod.price }}, 'unidad')">Agregar</button>
+                    {% else %}
+                        <div style="display:flex; gap:10px; margin-top:auto;">
+                            <input type="number" id="qty-{{ prod.id }}" placeholder="Cant." class="form-control" style="margin:0; width:70px;" min="1" value="1">
+                            <button class="add-btn" style="margin:0;" onclick="addGranelToCart({{ prod.id }}, '{{ prod.name }}', {{ prod.price }}, '{{ prod.weight_unit }}')">Agregar</button>
+                        </div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Sidebar (Cart) -->
+        <div class="sidebar">
+            <h2 style="margin-top:0;">Tu Pedido</h2>
+            <div id="cartItems" style="min-height: 150px; max-height: 400px; overflow-y: auto;">
+                <p style="color:var(--text-muted); text-align:center; margin-top:50px;">El carrito está vacío</p>
+            </div>
+            
+            <div class="cart-total" id="cartTotal">Total: $0</div>
+            
+            <hr style="border:0; border-top:1px solid #e5e7eb; margin:15px 0;">
+            
+            <label style="display:block; font-weight:500; margin-bottom:5px;">Tipo de Entrega</label>
+            <select id="orderType" class="form-control">
+                <option value="domicilio">A Domicilio</option>
+                <option value="recoger">Pasar a Recoger</option>
+            </select>
+            
+            <label style="display:block; font-weight:500; margin-bottom:5px;">Método de Pago</label>
+            <select id="paymentMethod" class="form-control">
+                <option value="efectivo">Efectivo (Pago Contraentrega)</option>
+                <option value="transferencia">Transferencia (Pago Contraentrega)</option>
+            </select>
+            
+            <button class="checkout-btn" onclick="submitOrder()">Solicitar Pedido</button>
+        </div>
+    </div>
+
+    <script>
+        let cart = [];
+        
+        function filterCategory(catId) {
+            document.querySelectorAll('.category-tab').forEach(t => t.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            
+            document.querySelectorAll('.product-card').forEach(card => {
+                const matchesCat = catId === 'all' || card.dataset.category === catId.toString();
+                const matchesSearch = card.dataset.name.includes(searchTerm);
+                if(matchesCat && matchesSearch) card.style.display = 'flex';
+                else card.style.display = 'none';
+            });
+        }
+
+        document.getElementById('searchInput').addEventListener('input', (e) => {
+            const activeCat = document.querySelector('.category-tab.active').innerText;
+            // Hacky way to re-trigger current filter
+            document.querySelector('.category-tab.active').click();
+        });
+
+        function addToCart(id, name, price, type, qty=1) {
+            const existing = cart.find(i => i.id === id);
+            if(existing) {
+                existing.qty += qty;
+            } else {
+                cart.push({id, name, price, type, qty});
+            }
+            renderCart();
+        }
+
+        function addGranelToCart(id, name, price, unit) {
+            const input = document.getElementById(`qty-${id}`);
+            const qty = parseFloat(input.value);
+            if(!qty || qty <= 0) return;
+            addToCart(id, `${name} (${unit})`, price, 'granel', qty);
+            input.value = '1';
+        }
+
+        function updateQty(index, delta) {
+            cart[index].qty += delta;
+            if(cart[index].qty <= 0) {
+                cart.splice(index, 1);
+            }
+            renderCart();
+        }
+
+        function renderCart() {
+            const container = document.getElementById('cartItems');
+            if(cart.length === 0) {
+                container.innerHTML = '<p style="color:var(--text-muted); text-align:center; margin-top:50px;">El carrito está vacío</p>';
+                document.getElementById('cartTotal').innerText = 'Total: $0';
+                return;
+            }
+            
+            let html = '';
+            let total = 0;
+            
+            cart.forEach((item, index) => {
+                const subtotal = item.price * item.qty;
+                total += subtotal;
+                html += `
+                <div class="cart-item">
+                    <div class="cart-item-info">
+                        <div class="cart-item-name">${item.name}</div>
+                        <div class="cart-item-price">$${item.price.toLocaleString()} x ${item.qty}</div>
+                    </div>
+                    <div class="cart-item-controls">
+                        <button class="qty-btn" onclick="updateQty(${index}, -1)">-</button>
+                        <span>${item.qty}</span>
+                        <button class="qty-btn" onclick="updateQty(${index}, 1)">+</button>
+                    </div>
+                </div>`;
+            });
+            
+            container.innerHTML = html;
+            document.getElementById('cartTotal').innerText = `Total: $${total.toLocaleString()}`;
+        }
+
+        async function submitOrder() {
+            if(cart.length === 0) {
+                alert('El carrito está vacío');
+                return;
+            }
+            
+            const btn = document.querySelector('.checkout-btn');
+            btn.disabled = true;
+            btn.innerText = 'Procesando...';
+            
+            try {
+                const response = await fetch('/api/c/order', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': '{{ csrf_token() }}'
+                    },
+                    body: JSON.stringify({
+                        store_id: {{ store.id }},
+                        items: cart,
+                        order_type: document.getElementById('orderType').value,
+                        payment_method: document.getElementById('paymentMethod').value
+                    })
+                });
+                
+                const data = await response.json();
+                if(data.success) {
+                    alert('¡Pedido realizado con éxito!');
+                    window.location.href = '/c/orders';
+                } else {
+                    alert('Error: ' + data.error);
+                    btn.disabled = false;
+                    btn.innerText = 'Solicitar Pedido';
+                }
+            } catch(e) {
+                alert('Error de conexión');
+                btn.disabled = false;
+                btn.innerText = 'Solicitar Pedido';
+            }
+        }
+    </script>
+</body>
+</html>

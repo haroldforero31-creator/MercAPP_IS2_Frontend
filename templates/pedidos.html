@@ -1,0 +1,410 @@
+{% extends "base.html" %}
+
+{% block title %}Pedidos y Domicilios — {{ settings.store_name if settings else 'MercAPP' }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .orders-container {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 24px;
+        margin-top: 20px;
+    }
+    .order-card {
+        background: var(--card-bg, #1e1e2e);
+        border-radius: 16px;
+        border: 1px solid var(--border, #2a2a3e);
+        padding: 24px;
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .order-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+    }
+    .order-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px solid rgba(255,255,255,0.05);
+        padding-bottom: 16px;
+    }
+    .order-title {
+        font-size: 1.25rem;
+        font-weight: 800;
+        color: var(--text-primary);
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+    .badge {
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 700;
+        text-transform: uppercase;
+    }
+    .badge-pendiente { background-color: rgba(251, 191, 36, 0.2); color: #fbbf24; }
+    .badge-confirmado { background-color: rgba(59, 130, 246, 0.2); color: #3b82f6; }
+    
+    .order-body {
+        display: grid;
+        grid-template-columns: 1.5fr 1fr;
+        gap: 24px;
+    }
+    @media (max-width: 768px) {
+        .order-body {
+            grid-template-columns: 1fr;
+        }
+    }
+    
+    .client-info {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+    .info-row {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        font-size: 0.95rem;
+        color: var(--text-secondary);
+    }
+    .info-row strong {
+        color: var(--text-primary);
+    }
+    
+    .items-list {
+        background: rgba(0, 0, 0, 0.15);
+        border-radius: 12px;
+        padding: 16px;
+        max-height: 200px;
+        overflow-y: auto;
+    }
+    .item-row {
+        display: flex;
+        justify-content: space-between;
+        font-size: 0.9rem;
+        margin-bottom: 8px;
+        color: var(--text-secondary);
+    }
+    .item-row:last-child {
+        margin-bottom: 0;
+    }
+    .item-name {
+        color: var(--text-primary);
+        font-weight: 500;
+    }
+    
+    .order-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-top: 1px solid rgba(255,255,255,0.05);
+        padding-top: 16px;
+    }
+    
+    .total-amount {
+        font-size: 1.5rem;
+        font-weight: 800;
+        color: var(--primary);
+    }
+    
+    .actions-group {
+        display: flex;
+        gap: 12px;
+    }
+    
+    /* Modal styles */
+    .modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.6);
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+    }
+    .modal.active {
+        display: flex;
+    }
+    .modal-content {
+        background: var(--card-bg, #1e1e2e);
+        border: 1px solid var(--border, #2a2a3e);
+        border-radius: 16px;
+        padding: 24px;
+        width: 90%;
+        max-width: 500px;
+        box-shadow: 0 20px 25px -5px rgba(0,0,0,0.3);
+    }
+    .modal-header {
+        font-size: 1.25rem;
+        font-weight: bold;
+        color: var(--text-primary);
+        margin-bottom: 16px;
+    }
+    .form-control {
+        width: 100%;
+        background: rgba(0,0,0,0.2);
+        border: 1px solid var(--border, #2a2a3e);
+        color: white;
+        padding: 12px;
+        border-radius: 8px;
+        box-sizing: border-box;
+        margin-top: 8px;
+        margin-bottom: 20px;
+    }
+    .modal-footer {
+        display: flex;
+        justify-content: flex-end;
+        gap: 12px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-container" style="max-width: 1200px; margin: 0 auto; padding: 24px;">
+
+    <!-- Header -->
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px;">
+        <div>
+            <h1 style="font-size: 2rem; font-weight: 800; color: var(--text-primary); margin: 0;">
+                Pedidos de Clientes
+            </h1>
+            <p style="color: var(--text-secondary); font-size: 1rem; margin-top: 6px;">
+                Administra los pedidos entrantes del catálogo B2C
+            </p>
+        </div>
+    </div>
+
+    <!-- Active Orders list -->
+    <h2 style="font-size: 1.5rem; font-weight: 800; color: var(--text-primary); margin-bottom: 20px;">Pedidos Activos</h2>
+    <div class="orders-container">
+        {% for order in active_orders %}
+        <div class="order-card">
+            <div class="order-header">
+                <div class="order-title">
+                    <span>ORD-{{ "%04d"|format(order.id) }}</span>
+                    <span class="badge badge-{{ order.status }}">{{ order.status }}</span>
+                </div>
+                <div style="color: var(--text-secondary); font-size: 0.9rem;">
+                    {{ order.created_at.strftime('%d/%m/%Y %I:%M %p') }}
+                </div>
+            </div>
+            
+            <div class="order-body">
+                <div class="client-info">
+                    <div class="info-row">
+                        <strong>Cliente:</strong> <span>{{ order.customer_name }}</span>
+                    </div>
+                    <div class="info-row">
+                        <strong>Teléfono:</strong> <span>{{ order.customer_phone }}</span>
+                    </div>
+                    <div class="info-row">
+                        <strong>Entrega:</strong> 
+                        <span>
+                            {% if order.order_type == 'domicilio' %}
+                            🚚 Domicilio a: {{ order.customer_address }}
+                            {% else %}
+                            🏪 Recoger en Tienda
+                            {% endif %}
+                        </span>
+                    </div>
+                    <div class="info-row">
+                        <strong>Pago:</strong> <span>{{ order.payment_method|capitalize }}</span>
+                    </div>
+                </div>
+                
+                <div>
+                    <strong style="display:block; margin-bottom:8px; font-size:0.95rem; color:var(--text-primary);">Detalles de Compra:</strong>
+                    <div class="items-list">
+                        {% for item in order.items %}
+                        <div class="item-row">
+                            <span class="item-name">{{ item.product.name }}</span>
+                            <span>x{{ item.quantity }} - ${{ "{:,.0f}".format(item.subtotal) }}</span>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            
+            <div class="order-footer">
+                <div class="total-amount">
+                    Total: ${{ "{:,.0f}".format(order.total) }}
+                </div>
+                <div class="actions-group">
+                    {% if order.status == 'pendiente' %}
+                    <button class="btn btn-primary" onclick="openConfirmModal({{ order.id }})">Confirmar Pedido</button>
+                    <button class="btn btn-secondary" style="background: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3);" onclick="openCancelModal({{ order.id }})">Cancelar</button>
+                    {% elif order.status == 'confirmado' %}
+                    <a href="{{ url_for('pos', order_id=order.id) }}" class="btn btn-primary">Facturar en Caja</a>
+                    <button class="btn btn-secondary" style="background: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3);" onclick="openCancelModal({{ order.id }})">Cancelar</button>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <div style="text-align: center; padding: 60px; color: var(--text-secondary); background: var(--card-bg, #1e1e2e); border-radius: 16px; border: 1px solid var(--border, #2a2a3e);">
+            No tienes pedidos activos.
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- History Section -->
+    <div style="margin-top: 48px;">
+        <h2 style="font-size: 1.5rem; font-weight: 800; color: var(--text-primary); margin-bottom: 24px; display: flex; align-items: center; gap: 12px;">
+            Historial de Pedidos Recientes (Últimas 48h)
+        </h2>
+        <div style="background: var(--card-bg, #1e1e2e); border-radius: 20px; border: 1px solid var(--border, #2a2a3e); overflow: hidden;">
+            <table style="width: 100%; border-collapse: collapse; text-align: left;">
+                <thead>
+                    <tr style="background: rgba(255,255,255,0.03); color: var(--text-secondary); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px;">
+                        <th style="padding: 16px 20px; font-weight: 600;">ID / Fecha</th>
+                        <th style="padding: 16px 20px; font-weight: 600;">Cliente</th>
+                        <th style="padding: 16px 20px; font-weight: 600;">Tipo</th>
+                        <th style="padding: 16px 20px; font-weight: 600;">Total</th>
+                        <th style="padding: 16px 20px; font-weight: 600;">Estado</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for order in history_orders %}
+                    <tr style="border-top: 1px solid rgba(255,255,255,0.05); color: var(--text-primary);">
+                        <td style="padding: 16px 20px;">
+                            <span style="font-weight: 700;">ORD-{{ "%04d"|format(order.id) }}</span><br>
+                            <span style="font-size: 0.8rem; color: var(--text-secondary);">{{ order.created_at.strftime('%d/%m/%Y %I:%M %p') }}</span>
+                        </td>
+                        <td style="padding: 16px 20px; font-weight: 600;">{{ order.customer_name }}</td>
+                        <td style="padding: 16px 20px;">{{ order.order_type|capitalize }}</td>
+                        <td style="padding: 16px 20px; font-weight: 700; color: var(--primary);">
+                            ${{ "{:,.0f}".format(order.total) }}
+                        </td>
+                        <td style="padding: 16px 20px;">
+                            {% if order.status == 'completado' %}
+                            <span style="color: #10b981; font-weight: 600;">Facturado</span>
+                            {% else %}
+                            <span style="color: #ef4444; font-weight: 600;">Cancelado</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="5" style="text-align: center; padding: 40px; color: var(--text-secondary);">No hay pedidos en el historial reciente.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Confirm Order Modal -->
+<div class="modal" id="confirmModal">
+    <div class="modal-content">
+        <div class="modal-header">Confirmar Pedido</div>
+        <p style="color: var(--text-secondary); margin-bottom: 15px;">Puedes escribir un pequeño mensaje interno para el cliente (aparecerá en sus notificaciones):</p>
+        <textarea id="confirmMessage" class="form-control" rows="3" placeholder="Ej: Tu pedido ya está confirmado y en preparación."></textarea>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" onclick="closeModals()">Volver</button>
+            <button class="btn btn-primary" id="btnSubmitConfirm" onclick="submitConfirm()">Confirmar</button>
+        </div>
+    </div>
+</div>
+
+<!-- Cancel Order Modal -->
+<div class="modal" id="cancelModal">
+    <div class="modal-content">
+        <div class="modal-header" style="color: #ef4444;">Cancelar Pedido</div>
+        <p style="color: var(--text-secondary); margin-bottom: 15px;">Escribe un motivo de cancelación que el cliente pueda ver:</p>
+        <textarea id="cancelMessage" class="form-control" rows="3" placeholder="Ej: No contamos con stock disponible de algunos productos."></textarea>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" onclick="closeModals()">Volver</button>
+            <button class="btn btn-primary" style="background-color: #ef4444;" id="btnSubmitCancel" onclick="submitCancel()">Cancelar Pedido</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    let activeOrderId = null;
+
+    function openConfirmModal(orderId) {
+        activeOrderId = orderId;
+        document.getElementById('confirmMessage').value = 'Tu pedido ha sido confirmado.';
+        document.getElementById('confirmModal').classList.add('active');
+    }
+
+    function openCancelModal(orderId) {
+        activeOrderId = orderId;
+        document.getElementById('cancelMessage').value = 'Pedido cancelado por la tienda.';
+        document.getElementById('cancelModal').classList.add('active');
+    }
+
+    function closeModals() {
+        document.getElementById('confirmModal').classList.remove('active');
+        document.getElementById('cancelModal').classList.remove('active');
+        activeOrderId = null;
+    }
+
+    async function submitConfirm() {
+        if (!activeOrderId) return;
+        const msg = document.getElementById('confirmMessage').value;
+        
+        const btn = document.getElementById('btnSubmitConfirm');
+        btn.disabled = true;
+        
+        try {
+            const response = await fetch(`/api/order/${activeOrderId}/status`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token() }}'
+                },
+                body: JSON.stringify({ status: 'confirmado', message: msg })
+            });
+            const data = await response.json();
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('Error: ' + data.message);
+                btn.disabled = false;
+            }
+        } catch (e) {
+            alert('Error de conexión');
+            btn.disabled = false;
+        }
+    }
+
+    async function submitCancel() {
+        if (!activeOrderId) return;
+        const msg = document.getElementById('cancelMessage').value;
+        
+        const btn = document.getElementById('btnSubmitCancel');
+        btn.disabled = true;
+        
+        try {
+            const response = await fetch(`/api/order/${activeOrderId}/status`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token() }}'
+                },
+                body: JSON.stringify({ status: 'cancelado', message: msg })
+            });
+            const data = await response.json();
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('Error: ' + data.message);
+                btn.disabled = false;
+            }
+        } catch (e) {
+            alert('Error de conexión');
+            btn.disabled = false;
+        }
+    }
+</script>
+{% endblock %}
