@@ -16,6 +16,11 @@
  <div class="fiado-client-info">
  <span class="fiado-label">VENTA FIADO</span>
  <span class="fiado-client-name">{{ client.name }}</span>
+ {% if client.email %}
+ <span style="font-size: 0.78rem; color: #93C5FD; display: block; margin-top: 2px;">✉️ {{ client.email }}</span>
+ {% else %}
+ <span style="font-size: 0.78rem; color: #FCA5A5; display: block; margin-top: 2px;">⚠️ Sin correo registrado</span>
+ {% endif %}
  </div>
  <div class="fiado-debt-display">
  <span class="fiado-debt-label">Deuda actual:</span>
@@ -23,6 +28,16 @@
  </div>
  </div>
  </div>
+
+ {% if client.is_blocked %}
+ <div style="background: rgba(239, 68, 68, 0.15); border: 2px solid #EF4444; border-radius: 8px; padding: 12px 16px; margin: 10px 16px 0; color: #FCA5A5; display: flex; align-items: center; gap: 12px;">
+ <div style="font-size: 1.8rem; line-height: 1;">⛔</div>
+ <div style="font-size: 0.85rem; line-height: 1.4;">
+ <strong style="color: #FFFFFF; font-size: 0.95rem; display: block;">CLIENTE BLOQUEADO POR MORA</strong>
+ Este cliente tiene una deuda de <strong>{{ client.total_debt | cop }}</strong> y lleva <strong>{{ client.days_without_payment }} días</strong> (>2 meses) sin realizar abonos. Está <strong>terminantemente prohibido fiar más</strong> hasta liquidar su deuda total.
+ </div>
+ </div>
+ {% endif %}
 
  <!-- Smart Search Input (same as caja) -->
  <div class="scanner-area">
@@ -87,8 +102,8 @@
  <button class="btn btn-outline" onclick="openPaymentPanel()" style="padding: 16px; font-weight: 700; border-color: var(--success); color: var(--success);" {% if client.total_debt <= 0 %}disabled{% endif %}>
  Pago
  </button>
- <button class="btn-charge fiado-charge-btn" onclick="openFiarConfirmationModal()" id="btnCharge" disabled>
- FIAR $0
+ <button class="btn-charge fiado-charge-btn" onclick="openFiarConfirmationModal()" id="btnCharge" {% if client.is_blocked %}disabled style="background: #4B5563; cursor: not-allowed; opacity: 0.5;"{% else %}disabled{% endif %}>
+ {% if client.is_blocked %}⛔ BLOQUEADO (>2M){% else %}FIAR $0{% endif %}
  </button>
  </div>
  </div>
@@ -375,22 +390,46 @@
  // Credit/Fiado specific configuration
  const CREDIT_CLIENT_ID = {{ client.id }};
  const CREDIT_CLIENT_NAME = '{{ client.name }}';
+ const CREDIT_CLIENT_EMAIL = '{{ client.email or "" }}';
+ const IS_CLIENT_BLOCKED = {{ 'true' if client.is_blocked else 'false' }};
 
- // Override the charge button text
+ // Override the charge button text and block enforcement
  const origUpdateCartDisplay = updateCartDisplay;
  updateCartDisplay = function() {
  origUpdateCartDisplay();
  const btnCharge = document.getElementById('btnCharge');
- btnCharge.textContent = ` FIAR ${formatCOP(currentTotal)}`;
+ if (IS_CLIENT_BLOCKED) {
+     btnCharge.disabled = true;
+     btnCharge.style.background = '#4B5563';
+     btnCharge.style.cursor = 'not-allowed';
+     btnCharge.style.opacity = '0.5';
+     btnCharge.textContent = '⛔ BLOQUEADO (>2M)';
+ } else {
+     btnCharge.textContent = ` FIAR ${formatCOP(currentTotal)}`;
+ }
  };
 
  // Process credit sale (instead of regular sale)
  function openFiarConfirmationModal() {
+     if (IS_CLIENT_BLOCKED) {
+         showToast('Cliente Bloqueado', 'Este cliente lleva más de 2 meses sin abonar a su deuda. No se le puede fiar más hasta que salde la deuda por completo.', 'error');
+         return;
+     }
      if (cart.length === 0) return;
      document.getElementById('confirmFiarAmount').textContent = formatCOP(currentTotal);
-     document.getElementById('chkSendEmail').checked = false;
-     document.getElementById('fiarEmailInputContainer').style.display = 'none';
-     document.getElementById('fiarEmailInput').value = '';
+     const chk = document.getElementById('chkSendEmail');
+     const container = document.getElementById('fiarEmailInputContainer');
+     const emailInput = document.getElementById('fiarEmailInput');
+     
+     if (CREDIT_CLIENT_EMAIL) {
+         chk.checked = true;
+         container.style.display = 'block';
+         emailInput.value = CREDIT_CLIENT_EMAIL;
+     } else {
+         chk.checked = false;
+         container.style.display = 'none';
+         emailInput.value = '';
+     }
      document.getElementById('fiarConfirmationModal').classList.add('active');
  }
 
