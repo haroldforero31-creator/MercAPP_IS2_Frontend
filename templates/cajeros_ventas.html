@@ -1,0 +1,123 @@
+{% extends "base.html" %}
+
+{% block title %}Ventas por Cajero — {{ settings.store_name if settings else 'MercAPP' }}{% endblock %}
+
+{% block content %}
+<div class="page-container" style="max-width: 1000px; margin: 0 auto; padding: 24px;">
+ 
+ <!-- Header -->
+ <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 12px;">
+  <div>
+   <h1 style="font-size: 1.6rem; font-weight: 800; color: var(--text-primary); margin: 0;">
+    📊 Ventas por Cajero
+   </h1>
+   <p style="color: var(--text-secondary); font-size: 0.85rem; margin-top: 4px;">
+    Historial diario de ventas de cada cajero
+   </p>
+  </div>
+  <a href="{{ url_for('cashiers') }}" class="btn btn-outline" style="padding: 10px 20px; border-radius: 10px; font-size: 0.9rem;">
+   ← Volver a Cajeros
+  </a>
+ </div>
+
+ <!-- Date Selector -->
+ <div style="background: var(--card-bg, #1e1e2e); border-radius: 14px; padding: 16px 20px; margin-bottom: 24px; border: 1px solid var(--border, #2a2a3e); display: flex; align-items: center; gap: 16px; flex-wrap: wrap;">
+  <label style="font-weight: 600; color: var(--text-primary); font-size: 0.95rem;">📅 Fecha:</label>
+  <form method="GET" style="display: flex; align-items: center; gap: 10px; flex: 1;">
+   <input type="date" name="date" value="{{ view_date.strftime('%Y-%m-%d') }}" 
+    class="form-control" style="max-width: 200px; padding: 10px 14px; border-radius: 10px; font-size: 0.95rem;"
+    onchange="this.form.submit()">
+   <span style="color: var(--text-secondary); font-size: 0.9rem;">
+    {{ view_date.strftime('%A %d de %B, %Y') }}
+   </span>
+  </form>
+ </div>
+
+ <!-- Cashier Sales Cards -->
+ {% if cashier_data %}
+ <div style="display: flex; flex-direction: column; gap: 20px;">
+  {% for data in cashier_data %}
+  <div class="cashier-sales-card" style="background: var(--card-bg, #1e1e2e); border-radius: 16px; border: 1px solid var(--border, #2a2a3e); overflow: hidden;">
+   
+   <!-- Cashier Header -->
+   <div style="padding: 18px 24px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border, #2a2a3e); background: rgba(124,77,255,0.05);">
+    <div style="display: flex; align-items: center; gap: 14px;">
+     <div style="width: 44px; height: 44px; border-radius: 12px; background: linear-gradient(135deg, var(--accent, #7c4dff), var(--accent-light, #b47cff)); display: flex; align-items: center; justify-content: center;">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+     </div>
+     <div>
+      <h3 style="font-size: 1.15rem; font-weight: 700; color: var(--text-primary); margin: 0;">{{ data.cashier.username or data.cashier.name }}</h3>
+      <p style="color: var(--text-secondary); font-size: 0.8rem; margin: 0;">
+       {% if data.session %}
+        Sesión: {{ data.session.opened_at.strftime('%H:%M') }}
+        {% if data.session.status == 'cerrada' %} — Cerrada {{ data.session.closed_at.strftime('%H:%M') if data.session.closed_at else '' }}{% else %} — <span style="color: var(--success);">Abierta</span>{% endif %}
+       {% else %}
+        Sin sesión abierta este día
+       {% endif %}
+      </p>
+     </div>
+    </div>
+    <div style="text-align: right;">
+     <div style="font-size: 1.4rem; font-weight: 800; color: var(--success, #66bb6a);">{{ data.total | cop }}</div>
+     <div style="font-size: 0.8rem; color: var(--text-secondary);">{{ data.sale_count }} venta{{ 's' if data.sale_count != 1 else '' }}</div>
+    </div>
+   </div>
+
+   <!-- Sales List -->
+   {% if data.sales %}
+   <div style="max-height: 300px; overflow-y: auto;">
+    <table style="width: 100%; border-collapse: collapse;">
+     <thead>
+      <tr style="background: rgba(0,0,0,0.15);">
+       <th style="padding: 10px 16px; text-align: left; font-size: 0.8rem; color: var(--text-secondary); font-weight: 600;">Hora</th>
+       <th style="padding: 10px 16px; text-align: left; font-size: 0.8rem; color: var(--text-secondary); font-weight: 600;">Factura</th>
+       <th style="padding: 10px 16px; text-align: center; font-size: 0.8rem; color: var(--text-secondary); font-weight: 600;">Método</th>
+       <th style="padding: 10px 16px; text-align: right; font-size: 0.8rem; color: var(--text-secondary); font-weight: 600;">Total</th>
+      </tr>
+     </thead>
+     <tbody>
+      {% for sale in data.sales %}
+      <tr style="border-bottom: 1px solid var(--border, #2a2a3e);">
+       <td style="padding: 10px 16px; font-size: 0.9rem; color: var(--text-primary);">{{ sale.sale_date.strftime('%H:%M:%S') }}</td>
+       <td style="padding: 10px 16px; font-size: 0.85rem; color: var(--text-secondary); font-family: monospace;">{{ sale.receipt_number }}</td>
+       <td style="padding: 10px 16px; text-align: center; font-size: 0.85rem;">
+        {% if sale.payment_method == 'efectivo' %}💵
+        {% elif sale.payment_method == 'tarjeta' %}💳
+        {% elif sale.payment_method == 'transferencia' %}📱
+        {% else %}📋{% endif %}
+       </td>
+       <td style="padding: 10px 16px; text-align: right; font-weight: 700; color: var(--text-primary);">{{ sale.total | cop }}</td>
+      </tr>
+      {% endfor %}
+     </tbody>
+    </table>
+   </div>
+   {% else %}
+   <div style="padding: 30px; text-align: center; color: var(--text-secondary); font-size: 0.9rem;">
+    Sin ventas registradas este día
+   </div>
+   {% endif %}
+  </div>
+  {% endfor %}
+ </div>
+
+ <!-- Grand Total -->
+ <div style="margin-top: 24px; background: linear-gradient(135deg, var(--accent, #7c4dff), var(--accent-light, #b47cff)); border-radius: 16px; padding: 20px 28px; display: flex; justify-content: space-between; align-items: center;">
+  <span style="color: white; font-size: 1.1rem; font-weight: 600;">Total General del Día</span>
+  <span style="color: white; font-size: 1.6rem; font-weight: 800;">
+   {% set grand_total = cashier_data | sum(attribute='total') %}
+   {{ grand_total | cop }}
+  </span>
+ </div>
+
+ {% else %}
+ <div style="text-align: center; padding: 60px 20px; color: var(--text-secondary);">
+  <p style="font-size: 1.1rem;">No hay cajeros registrados.</p>
+  <a href="{{ url_for('cashiers') }}" class="btn btn-primary" style="margin-top: 16px; padding: 12px 24px; border-radius: 12px;">
+   Agregar Cajeros
+  </a>
+ </div>
+ {% endif %}
+
+</div>
+{% endblock %}
