@@ -56,6 +56,18 @@
  <div class="btn btn-primary" style="margin-top: 20px;">Configurar Hardware</div>
  </a>
 
+ <!-- Gestión de Cajeros Card -->
+ <a href="{{ url_for('cashiers') }}" class="card hub-card" style="text-decoration: none; display: flex; flex-direction: column; align-items: center; padding: 40px 20px; transition: transform 0.2s, box-shadow 0.2s; border: 1px solid var(--border);">
+ <div style="margin-bottom: 15px; color: #34D399;">
+  <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+ </div>
+ <h2 style="color: var(--accent); margin-bottom: 10px;">Gestión de Cajeros</h2>
+ <p style="color: var(--text-secondary); text-align: center; font-size: 0.95rem;">
+ Administra las cuentas de cajeros, controla accesos, contraseñas y consulta ventas por cajero.
+ </p>
+ <div class="btn btn-primary" style="margin-top: 20px;">Administrar Cajeros</div>
+ </a>
+
  <!-- Auditoría del Sistema Card -->
  <a href="{{ url_for('audit') }}" class="card hub-card" style="text-decoration: none; display: flex; flex-direction: column; align-items: center; padding: 40px 20px; transition: transform 0.2s, box-shadow 0.2s; border: 1px solid var(--border);">
  <div style="margin-bottom: 15px; color: #60A5FA;">
