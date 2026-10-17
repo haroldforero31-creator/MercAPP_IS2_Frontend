@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mis Pedidos - MercAPP</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <style>
+        body {
+            background-color: var(--bg);
+            margin: 0;
+            font-family: var(--font);
+            color: var(--text);
+        }
+        .header {
+            background-color: var(--bg-card);
+            border-bottom: 1px solid var(--border);
+            padding: 1rem 2rem;
+            color: var(--text);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        .header-title {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+        .orders-table {
+            width: 100%;
+            background: var(--bg-card);
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow);
+            border-collapse: collapse;
+            overflow: hidden;
+        }
+        .orders-table th, .orders-table td {
+            padding: 18px 24px;
+            text-align: left;
+        }
+        .orders-table th {
+            background-color: var(--bg-input);
+            color: var(--text-secondary);
+            font-weight: 600;
+            border-bottom: 1px solid var(--border);
+        }
+        .orders-table tr {
+            border-bottom: 1px solid var(--border);
+        }
+        .orders-table tr:last-child {
+            border-bottom: none;
+        }
+        .badge {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            display: inline-block;
+        }
+        .badge-pendiente { background-color: var(--warning-bg); color: var(--warning); }
+        .badge-confirmado { background-color: var(--info-bg); color: var(--info); }
+        .badge-completado { background-color: var(--success-bg); color: var(--success); }
+        .badge-cancelado { background-color: var(--error-bg); color: var(--error); }
+        
+        .action-link {
+            color: var(--primary);
+            text-decoration: none;
+            cursor: pointer;
+            font-weight: 500;
+            margin-right: 15px;
+            transition: var(--transition);
+        }
+        .action-link:hover {
+            color: var(--primary-light);
+            text-decoration: underline;
+        }
+        
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--bg-modal);
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        .modal.active {
+            display: flex;
+        }
+        .modal-content {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 30px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: var(--shadow-lg);
+            color: var(--text);
+        }
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+        }
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: var(--text-secondary);
+            transition: var(--transition);
+        }
+        .modal-close:hover {
+            color: var(--text);
+        }
+        
+        .btn-cancel {
+            background-color: var(--error-bg);
+            color: var(--error);
+            border: 1px solid rgba(229, 57, 53, 0.2);
+            padding: 6px 12px;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 500;
+            transition: var(--transition);
+        }
+        .btn-cancel:hover {
+            background-color: var(--error);
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div style="font-size: 1.5rem; font-weight: bold;">
+            <a href="{{ url_for('customer_stores') }}" style="color:white; text-decoration:none;">MercAPP</a>
+        </div>
+        <div style="display:flex; align-items:center; gap:20px;">
+            <span>Hola, {{ current_user.name }}</span>
+            <a href="{{ url_for('customer_logout') }}" style="color:var(--text); text-decoration:none;">Salir</a>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="header-title">
+            <h1 style="font-size: 2rem; margin:0;">Mis Pedidos</h1>
+            <p style="color: var(--text-secondary); margin:0;">Historial de compras y seguimiento</p>
+        </div>
+
+        <table class="orders-table">
+            <thead>
+                <tr>
+                    <th>PEDIDO</th>
+                    <th>FECHA</th>
+                    <th>ESTADO</th>
+                    <th>TOTAL</th>
+                    <th>ACCIONES</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for order in orders %}
+                <tr>
+                    <td><strong>ORD-{{ "%04d"|format(order.id) }}</strong></td>
+                    <td>{{ order.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                    <td>
+                        <span class="badge badge-{{ order.status }}">
+                            {% if order.status == 'pendiente' %}Pendiente
+                            {% elif order.status == 'confirmado' %}Confirmado
+                            {% elif order.status == 'completado' %}Completado
+                            {% elif order.status == 'cancelado' %}Cancelado
+                            {% endif %}
+                        </span>
+                    </td>
+                    <td><strong>${{ "{:,.0f}".format(order.total) }}</strong></td>
+                    <td style="display: flex; align-items: center; gap: 12px;">
+                        <a class="action-link" onclick="viewDetails({{ order.id }})">Ver Detalle</a>
+                        {% if order.status == 'pendiente' %}
+                        <button class="btn-cancel" onclick="cancelOrder({{ order.id }})">Cancelar</button>
+                        {% endif %}
+                        {% if order.notifications|length > 0 %}
+                            {% set has_unread = namespace(value=false) %}
+                            {% for n in order.notifications %}
+                                {% if not n.is_read %}
+                                    {% set has_unread.value = true %}
+                                {% endif %}
+                            {% endfor %}
+                            <div class="order-notif-icon-wrapper" onclick="viewDetails({{ order.id }})" style="position: relative; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px; margin-left: 4px;">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#86efac" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="envelope-icon" style="transition: stroke 0.2s;">
+                                    <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                                    <polyline points="22,6 12,13 2,6"></polyline>
+                                </svg>
+                                {% if has_unread.value %}
+                                <span id="notif-dot-{{ order.id }}" class="notif-dot" style="position: absolute; top: 0px; right: -2px; width: 8px; height: 8px; background-color: #ef4444; border-radius: 50%; border: 1.5px solid var(--bg-card);"></span>
+                                {% endif %}
+                            </div>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="5" style="text-align: center; padding: 40px; color:#6b7280;">
+                        Aún no has realizado ningún pedido.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Order Details Modal -->
+    <div class="modal" id="detailsModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modalTitle" style="margin:0;">Detalle de Pedido</h3>
+                <button class="modal-close" onclick="closeModal()">&times;</button>
+            </div>
+            <div id="modalBody">
+                <!-- Dynamically populated via JS -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Store orders list as JS objects for quick modal render
+        const ordersData = {
+            {% for order in orders %}
+            "{{ order.id }}": {
+                id: {{ order.id }},
+                storeName: "{{ order.store.name }}",
+                orderType: "{{ order.order_type }}",
+                paymentMethod: "{{ order.payment_method }}",
+                address: "{{ order.customer_address or '' }}",
+                subtotal: {{ order.subtotal }},
+                total: {{ order.total }},
+                status: "{{ order.status }}",
+                items: [
+                    {% for item in order.items %}
+                    {
+                        name: "{{ item.product.name }}",
+                        qty: {{ item.quantity }},
+                        price: {{ item.unit_price }},
+                        subtotal: {{ item.subtotal }}
+                    },
+                    {% endfor %}
+                ],
+                notifications: [
+                    {% for n in order.notifications %}
+                    {
+                        id: {{ n.id }},
+                        message: "{{ n.message }}",
+                        is_read: {{ 'true' if n.is_read else 'false' }},
+                        createdAt: "{{ n.created_at.strftime('%Y-%m-%d %H:%M') }}"
+                    },
+                    {% endfor %}
+                ]
+            },
+            {% endfor %}
+        };
+
+        function viewDetails(orderId) {
+            const order = ordersData[orderId];
+            if(!order) return;
+            
+            document.getElementById('modalTitle').innerText = `Detalle de Pedido ORD-${orderId.toString().padStart(4, '0')}`;
+            
+            // Mark notifications as read if there are unread ones
+            const hasUnread = order.notifications.some(n => !n.is_read);
+            if (hasUnread) {
+                fetch(`/api/c/order/${orderId}/read-notifications`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': '{{ csrf_token() }}'
+                    }
+                }).then(res => res.json())
+                  .then(data => {
+                      if (data.success) {
+                          const dot = document.getElementById(`notif-dot-${orderId}`);
+                          if (dot) {
+                              dot.style.display = 'none';
+                          }
+                          order.notifications.forEach(n => n.is_read = true);
+                      }
+                  }).catch(err => console.error("Error updating notification status:", err));
+            }
+            
+            let itemsHtml = '';
+            order.items.forEach(item => {
+                itemsHtml += `
+                <div style="display:flex; justify-content:space-between; margin-bottom:10px; font-size:0.95rem;">
+                    <div>${item.name} x ${item.qty}</div>
+                    <strong>$${item.subtotal.toLocaleString()}</strong>
+                </div>`;
+            });
+            
+            let notificationsHtml = '';
+            if (order.notifications.length > 0) {
+                notificationsHtml += `<div style="margin-top:20px; background:var(--bg-input); padding:15px; border-radius:8px; border-left:4px solid var(--primary);">
+                    <h4 style="margin:0 0 10px 0; color:var(--primary);">Mensajes de la Tienda:</h4>`;
+                order.notifications.forEach(n => {
+                    notificationsHtml += `
+                    <div style="margin-bottom:8px; font-size:0.9rem; border-bottom:1px solid var(--border); padding-bottom:8px;">
+                        <div>${n.message}</div>
+                        <div style="font-size:0.75rem; color:var(--text-muted); margin-top:2px;">${n.createdAt}</div>
+                    </div>`;
+                });
+                notificationsHtml += `</div>`;
+            }
+            
+            const bodyHtml = `
+                <div style="margin-bottom:15px;">
+                    <strong>Tienda:</strong> ${order.storeName}<br>
+                    <strong>Método de Entrega:</strong> ${order.orderType === 'domicilio' ? 'Domicilio' : 'Recoger en Tienda'}<br>
+                    ${order.orderType === 'domicilio' ? `<strong>Dirección:</strong> ${order.address}<br>` : ''}
+                    <strong>Método de Pago:</strong> ${order.paymentMethod === 'efectivo' ? 'Efectivo' : 'Transferencia'}<br>
+                </div>
+                <hr style="border:0; border-top:1px solid var(--border); margin:15px 0;">
+                <h4 style="margin-top:0;">Productos:</h4>
+                ${itemsHtml}
+                <hr style="border:0; border-top:1px solid var(--border); margin:15px 0;">
+                <div style="display:flex; justify-content:space-between; font-size:1.15rem; font-weight:bold;">
+                    <div>Total:</div>
+                    <div>$${order.total.toLocaleString()}</div>
+                </div>
+                ${notificationsHtml}
+            `;
+            
+            document.getElementById('modalBody').innerHTML = bodyHtml;
+            document.getElementById('detailsModal').classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('detailsModal').classList.remove('active');
+        }
+
+        async function cancelOrder(orderId) {
+            if(!confirm('¿Estás seguro de que deseas cancelar este pedido?')) return;
+            
+            try {
+                const response = await fetch(`/api/c/order/${orderId}/cancel`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': '{{ csrf_token() }}'
+                    }
+                });
+                const data = await response.json();
+                if(data.success) {
+                    alert('Pedido cancelado con éxito');
+                    window.location.reload();
+                } else {
+                    alert('Error: ' + data.error);
+                }
+            } catch(e) {
+                alert('Error de conexión');
+            }
+        }
+    </script>
+</body>
+</html>
