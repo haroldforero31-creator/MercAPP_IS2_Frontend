@@ -149,19 +149,37 @@
 </head>
 <body>
     <div class="header">
-        <div style="font-size: 1.5rem; font-weight: bold;">
-            <a href="{{ url_for('customer_stores') }}" style="color:white; text-decoration:none;">MercAPP</a>
+        <div style="font-size: 1.5rem; font-weight: bold; display: flex; align-items: center; gap: 15px;">
+            <a href="{{ url_for('customer_stores') }}" style="color:var(--text); text-decoration:none; display: inline-flex; align-items: center; gap: 8px;">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#43A047" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+                <span>MercAPP</span>
+            </a>
+            <a href="{{ url_for('customer_stores') }}" style="font-size: 0.85rem; padding: 6px 12px; text-decoration: none; border-radius: var(--radius-sm); border: 1px solid var(--border); color: var(--text); background: var(--bg-card); display: inline-flex; align-items: center; gap: 6px; transition: var(--transition);">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+                Tiendas
+            </a>
         </div>
         <div style="display:flex; align-items:center; gap:20px;">
-            <span>Hola, {{ current_user.name }}</span>
-            <a href="{{ url_for('customer_logout') }}" style="color:var(--text); text-decoration:none;">Salir</a>
+            <a href="{{ url_for('customer_stores') }}" style="color: var(--text-secondary); text-decoration: none; font-weight: 500; transition: var(--transition);">🏪 Tiendas</a>
+            <a href="{{ url_for('customer_orders') }}" style="color: var(--primary); text-decoration: none; font-weight: 600;">🛍️ Mis Pedidos</a>
+            <span style="color: var(--text-secondary);">Hola, <strong style="color: var(--text);">{{ current_user.name }}</strong></span>
+            <a href="#" onclick="confirmAppLogout(event, '{{ url_for('customer_logout') }}')" style="color: var(--error); text-decoration: none; font-weight: 500; display: inline-flex; align-items: center; gap: 4px; padding: 6px 12px; border-radius: var(--radius-sm); background: rgba(239, 68, 68, 0.1); transition: var(--transition);">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                Salir
+            </a>
         </div>
     </div>
 
     <div class="container">
-        <div class="header-title">
-            <h1 style="font-size: 2rem; margin:0;">Mis Pedidos</h1>
-            <p style="color: var(--text-secondary); margin:0;">Historial de compras y seguimiento</p>
+        <div class="header-title" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+            <div>
+                <h1 style="font-size: 2rem; margin:0; font-weight: 700;">Mis Pedidos</h1>
+                <p style="color: var(--text-secondary); margin: 6px 0 0 0;">Historial de compras y seguimiento</p>
+            </div>
+            <a href="{{ url_for('customer_stores') }}" style="display: inline-flex; align-items: center; gap: 8px; text-decoration: none; padding: 10px 18px; border-radius: var(--radius-sm); border: 1px solid var(--border); color: var(--text); background: var(--bg-card); font-weight: 500; transition: var(--transition); box-shadow: var(--shadow);">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+                Volver a Tiendas
+            </a>
         </div>
 
         <table class="orders-table">
@@ -215,8 +233,14 @@
                 </tr>
                 {% else %}
                 <tr>
-                    <td colspan="5" style="text-align: center; padding: 40px; color:#6b7280;">
-                        Aún no has realizado ningún pedido.
+                    <td colspan="5" style="text-align: center; padding: 60px 20px;">
+                        <div style="font-size: 2.8rem; margin-bottom: 12px;">🛍️</div>
+                        <h3 style="margin: 0 0 8px 0; color: var(--text); font-size: 1.25rem; font-weight: 600;">Aún no has realizado ningún pedido</h3>
+                        <p style="color: var(--text-secondary); margin: 0 0 20px 0; font-size: 0.95rem;">Explora las tiendas disponibles y agrega productos a tu carrito de compras.</p>
+                        <a href="{{ url_for('customer_stores') }}" style="display: inline-flex; align-items: center; gap: 8px; text-decoration: none; padding: 10px 20px; background: var(--primary); color: white; border-radius: var(--radius-sm); font-weight: 600; box-shadow: var(--shadow); transition: var(--transition);">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+                            Ver Tiendas Disponibles
+                        </a>
                     </td>
                 </tr>
                 {% endfor %}
@@ -371,6 +395,66 @@
                 alert('Error de conexión');
             }
         }
+
+        // Logout Confirmation
+        let pendingLogoutUrl = '';
+        function confirmAppLogout(event, url) {
+            if (event) {
+                event.preventDefault();
+                event.stopPropagation();
+            }
+            pendingLogoutUrl = url || "{{ url_for('customer_logout') }}";
+            const modal = document.getElementById('logoutConfirmModal');
+            const confirmBtn = document.getElementById('confirmLogoutBtn');
+            if (confirmBtn && pendingLogoutUrl) {
+                confirmBtn.href = pendingLogoutUrl;
+            }
+            if (modal) {
+                modal.classList.add('active');
+            }
+        }
+
+        function closeLogoutModal() {
+            const modal = document.getElementById('logoutConfirmModal');
+            if (modal) {
+                modal.classList.remove('active');
+            }
+        }
+
+        document.getElementById('logoutConfirmModal')?.addEventListener('click', function(e) {
+            if (e.target === this) closeLogoutModal();
+        });
+
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeLogoutModal();
+                closeModal();
+            }
+        });
     </script>
+
+    <!-- Modal de confirmación para cerrar sesión -->
+    <div class="modal" id="logoutConfirmModal">
+        <div class="modal-content" style="max-width: 380px; text-align: center;">
+            <div class="modal-header" style="justify-content: space-between;">
+                <h3 style="margin: 0; font-size: 1.1rem; display: flex; align-items: center; gap: 8px;">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                    Cerrar Sesión
+                </h3>
+                <button class="modal-close" onclick="closeLogoutModal()">&times;</button>
+            </div>
+            <div style="padding: 15px 0;">
+                <div style="width: 54px; height: 54px; border-radius: 50%; background: rgba(239, 68, 68, 0.12); display: flex; align-items: center; justify-content: center; margin: 0 auto 16px auto;">
+                    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2.2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                </div>
+                <h3 style="margin: 0 0 8px 0; font-size: 1.15rem; color: var(--text); font-weight: 600;">¿Estás seguro de cerrar sesión?</h3>
+                <p style="margin: 0 0 24px 0; color: var(--text-secondary); font-size: 0.9rem; line-height: 1.4;">Tendrás que volver a ingresar tus credenciales para acceder a tus pedidos.</p>
+                <div style="display: flex; gap: 12px;">
+                    <button type="button" class="btn btn-outline" style="flex: 1; padding: 10px; border-radius: var(--radius-sm); border: 1px solid var(--border); background: transparent; color: var(--text); font-weight: 500; cursor: pointer;" onclick="closeLogoutModal()">Cancelar</button>
+                    <a id="confirmLogoutBtn" href="{{ url_for('customer_logout') }}" style="flex: 1; text-align: center; text-decoration: none; display: flex; align-items: center; justify-content: center; background-color: var(--error); color: white; border: none; border-radius: var(--radius-sm); font-weight: 600; padding: 10px 16px; transition: var(--transition);">Cerrar Sesión</a>
+                </div>
+            </div>
+        </div>
+    </div>
 </body>
 </html>
