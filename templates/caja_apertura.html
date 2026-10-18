@@ -19,7 +19,7 @@
  </div>
  <div class="nav-user">
  <span class="user-greeting">👋 Hola, {{ current_user.name }}</span>
- <a href="{{ url_for('logout') }}" class="btn btn-outline btn-sm">Cerrar Sesión</a>
+ <a href="{{ url_for('logout') }}" onclick="confirmAppLogout(event, '{{ url_for('logout') }}')" class="btn btn-outline btn-sm">Cerrar Sesión</a>
  </div>
  </nav>
 
@@ -123,7 +123,63 @@
  validateAmount();
  });
  });
- </script>
+    <!-- Modal de confirmación para cerrar sesión -->
+    <div class="modal-overlay" id="logoutConfirmModal">
+        <div class="modal" style="max-width: 380px;">
+            <div class="modal-header">
+                <span class="modal-title" style="display: flex; align-items: center; gap: 8px;">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                    Cerrar Sesión
+                </span>
+                <button class="modal-close" onclick="closeLogoutModal()">✕</button>
+            </div>
+            <div class="modal-body" style="padding: 24px; text-align: center;">
+                <div style="width: 54px; height: 54px; border-radius: 50%; background: rgba(239, 68, 68, 0.12); display: flex; align-items: center; justify-content: center; margin: 0 auto 16px auto;">
+                    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2.2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                </div>
+                <h3 style="margin: 0 0 8px 0; font-size: 1.15rem; color: var(--text); font-weight: 600;">¿Estás seguro de cerrar sesión?</h3>
+                <p style="margin: 0 0 24px 0; color: var(--text-secondary); font-size: 0.9rem; line-height: 1.4;">Tendrás que volver a ingresar tus credenciales para acceder nuevamente al sistema.</p>
+                <div style="display: flex; gap: 12px;">
+                    <button type="button" class="btn btn-outline" style="flex: 1;" onclick="closeLogoutModal()">Cancelar</button>
+                    <a id="confirmLogoutBtn" href="{{ url_for('logout') }}" class="btn" style="flex: 1; text-align: center; text-decoration: none; display: flex; align-items: center; justify-content: center; background-color: var(--error); color: white; border: none; border-radius: var(--radius-sm); font-weight: 600; padding: 10px 16px; transition: var(--transition);">Cerrar Sesión</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let pendingLogoutUrl = '';
+        function confirmAppLogout(event, url) {
+            if (event) {
+                event.preventDefault();
+                event.stopPropagation();
+            }
+            pendingLogoutUrl = url || "{{ url_for('logout') }}";
+            const modal = document.getElementById('logoutConfirmModal');
+            const confirmBtn = document.getElementById('confirmLogoutBtn');
+            if (confirmBtn && pendingLogoutUrl) {
+                confirmBtn.href = pendingLogoutUrl;
+            }
+            if (modal) {
+                modal.classList.add('active');
+            }
+        }
+
+        function closeLogoutModal() {
+            const modal = document.getElementById('logoutConfirmModal');
+            if (modal) {
+                modal.classList.remove('active');
+            }
+        }
+
+        document.getElementById('logoutConfirmModal')?.addEventListener('click', function(e) {
+            if (e.target === this) closeLogoutModal();
+        });
+
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') closeLogoutModal();
+        });
+    </script>
 </body>
 
 </html>
