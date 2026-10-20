@@ -3,200 +3,345 @@
 
 {% block content %}
 <div class="page-container" style="max-width: 800px;">
- <div class="page-header">
- <h1 class="page-title">
- <span class="title-icon">{{ '' if editing else '' }}</span> 
- {{ 'Editar Producto' if editing else 'Agregar Nuevo Producto' }}
- </h1>
- <a href="{{ url_for('products') }}" class="btn btn-outline">
- ← Volver a Productos
- </a>
- </div>
+  <div class="page-header">
+    <h1 class="page-title">
+      <span class="title-icon">{{ '' if editing else '' }}</span>
+      {{ 'Editar Producto' if editing else 'Agregar Nuevo Producto' }}
+    </h1>
+    <a href="{{ url_for('products') }}" class="btn btn-outline">
+      ← Volver a Productos
+    </a>
+  </div>
 
- <div class="card">
- <form method="POST" enctype="multipart/form-data" id="productForm">
- <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <div class="card">
+    <form method="POST" enctype="multipart/form-data" id="productForm">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 
- <!-- Category Selection with Visual Buttons -->
- <div class="form-group">
- <label class="form-label">Categoría *</label>
- <div class="category-grid" style="grid-template-columns: repeat(3, 1fr); margin-bottom: 8px;">
- {% for cat in categories %}
- <label class="category-btn" style="cursor: pointer; position: relative;" 
- id="catBtn{{ cat.id }}" onclick="selectCategory({{ cat.id }})">
- <input type="radio" name="category_id" value="{{ cat.id }}" 
- style="position: absolute; opacity: 0;"
- {% if editing and product.category_id == cat.id %}checked{% endif %}
- required>
- <span class="cat-name">{{ cat.name }}</span>
- </label>
- {% endfor %}
- </div>
- </div>
+      <!-- Category Selection with Visual Buttons -->
+      <div class="form-group">
+        <label class="form-label">Categoría *</label>
+        <div class="category-grid" style="grid-template-columns: repeat(3, 1fr); margin-bottom: 8px;">
+          {% for cat in categories %}
+          <label class="category-btn" style="cursor: pointer; position: relative;" id="catBtn{{ cat.id }}"
+            onclick="selectCategory({{ cat.id }})">
+            <input type="radio" name="category_id" value="{{ cat.id }}" style="position: absolute; opacity: 0;" {% if
+              editing and product.category_id==cat.id %}checked{% endif %} required>
+            <span class="cat-name">{{ cat.name }}</span>
+          </label>
+          {% endfor %}
+        </div>
+      </div>
 
- <!-- Subcategory -->
- <div class="form-group" id="subcategoryGroup" style="display: none;">
- <label class="form-label">Subcategoría</label>
- <select name="subcategory_id" id="subcategorySelect" class="form-control">
- <option value="">-- Sin subcategoría --</option>
- </select>
- </div>
+      <!-- Subcategory -->
+      <div class="form-group" id="subcategoryGroup" style="display: none;">
+        <label class="form-label">Subcategoría</label>
+        <select name="subcategory_id" id="subcategorySelect" class="form-control">
+          <option value="">-- Sin subcategoría --</option>
+        </select>
+      </div>
 
- <!-- Product Name -->
- <div class="form-group">
- <label class="form-label" for="productName">Nombre del Producto *</label>
- <input type="text" id="productName" name="name" class="form-control" 
- placeholder="Ej: Coca-Cola 600ml"
- value="{{ product.name if editing else '' }}" 
- required minlength="2" maxlength="150">
- </div>
+      <!-- Product Name -->
+      <div class="form-group">
+        <label class="form-label" for="productName">Nombre del Producto *</label>
+        <input type="text" id="productName" name="name" class="form-control" placeholder="Ej: Coca-Cola 600ml"
+          value="{{ product.name if editing else '' }}" required minlength="2" maxlength="150"
+          oninput="onProductNameOrPriceChange()">
+      </div>
 
- <!-- Barcode -->
- <div class="form-group">
- <label class="form-label" for="productBarcode">Código de Barras</label>
- <input type="text" id="productBarcode" name="barcode" class="form-control" 
- placeholder="Escanea o escribe el código (opcional, máx 50 caracteres)"
- maxlength="50"
- value="{{ product.barcode if editing and product.barcode else '' }}">
- <div class="form-hint">Si no tiene código de barras, déjalo vacío. Soporta códigos largos de hasta 50 dígitos.</div>
- </div>
+      <!-- Barcode -->
+      <div class="form-group">
+        <div
+          style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; flex-wrap: wrap; gap: 8px;">
+          <label class="form-label" for="productBarcode" style="margin-bottom: 0;">Código de Barras</label>
+          <div style="display: flex; gap: 8px;">
+            <button type="button" class="btn btn-outline btn-sm" onclick="openBarcodeModal()" id="btnOpenBarcodeModal"
+              style="display: inline-flex; align-items: center; gap: 6px; border-color: var(--primary); color: var(--primary); font-weight: 600; padding: 5px 12px; font-size: 0.85rem; border-radius: 6px;">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M3 5v14M8 5v14M12 5v14M17 5v14M21 5v14" />
+              </svg>
+              Crear código de barras
+            </button>
+            <button type="button" class="btn btn-outline btn-sm" id="btnQuickPrintBarcode"
+              onclick="quickPrintCurrentBarcode()"
+              style="display: {{ 'inline-flex' if editing and product.barcode else 'none' }}; align-items: center; gap: 6px; font-weight: 600; padding: 5px 12px; font-size: 0.85rem; border-radius: 6px;">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="6 9 6 2 18 2 18 9" />
+                <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2" />
+                <rect x="6" y="14" width="12" height="8" />
+              </svg>
+              Imprimir etiqueta
+            </button>
+          </div>
+        </div>
 
- <!-- PLU Code (for label-printing scales) -->
- <div class="form-group">
- <label class="form-label" for="productPlu">Código PLU (Básculas Etiquetadoras)</label>
- <input type="text" id="productPlu" name="plu_code" class="form-control" 
- placeholder="Ej: 00015 (opcional, máx 50 caracteres)"
- maxlength="50"
- value="{{ product.plu_code if editing and product.plu_code else '' }}">
- <div class="form-hint">Si usas una báscula que imprime códigos de barras con precio o código de producto (hasta 50 caracteres).</div>
- </div>
+        <div style="position: relative;">
+          <input type="text" id="productBarcode" name="barcode" class="form-control"
+            placeholder="Escanea o escribe el código (opcional, máx 50 caracteres)" maxlength="50"
+            value="{{ product.barcode if editing and product.barcode else '' }}"
+            style="font-family: monospace; font-size: 1.05rem; letter-spacing: 0.5px;">
+        </div>
 
- <!-- Sell by Weight Toggle -->
- <div class="form-group">
- <label class="form-label">¿Se vende por peso?</label>
- <div style="display: flex; align-items: center; gap: 16px;">
- <label class="weight-toggle" style="display: flex; align-items: center; gap: 10px; cursor: pointer; padding: 12px 20px; background: var(--bg-input); border: 2px solid var(--border); border-radius: var(--radius-sm); transition: var(--transition);">
- <input type="checkbox" name="sell_by_weight" id="sellByWeight"
- {% if editing and product.sell_by_weight %}checked{% endif %}
- onchange="toggleWeightMode(this.checked)"
- style="width: 20px; height: 20px; accent-color: var(--primary);">
- <span style="font-weight: 600;"> Venta por peso</span>
- </label>
- <div id="weightUnitGroup" style="display: none;">
- <select name="weight_unit" id="weightUnit" class="form-control" style="max-width: 180px;" onchange="updatePriceLabel()">
- <option value="kg" {% if editing and product.weight_unit == 'kg' %}selected{% endif %}>Kilogramo (kg)</option>
- <option value="lb" {% if editing and product.weight_unit == 'lb' %}selected{% endif %}> Libra (500g)</option>
- </select>
- </div>
- </div>
- <div class="form-hint">Actívalo para productos como frutas, verduras, carnes que se venden al peso.</div>
- </div>
+        <!-- Hidden inputs for automatic printing on save and hardware printer -->
+        <input type="hidden" name="auto_print_barcode" id="autoPrintBarcode" value="0">
+        <input type="hidden" name="printer_name" id="formPrinterName" value="">
 
- <!-- Price -->
- <div class="form-group">
- <label class="form-label" for="productPrice" id="priceLabel">Precio (Pesos Colombianos) *</label>
- <input type="text" id="productPrice" name="price" class="form-control" 
- placeholder="Ej: 3500 (sin puntos ni comas)"
- maxlength="9"
- value="{{ product.price if editing else '' }}" 
- required style="font-size: 1.2rem; font-weight: 700;">
- <div class="form-hint" id="priceHint">Solo números enteros. Ejemplo: 3500 = $3.500 COP. Mínimo $100, Máximo $100.000.000</div>
- </div>
+        <div id="barcodeValidationFeedback"
+          style="margin-top: 6px; font-size: 0.85rem; font-weight: 600; min-height: 18px;"></div>
+        <div class="form-hint">Si el producto no tiene código de barras, pulsa <strong> Crear código de barras</strong>
+          para asignarle uno e imprimirlo automáticamente.</div>
+      </div>
 
- <!-- Price Preview -->
- <div id="pricePreview" style="display: none; padding: 10px 16px; background: var(--success-bg); border: 1px solid rgba(67,160,71,0.3); border-radius: var(--radius-sm); margin-bottom: 20px; font-weight: 700; color: var(--success);">
- Precio: <span id="pricePreviewValue">$0</span> <span id="pricePreviewUnit"></span>
- </div>
+      <!-- PLU Code (for label-printing scales) -->
+      <div class="form-group">
+        <label class="form-label" for="productPlu">Código PLU (Básculas Etiquetadoras)</label>
+        <input type="text" id="productPlu" name="plu_code" class="form-control"
+          placeholder="Ej: 00015 (opcional, máx 50 caracteres)" maxlength="50"
+          value="{{ product.plu_code if editing and product.plu_code else '' }}">
+        <div class="form-hint">Si usas una báscula que imprime códigos de barras con precio o código de producto (hasta
+          50 caracteres).</div>
+      </div>
 
- <!-- Image -->
- <div class="form-group">
- <label class="form-label" for="productImage">Imagen del Producto</label>
- {% if editing and product.image and product.image != 'default_product.png' %}
- <div style="margin-bottom: 12px;">
- <img src="{{ url_for('user_images', filename='products/' + product.image) }}" 
- alt="{{ product.name }}" style="width: 100px; height: 100px; object-fit: cover; border-radius: var(--radius-sm); border: 2px solid var(--border);">
- <p class="form-hint">Imagen actual. Sube una nueva para reemplazarla.</p>
- </div>
- {% endif %}
- <input type="file" id="productImage" name="image" class="form-control" 
- accept=".jpg,.jpeg,.png,.webp">
- <div class="form-hint">Formatos: JPG, PNG, WEBP. Máximo 5MB. La imagen se optimizará automáticamente.</div>
- </div>
+      <!-- Sell by Weight Toggle -->
+      <div class="form-group">
+        <label class="form-label">¿Se vende por peso?</label>
+        <div style="display: flex; align-items: center; gap: 16px;">
+          <label class="weight-toggle"
+            style="display: flex; align-items: center; gap: 10px; cursor: pointer; padding: 12px 20px; background: var(--bg-input); border: 2px solid var(--border); border-radius: var(--radius-sm); transition: var(--transition);">
+            <input type="checkbox" name="sell_by_weight" id="sellByWeight" {% if editing and product.sell_by_weight
+              %}checked{% endif %} onchange="toggleWeightMode(this.checked)"
+              style="width: 20px; height: 20px; accent-color: var(--primary);">
+            <span style="font-weight: 600;"> Venta por peso</span>
+          </label>
+          <div id="weightUnitGroup" style="display: none;">
+            <select name="weight_unit" id="weightUnit" class="form-control" style="max-width: 180px;"
+              onchange="updatePriceLabel()">
+              <option value="kg" {% if editing and product.weight_unit=='kg' %}selected{% endif %}>Kilogramo (kg)
+              </option>
+              <option value="lb" {% if editing and product.weight_unit=='lb' %}selected{% endif %}> Libra (500g)
+              </option>
+            </select>
+          </div>
+        </div>
+        <div class="form-hint">Actívalo para productos como frutas, verduras, carnes que se venden al peso.</div>
+      </div>
 
- <!-- Stock (hidden when sell_by_weight) -->
- <div class="form-group" id="stockGroup">
- <label class="form-label" for="productStock">Stock Actual (Opcional)</label>
- <input type="number" id="productStock" name="stock" class="form-control" 
- value="{{ product.stock if editing and product.stock is not none else '' }}" 
- min="0" max="999999" style="max-width: 200px;">
- <div class="form-hint">Deja este campo vacío para productos con stock infinito. Si pones 0, el producto no se podrá vender.</div>
- </div>
+      <!-- Price -->
+      <div class="form-group">
+        <label class="form-label" for="productPrice" id="priceLabel">Precio (Pesos Colombianos) *</label>
+        <input type="text" id="productPrice" name="price" class="form-control"
+          placeholder="Ej: 3500 (sin puntos ni comas)" maxlength="9" value="{{ product.price if editing else '' }}"
+          required style="font-size: 1.2rem; font-weight: 700;" oninput="onProductNameOrPriceChange()">
+        <div class="form-hint" id="priceHint">Solo números enteros. Ejemplo: 3500 = $3.500 COP. Mínimo $100, Máximo
+          $100.000.000</div>
+      </div>
 
- <!-- Submit -->
- <div style="display: flex; gap: 12px; margin-top: 24px;">
- <button type="submit" class="btn btn-primary btn-lg">
- {{ ' Guardar Cambios' if editing else ' Agregar Producto' }}
- </button>
- <a href="{{ url_for('products') }}" class="btn btn-outline btn-lg">Cancelar</a>
- </div>
- </form>
- </div>
+      <!-- Price Preview -->
+      <div id="pricePreview"
+        style="display: none; padding: 10px 16px; background: var(--success-bg); border: 1px solid rgba(67,160,71,0.3); border-radius: var(--radius-sm); margin-bottom: 20px; font-weight: 700; color: var(--success);">
+        Precio: <span id="pricePreviewValue">$0</span> <span id="pricePreviewUnit"></span>
+      </div>
+
+      <!-- Image -->
+      <div class="form-group">
+        <label class="form-label" for="productImage">Imagen del Producto</label>
+        {% if editing and product.image and product.image != 'default_product.png' %}
+        <div style="margin-bottom: 12px;">
+          <img src="{{ url_for('user_images', filename='products/' + product.image) }}" alt="{{ product.name }}"
+            style="width: 100px; height: 100px; object-fit: cover; border-radius: var(--radius-sm); border: 2px solid var(--border);">
+          <p class="form-hint">Imagen actual. Sube una nueva para reemplazarla.</p>
+        </div>
+        {% endif %}
+        <input type="file" id="productImage" name="image" class="form-control" accept=".jpg,.jpeg,.png,.webp">
+        <div class="form-hint">Formatos: JPG, PNG, WEBP. Máximo 5MB. La imagen se optimizará automáticamente.</div>
+      </div>
+
+      <!-- Stock (hidden when sell_by_weight) -->
+      <div class="form-group" id="stockGroup">
+        <label class="form-label" for="productStock">Stock Actual (Opcional)</label>
+        <input type="number" id="productStock" name="stock" class="form-control"
+          value="{{ product.stock if editing and product.stock is not none else '' }}" min="0" max="999999"
+          style="max-width: 200px;">
+        <div class="form-hint">Deja este campo vacío para productos con stock infinito. Si pones 0, el producto no se
+          podrá vender.</div>
+      </div>
+
+      <!-- Submit -->
+      <div style="display: flex; gap: 12px; margin-top: 24px;">
+        <button type="submit" class="btn btn-primary btn-lg" id="btnSubmitProduct">
+          {{ ' Guardar Cambios' if editing else ' Agregar Producto' }}
+        </button>
+        <a href="{{ url_for('products') }}" class="btn btn-outline btn-lg">Cancelar</a>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ===== MODAL GENERADOR Y DE IMPRESIÓN DE CÓDIGO DE BARRAS ===== -->
+<div class="modal-overlay" id="barcodeModal"
+  style="display: none; z-index: 10000; align-items: center; justify-content: center; position: fixed; inset: 0; background: rgba(0,0,0,0.75); backdrop-filter: blur(6px);">
+  <div class="modal"
+    style="max-width: 520px; width: 92%; max-height: 90vh; display: flex; flex-direction: column; background: var(--bg-card); border-radius: var(--radius-md); border: 1px solid var(--border); box-shadow: 0 12px 36px rgba(0,0,0,0.6); overflow: hidden; animation: fadeInModal 0.2s ease-out;">
+    <div class="modal-header"
+      style="display: flex; justify-content: space-between; align-items: center; padding: 16px 24px; border-bottom: 1px solid var(--border); background: var(--bg-surface); flex-shrink: 0;">
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <span style="font-size: 1.5rem;">🏷️</span>
+        <div>
+          <h3 style="margin: 0; font-size: 1.15rem; font-weight: 700; color: var(--text-main);">Crear / Editar Código de
+            Barras</h3>
+          <p style="margin: 0; font-size: 0.8rem; color: var(--text-muted);">Asigna un código único e imprímelo en tu
+            impresora</p>
+        </div>
+      </div>
+      <button type="button" class="modal-close" onclick="closeBarcodeModal()"
+        style="background: none; border: none; font-size: 1.4rem; color: var(--text-muted); cursor: pointer; padding: 4px 8px;">✕</button>
+    </div>
+
+    <div class="modal-body" style="padding: 18px 24px; overflow-y: auto; flex: 1;">
+      <!-- Code Input and Generate Button -->
+      <div class="form-group" style="margin-bottom: 16px;">
+        <label class="form-label" style="font-weight: 600; font-size: 0.9rem;">Código de Barras para este
+          producto</label>
+        <div style="display: flex; gap: 8px;">
+          <input type="text" id="modalBarcodeInput" class="form-control" placeholder="Ej: 200100000001" maxlength="50"
+            style="flex: 1; font-family: monospace; font-size: 1.15rem; font-weight: 700; letter-spacing: 1px;">
+          <button type="button" class="btn btn-outline" onclick="generateNewBarcodeCode()" id="btnGenerateNewCode"
+            title="Generar otro código único"
+            style="white-space: nowrap; display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; font-weight: 600;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2" />
+            </svg>
+            Generar Nuevo
+          </button>
+        </div>
+        <div id="modalBarcodeFeedback" style="margin-top: 6px; font-size: 0.85rem; font-weight: 600;">
+          <span style="color: var(--success);">✓ Código único y disponible</span>
+        </div>
+        <div class="form-hint" style="margin-top: 4px; font-size: 0.78rem;">
+          Puedes editar este código libremente a tu gusto. El sistema verifica en tiempo real que no choque con ningún
+          otro producto de tu tienda.
+        </div>
+      </div>
+
+      <!-- Live Sticker Preview -->
+      <div class="form-group" style="margin-bottom: 18px;">
+        <label class="form-label" style="font-weight: 600; font-size: 0.9rem; margin-bottom: 8px;">Vista Previa de la
+          Etiqueta (Impresora)</label>
+        <div id="barcodePreviewCard"
+          style="background: #ffffff; color: #000000; border-radius: 8px; padding: 14px 16px; text-align: center; border: 2px dashed #999; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
+          <div id="previewStoreName"
+            style="font-size: 0.8rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 2px; color: #333;">
+            {{ current_user.store.name if current_user.store else 'MERCAPP' }}</div>
+          <div id="previewProdName"
+            style="font-size: 1rem; font-weight: 800; margin-bottom: 4px; color: #000; line-height: 1.2;">Producto</div>
+          <div id="previewProdPrice" style="font-size: 1.2rem; font-weight: 900; color: #111; margin-bottom: 4px;">$ 0
+            COP</div>
+          <div style="display: flex; justify-content: center; margin: 6px 0;">
+            <svg id="modalBarcodeSvg" style="max-width: 100%; height: auto;"></svg>
+          </div>
+          <div style="font-size: 0.72rem; color: #666; margin-top: 2px;">Listo para escanear en Caja / Punto de Venta
+          </div>
+        </div>
+      </div>
+
+      <!-- Print Options -->
+      <div
+        style="background: var(--bg-surface); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; margin-bottom: 12px;">
+        <label
+          style="display: flex; align-items: center; gap: 10px; cursor: pointer; font-size: 0.92rem; font-weight: 600;">
+          <input type="checkbox" id="modalChkAutoPrint" checked
+            style="width: 19px; height: 19px; accent-color: var(--primary);">
+          <span>Imprimir etiqueta automáticamente al guardar cambios / agregar producto</span>
+        </label>
+        <div
+          style="display: flex; justify-content: space-between; align-items: center; margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--border); flex-wrap: wrap; gap: 8px;">
+          <span style="font-size: 0.85rem; color: var(--text-muted);">¿Quieres imprimir una muestra de prueba
+            ahora?</span>
+          <button type="button" class="btn btn-outline btn-sm" onclick="printModalBarcodeNow()"
+            style="display: inline-flex; align-items: center; gap: 6px; font-weight: 600; border-radius: 6px;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="6 9 6 2 18 2 18 9" />
+              <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2" />
+              <rect x="6" y="14" width="12" height="8" />
+            </svg>
+            Imprimir Ahora
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-footer"
+      style="display: flex; justify-content: flex-end; gap: 12px; padding: 14px 24px; border-top: 1px solid var(--border); background: var(--bg-surface); flex-shrink: 0;">
+      <button type="button" class="btn btn-outline" onclick="closeBarcodeModal()">Cancelar</button>
+      <button type="button" class="btn btn-primary" onclick="applyBarcodeFromModal()" id="btnApplyModalBarcode"
+        style="font-weight: 700; padding: 10px 22px;">
+        ✓ Asignar Código al Producto
+      </button>
+    </div>
+  </div>
 </div>
 {% endblock %}
 
 {% block extra_js %}
+<!-- JsBarcode Library with cache buster -->
+<script src="{{ url_for('static', filename='js/JsBarcode.all.min.js') }}?v=3.11.6"></script>
+
 <script>
- // Weight mode toggle
- function toggleWeightMode(enabled) {
-  const unitGroup = document.getElementById('weightUnitGroup');
-  const stockGroup = document.getElementById('stockGroup');
-  const toggle = document.querySelector('.weight-toggle');
-  
-  unitGroup.style.display = enabled ? 'block' : 'none';
-  stockGroup.style.display = enabled ? 'none' : 'block';
- 
- if (enabled) {
- toggle.style.borderColor = 'var(--primary)';
- toggle.style.background = 'var(--success-bg)';
- } else {
- toggle.style.borderColor = 'var(--border)';
- toggle.style.background = 'var(--bg-input)';
- }
- 
- updatePriceLabel();
- }
- 
- function updatePriceLabel() {
- const isWeight = document.getElementById('sellByWeight').checked;
- const unit = document.getElementById('weightUnit').value;
- const label = document.getElementById('priceLabel');
- const hint = document.getElementById('priceHint');
- const previewUnit = document.getElementById('pricePreviewUnit');
- 
- if (isWeight) {
- if (unit === 'lb') {
- label.textContent = 'Precio por Libra (COP) *';
- hint.textContent = 'Precio por cada libra (500g). Ej: 3500 = $3.500 por libra.';
- previewUnit.textContent = '/ libra';
- } else {
- label.textContent = 'Precio por Kilo (COP) *';
- hint.textContent = 'Precio por cada kilogramo. Ej: 7000 = $7.000 por kilo.';
- previewUnit.textContent = '/ kg';
- }
- } else {
- label.textContent = 'Precio (Pesos Colombianos) *';
- hint.textContent = 'Solo números enteros. Ejemplo: 3500 = $3.500 COP. Mínimo $100, Máximo $10.000.000';
- previewUnit.textContent = '';
- }
- }
+  const currentProductId = {{ product.id if editing else 'null' }};
+  let barcodeCheckTimeout = null;
+  let isBarcodeValid = true;
+
+  // Weight mode toggle
+  function toggleWeightMode(enabled) {
+    const unitGroup = document.getElementById('weightUnitGroup');
+    const stockGroup = document.getElementById('stockGroup');
+    const toggle = document.querySelector('.weight-toggle');
+
+    unitGroup.style.display = enabled ? 'block' : 'none';
+    stockGroup.style.display = enabled ? 'none' : 'block';
+
+    if (enabled) {
+      toggle.style.borderColor = 'var(--primary)';
+      toggle.style.background = 'var(--success-bg)';
+    } else {
+      toggle.style.borderColor = 'var(--border)';
+      toggle.style.background = 'var(--bg-input)';
+    }
+
+    updatePriceLabel();
+  }
+
+  function updatePriceLabel() {
+    const isWeight = document.getElementById('sellByWeight').checked;
+    const unit = document.getElementById('weightUnit').value;
+    const label = document.getElementById('priceLabel');
+    const hint = document.getElementById('priceHint');
+    const previewUnit = document.getElementById('pricePreviewUnit');
+
+    if (isWeight) {
+      if (unit === 'lb') {
+        label.textContent = 'Precio por Libra (COP) *';
+        hint.textContent = 'Precio por cada libra (500g). Ej: 3500 = $3.500 por libra.';
+        previewUnit.textContent = '/ libra';
+      } else {
+        label.textContent = 'Precio por Kilo (COP) *';
+        hint.textContent = 'Precio por cada kilogramo. Ej: 7000 = $7.000 por kilo.';
+        previewUnit.textContent = '/ kg';
+      }
+    } else {
+      label.textContent = 'Precio (Pesos Colombianos) *';
+      hint.textContent = 'Solo números enteros. Ejemplo: 3500 = $3.500 COP. Mínimo $100, Máximo $10.000.000';
+      previewUnit.textContent = '';
+    }
+    onProductNameOrPriceChange();
+  }
 
   // Price input: only digits, max 9 digits (max 100,000,000 COP)
-  document.getElementById('productPrice').addEventListener('input', function() {
+  document.getElementById('productPrice').addEventListener('input', function () {
     this.value = this.value.replace(/\D/g, '').slice(0, 9);
     const val = parseInt(this.value) || 0;
     const preview = document.getElementById('pricePreview');
     const previewValue = document.getElementById('pricePreviewValue');
-    
+
     if (val > 0) {
       preview.style.display = 'block';
       previewValue.textContent = '$' + val.toLocaleString('es-CO');
@@ -205,15 +350,21 @@
     }
   });
 
-  // Barcode: up to 50 characters
-  document.getElementById('productBarcode').addEventListener('input', function() {
+  // Barcode input filtering and live validation
+  document.getElementById('productBarcode').addEventListener('input', function () {
     this.value = this.value.replace(/[^0-9a-zA-Z]/g, '').slice(0, 50);
+    const code = this.value.trim();
+    const btnPrint = document.getElementById('btnQuickPrintBarcode');
+    if (btnPrint) {
+      btnPrint.style.display = code ? 'inline-flex' : 'none';
+    }
+    checkBarcodeUnique(code, document.getElementById('barcodeValidationFeedback'));
   });
 
   // PLU: up to 50 characters
   const pluInput = document.getElementById('productPlu');
   if (pluInput) {
-    pluInput.addEventListener('input', function() {
+    pluInput.addEventListener('input', function () {
       this.value = this.value.replace(/[^0-9a-zA-Z]/g, '').slice(0, 50);
     });
   }
@@ -221,67 +372,357 @@
   // Stock: max 6 digits (up to 999,999)
   const stockInput = document.getElementById('productStock');
   if (stockInput) {
-    stockInput.addEventListener('input', function() {
+    stockInput.addEventListener('input', function () {
       this.value = this.value.replace(/\D/g, '').slice(0, 6);
     });
   }
 
- // Category selection
- function selectCategory(catId) {
- document.querySelectorAll('.category-btn').forEach(btn => btn.classList.remove('active'));
- document.getElementById('catBtn' + catId).classList.add('active');
- 
- // Load subcategories
- fetch(`/api/subcategories/${catId}`)
- .then(res => res.json())
- .then(data => {
- const select = document.getElementById('subcategorySelect');
- const group = document.getElementById('subcategoryGroup');
- select.innerHTML = '<option value="">-- Sin subcategoría --</option>';
- 
- if (data.subcategories.length > 0) {
- data.subcategories.forEach(sub => {
- const opt = document.createElement('option');
- opt.value = sub.id;
- opt.textContent = sub.name;
- select.appendChild(opt);
- });
- group.style.display = 'block';
- } else {
- group.style.display = 'none';
- }
- });
- }
+  // Category selection
+  function selectCategory(catId) {
+    document.querySelectorAll('.category-btn').forEach(btn => btn.classList.remove('active'));
+    document.getElementById('catBtn' + catId).classList.add('active');
 
- // Initialize on page load
- document.addEventListener('DOMContentLoaded', () => {
- // Initialize weight mode
- const sellByWeight = document.getElementById('sellByWeight');
- if (sellByWeight.checked) {
- toggleWeightMode(true);
- }
- 
- {% if editing and product.category_id %}
- selectCategory({{ product.category_id }});
- {% if product.subcategory_id %}
- setTimeout(() => {
- document.getElementById('subcategorySelect').value = '{{ product.subcategory_id }}';
- }, 500);
- {% endif %}
- {% endif %}
- 
- {% if editing %}
- document.getElementById('productPrice').dispatchEvent(new Event('input'));
- {% endif %}
+    // Load subcategories
+    fetch(`/api/subcategories/${catId}`)
+      .then(res => res.json())
+      .then(data => {
+        const select = document.getElementById('subcategorySelect');
+        const group = document.getElementById('subcategoryGroup');
+        select.innerHTML = '<option value="">-- Sin subcategoría --</option>';
 
- // Pre-fill barcode from URL parameter (from POS Agregar a Inventario)
- const urlParams = new URLSearchParams(window.location.search);
- const prefillBarcode = urlParams.get('barcode');
- if (prefillBarcode) {
-     document.getElementById('productBarcode').value = prefillBarcode;
-     document.getElementById('productName').focus();
- }
- });
+        if (data.subcategories && data.subcategories.length > 0) {
+          data.subcategories.forEach(sub => {
+            const opt = document.createElement('option');
+            opt.value = sub.id;
+            opt.textContent = sub.name;
+            select.appendChild(opt);
+          });
+          group.style.display = 'block';
+        } else {
+          group.style.display = 'none';
+        }
+      });
+  }
+
+  // ============================================================
+  // BARCODE GENERATOR & HARDWARE PRINTING ENGINE
+  // ============================================================
+
+  function onProductNameOrPriceChange() {
+    const name = document.getElementById('productName').value.trim() || 'Nombre del Producto';
+    const priceVal = parseInt(document.getElementById('productPrice').value) || 0;
+    const previewName = document.getElementById('previewProdName');
+    const previewPrice = document.getElementById('previewProdPrice');
+    if (previewName) previewName.textContent = name;
+    if (previewPrice) {
+      previewPrice.textContent = priceVal > 0 ? ('$' + priceVal.toLocaleString('es-CO') + ' COP') : '$ 0 COP';
+    }
+  }
+
+  function checkBarcodeUnique(code, feedbackEl, callback) {
+    if (!feedbackEl) return;
+    if (!code) {
+      feedbackEl.innerHTML = '';
+      isBarcodeValid = true;
+      if (callback) callback(true);
+      return;
+    }
+
+    if (barcodeCheckTimeout) clearTimeout(barcodeCheckTimeout);
+    feedbackEl.innerHTML = '<span style="color: var(--text-muted);">⌛ Verificando disponibilidad...</span>';
+
+    barcodeCheckTimeout = setTimeout(() => {
+      let url = `/api/products/check-barcode?barcode=${encodeURIComponent(code)}`;
+      if (currentProductId) {
+        url += `&product_id=${currentProductId}`;
+      }
+
+      fetch(url)
+        .then(res => res.json())
+        .then(data => {
+          if (data.success && data.available) {
+            feedbackEl.innerHTML = '<span style="color: var(--success, #43A047);">✓ Código único y disponible para usar</span>';
+            isBarcodeValid = true;
+            if (callback) callback(true);
+          } else if (data.success && !data.available) {
+            const pName = data.existing_product ? data.existing_product.name : 'otro producto';
+            feedbackEl.innerHTML = `<span style="color: var(--error, #e53935);">⚠️ Ya está en uso por: <strong>${pName}</strong></span>`;
+            isBarcodeValid = false;
+            if (callback) callback(false);
+          } else {
+            feedbackEl.innerHTML = '';
+            isBarcodeValid = true;
+            if (callback) callback(true);
+          }
+        })
+        .catch(() => {
+          feedbackEl.innerHTML = '';
+          isBarcodeValid = true;
+          if (callback) callback(true);
+        });
+    }, 250);
+  }
+
+  function openBarcodeModal() {
+    const modal = document.getElementById('barcodeModal');
+    const modalInput = document.getElementById('modalBarcodeInput');
+    const currentCode = document.getElementById('productBarcode').value.trim();
+
+    onProductNameOrPriceChange();
+    modal.style.display = 'flex';
+
+    if (currentCode) {
+      modalInput.value = currentCode;
+      renderBarcodeSvg(currentCode);
+      checkBarcodeUnique(currentCode, document.getElementById('modalBarcodeFeedback'));
+    } else {
+      generateNewBarcodeCode();
+    }
+  }
+
+  function closeBarcodeModal() {
+    document.getElementById('barcodeModal').style.display = 'none';
+  }
+
+  function generateNewBarcodeCode() {
+    const btn = document.getElementById('btnGenerateNewCode');
+    const originalText = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = '⌛ Generando...';
+
+    fetch('/api/products/generate-barcode')
+      .then(res => res.json())
+      .then(data => {
+        btn.disabled = false;
+        btn.innerHTML = originalText;
+        if (data.success && data.barcode) {
+          const modalInput = document.getElementById('modalBarcodeInput');
+          modalInput.value = data.barcode;
+          renderBarcodeSvg(data.barcode);
+          checkBarcodeUnique(data.barcode, document.getElementById('modalBarcodeFeedback'));
+        }
+      })
+      .catch(() => {
+        btn.disabled = false;
+        btn.innerHTML = originalText;
+        // Fallback local internal barcode
+        const fallback = '20' + Math.floor(1000000000 + Math.random() * 9000000000);
+        document.getElementById('modalBarcodeInput').value = fallback;
+        renderBarcodeSvg(fallback);
+      });
+  }
+
+  function renderBarcodeSvg(code) {
+    const svgEl = document.getElementById('modalBarcodeSvg');
+    if (!svgEl) return;
+    if (!code) {
+      svgEl.innerHTML = '';
+      return;
+    }
+
+    if (typeof JsBarcode === 'function') {
+      try {
+        JsBarcode(svgEl, String(code).trim(), {
+          format: "CODE128",
+          width: 2,
+          height: 55,
+          displayValue: true,
+          fontSize: 15,
+          fontOptions: "bold",
+          font: "monospace",
+          lineColor: "#000000",
+          background: "#ffffff",
+          margin: 4
+        });
+        return;
+      } catch (e) {
+        console.warn("JsBarcode error:", e);
+      }
+    }
+    renderFallbackBarcodeSvg(svgEl, String(code).trim());
+  }
+
+  function renderFallbackBarcodeSvg(svgEl, code) {
+    const clean = code.replace(/[^0-9a-zA-Z]/g, '');
+    let barsHtml = '';
+    let x = 12;
+    const barHeight = 48;
+
+    for (let i = 0; i < clean.length; i++) {
+      const charCode = clean.charCodeAt(i);
+      const w1 = (charCode % 3) + 1;
+      const space = ((charCode >> 1) % 2) + 2;
+      barsHtml += `<rect x="${x}" y="4" width="${w1}" height="${barHeight}" fill="#000000" />`;
+      x += w1 + space;
+      const w2 = ((charCode >> 2) % 2) + 1;
+      barsHtml += `<rect x="${x}" y="4" width="${w2}" height="${barHeight}" fill="#000000" />`;
+      x += w2 + 2;
+    }
+    barsHtml = `<rect x="5" y="0" width="2" height="${barHeight + 6}" fill="#000" />` +
+      `<rect x="8" y="0" width="2" height="${barHeight + 6}" fill="#000" />` +
+      barsHtml +
+      `<rect x="${x}" y="0" width="2" height="${barHeight + 6}" fill="#000" />` +
+      `<rect x="${x + 3}" y="0" width="2" height="${barHeight + 6}" fill="#000" />`;
+
+    const totalWidth = x + 15;
+    const textX = totalWidth / 2;
+    barsHtml += `<text x="${textX}" y="${barHeight + 18}" font-family="monospace" font-size="14" font-weight="bold" text-anchor="middle" fill="#000">${clean}</text>`;
+
+    svgEl.setAttribute('viewBox', `0 0 ${totalWidth} ${barHeight + 24}`);
+    svgEl.setAttribute('width', `${Math.min(totalWidth * 1.5, 300)}`);
+    svgEl.setAttribute('height', '76');
+    svgEl.innerHTML = barsHtml;
+  }
+
+  // Modal barcode typing live updates
+  document.getElementById('modalBarcodeInput').addEventListener('input', function () {
+    this.value = this.value.replace(/[^0-9a-zA-Z]/g, '').slice(0, 50);
+    const code = this.value.trim();
+    renderBarcodeSvg(code);
+    checkBarcodeUnique(code, document.getElementById('modalBarcodeFeedback'));
+  });
+
+  function applyBarcodeFromModal() {
+    const code = document.getElementById('modalBarcodeInput').value.trim();
+    const autoPrint = document.getElementById('modalChkAutoPrint').checked;
+
+    if (!code) {
+      alert('Por favor ingresa o genera un código de barras válido.');
+      return;
+    }
+
+    // Verify uniqueness before closing
+    checkBarcodeUnique(code, document.getElementById('modalBarcodeFeedback'), (available) => {
+      if (!available) {
+        alert('Este código de barras ya pertenece a otro producto en tu tienda. Por favor genera o escribe uno diferente.');
+        return;
+      }
+
+      const input = document.getElementById('productBarcode');
+      input.value = code;
+
+      const printBtn = document.getElementById('btnQuickPrintBarcode');
+      if (printBtn) printBtn.style.display = 'inline-flex';
+
+      const autoPrintField = document.getElementById('autoPrintBarcode');
+      if (autoPrintField) {
+        autoPrintField.value = autoPrint ? '1' : '0';
+      }
+
+      const feedback = document.getElementById('barcodeValidationFeedback');
+      if (feedback) {
+        feedback.innerHTML = `<span style="color: var(--success);">✓ Código asignado: <strong>${code}</strong> ${autoPrint ? '(Se imprimirá al guardar)' : ''}</span>`;
+      }
+
+      closeBarcodeModal();
+    });
+  }
+
+  function printModalBarcodeNow() {
+    const code = document.getElementById('modalBarcodeInput').value.trim();
+    if (!code) {
+      alert('Ingresa o genera un código antes de imprimir.');
+      return;
+    }
+    const name = document.getElementById('productName').value.trim() || 'Producto';
+    const price = document.getElementById('productPrice').value.trim() || '0';
+    sendBarcodePrint(code, name, price);
+  }
+
+  function quickPrintCurrentBarcode() {
+    const code = document.getElementById('productBarcode').value.trim();
+    if (!code) {
+      alert('El producto aún no tiene un código de barras asignado.');
+      return;
+    }
+    const name = document.getElementById('productName').value.trim() || 'Producto';
+    const price = document.getElementById('productPrice').value.trim() || '0';
+    sendBarcodePrint(code, name, price);
+  }
+
+  function sendBarcodePrint(barcode, productName, price) {
+    const hwPrinter = localStorage.getItem('mercapp_hw_printer');
+    const csrfToken = document.querySelector('input[name="csrf_token"]').value;
+
+    if (hwPrinter) {
+      fetch('/api/hardware/print-barcode', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': csrfToken
+        },
+        body: JSON.stringify({
+          printer_name: hwPrinter,
+          barcode: barcode,
+          product_name: productName,
+          price: parseInt(price) || 0,
+          copies: 1
+        })
+      })
+        .then(r => r.json())
+        .then(res => {
+          if (res.success) {
+            alert('✅ Etiqueta enviada a la impresora: ' + hwPrinter);
+          } else if (res.browser_fallback) {
+            window.open(`/products/barcode-label?barcode=${encodeURIComponent(barcode)}&name=${encodeURIComponent(productName)}&price=${encodeURIComponent(price)}&autoprint=1`, '_blank');
+          } else {
+            alert('Error al imprimir: ' + (res.message || 'Desconocido'));
+          }
+        })
+        .catch(() => {
+          window.open(`/products/barcode-label?barcode=${encodeURIComponent(barcode)}&name=${encodeURIComponent(productName)}&price=${encodeURIComponent(price)}&autoprint=1`, '_blank');
+        });
+    } else {
+      window.open(`/products/barcode-label?barcode=${encodeURIComponent(barcode)}&name=${encodeURIComponent(productName)}&price=${encodeURIComponent(price)}&autoprint=1`, '_blank');
+    }
+  }
+
+  // Populate printer_name before submit
+  document.getElementById('productForm').addEventListener('submit', function (e) {
+    const hwPrinter = localStorage.getItem('mercapp_hw_printer') || '';
+    document.getElementById('formPrinterName').value = hwPrinter;
+
+    if (!isBarcodeValid) {
+      e.preventDefault();
+      alert('El código de barras ingresado ya existe en otro producto. Por favor corrígelo antes de guardar.');
+      document.getElementById('productBarcode').focus();
+    }
+  });
+
+  // Initialize on page load
+  document.addEventListener('DOMContentLoaded', () => {
+    const sellByWeight = document.getElementById('sellByWeight');
+    if (sellByWeight && sellByWeight.checked) {
+      toggleWeightMode(true);
+    }
+
+    {% if editing and product.category_id %}
+    selectCategory({{ product.category_id }});
+  {% if product.subcategory_id %}
+  setTimeout(() => {
+    document.getElementById('subcategorySelect').value = '{{ product.subcategory_id }}';
+  }, 500);
+  {% endif %}
+  {% endif %}
+
+  {% if editing %}
+  document.getElementById('productPrice').dispatchEvent(new Event('input'));
+  {% endif %}
+
+  // Pre-fill barcode from URL parameter (e.g., from POS Agregar a Inventario)
+  const urlParams = new URLSearchParams(window.location.search);
+  const prefillBarcode = urlParams.get('barcode');
+  if (prefillBarcode) {
+    document.getElementById('productBarcode').value = prefillBarcode;
+    document.getElementById('productName').focus();
+    checkBarcodeUnique(prefillBarcode, document.getElementById('barcodeValidationFeedback'));
+  }
+
+  // Set saved printer
+  const savedPrinter = localStorage.getItem('mercapp_hw_printer');
+  if (savedPrinter) {
+    document.getElementById('formPrinterName').value = savedPrinter;
+  }
+  });
 </script>
 {% endblock %}
-

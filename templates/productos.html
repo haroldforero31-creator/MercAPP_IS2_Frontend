@@ -138,9 +138,16 @@
                     </td>
                     <td>
                         {% if product.barcode %}
-                        <code style="background: var(--bg-input); padding: 4px 8px; border-radius: 4px; font-size: 0.85rem;">{{ product.barcode }}</code>
+                        <div style="display: flex; align-items: center; gap: 6px;">
+                            <code style="background: var(--bg-input); padding: 4px 8px; border-radius: 4px; font-size: 0.85rem; font-family: monospace;">{{ product.barcode }}</code>
+                            <button type="button" class="btn btn-outline btn-sm" onclick="printProductBarcode('{{ product.barcode }}', '{{ product.name | replace("'", "\\'") }}', {{ product.price }})" title="Imprimir etiqueta de código de barras" style="padding: 2px 7px; font-size: 0.85rem; line-height: 1.2;">
+                                🖨️
+                            </button>
+                        </div>
                         {% else %}
-                        <span class="text-muted">Sin código</span>
+                        <a href="{{ url_for('product_edit', product_id=product.id) }}" class="btn btn-outline btn-sm" style="font-size: 0.75rem; padding: 2px 8px; color: var(--primary); border-color: var(--primary);">
+                            + Asignar
+                        </a>
                         {% endif %}
                     </td>
                     <td>{{ product.category.name if product.category else '-' }}</td>
@@ -439,5 +446,45 @@ function applyBulkPrice() {
         btn.textContent = 'Aplicar Precio';
     });
 }
+
+function printProductBarcode(barcode, name, price) {
+    const hwPrinter = localStorage.getItem('mercapp_hw_printer');
+    const csrfToken = document.querySelector('input[name="csrf_token"]') ? document.querySelector('input[name="csrf_token"]').value : '';
+    if (hwPrinter) {
+        fetch('/api/hardware/print-barcode', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json', 'X-CSRFToken': csrfToken},
+            body: JSON.stringify({
+                printer_name: hwPrinter,
+                barcode: barcode,
+                product_name: name,
+                price: price,
+                copies: 1
+            })
+        }).then(r => r.json()).then(res => {
+            if (res.success) {
+                alert('✅ Etiqueta enviada a la impresora: ' + hwPrinter);
+            } else {
+                window.open(`/products/barcode-label?barcode=${encodeURIComponent(barcode)}&name=${encodeURIComponent(name)}&price=${encodeURIComponent(price)}&autoprint=1`, '_blank');
+            }
+        }).catch(() => {
+            window.open(`/products/barcode-label?barcode=${encodeURIComponent(barcode)}&name=${encodeURIComponent(name)}&price=${encodeURIComponent(price)}&autoprint=1`, '_blank');
+        });
+    } else {
+        window.open(`/products/barcode-label?barcode=${encodeURIComponent(barcode)}&name=${encodeURIComponent(name)}&price=${encodeURIComponent(price)}&autoprint=1`, '_blank');
+    }
+}
 </script>
+
+{% if session.get('print_barcode_popup') %}
+{% set pop = session.pop('print_barcode_popup') %}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const hwPrinter = localStorage.getItem('mercapp_hw_printer');
+    if (!hwPrinter) {
+        window.open('/products/barcode-label?barcode={{ pop.barcode | urlencode }}&name={{ pop.name | urlencode }}&price={{ pop.price }}&autoprint=1', '_blank');
+    }
+});
+</script>
+{% endif %}
 {% endblock %}
