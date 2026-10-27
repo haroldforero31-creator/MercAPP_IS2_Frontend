@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-width=1.0">
+    <title>Licencia Expirada - MercAPP</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <style>
+        body {
+            background-color: var(--bg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            font-family: var(--font);
+            color: var(--text);
+        }
+        .license-container {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 40px;
+            max-width: 480px;
+            width: 90%;
+            text-align: center;
+            box-shadow: var(--shadow-lg);
+        }
+        .lock-icon {
+            font-size: 4rem;
+            color: var(--error);
+            margin-bottom: 20px;
+        }
+        .license-title {
+            color: var(--text);
+            font-size: 1.8rem;
+            margin-bottom: 10px;
+            font-weight: 800;
+        }
+        .license-desc {
+            color: var(--text-secondary);
+            font-size: 1rem;
+            margin-bottom: 30px;
+            line-height: 1.5;
+        }
+        .form-group {
+            text-align: left;
+            margin-bottom: 20px;
+        }
+        .btn-unlock {
+            width: 100%;
+            padding: 14px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            background: var(--primary);
+            color: #fff;
+            border: none;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        .btn-unlock:hover {
+            background: var(--primary-light);
+            box-shadow: var(--shadow-glow);
+        }
+        .flash-messages {
+            margin-bottom: 20px;
+        }
+        .flash-message {
+            padding: 12px;
+            border-radius: var(--radius-sm);
+            font-weight: 600;
+            font-size: 0.9rem;
+            text-align: center;
+        }
+        .flash-message.error {
+            background: rgba(229, 57, 53, 0.1);
+            color: #cf8c8c;
+            border: 1px solid rgba(229, 57, 53, 0.3);
+        }
+        .flash-message.success {
+            background: rgba(67, 160, 71, 0.1);
+            color: #8cbf8c;
+            border: 1px solid rgba(67, 160, 71, 0.3);
+        }
+    </style>
+</head>
+<body>
+    <div class="license-container">
+        <div class="lock-icon">🔒</div>
+        <h1 class="license-title">Licencia Expirada</h1>
+        <p class="license-desc">
+            El período de uso de 60 días ha finalizado. Por favor, contacte al administrador del sistema para renovar la licencia y desbloquear el acceso.
+        </p>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="flash-messages">
+                    {% for category, message in messages %}
+                        <div class="flash-message {{ category }}">{{ message }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        <form method="POST" action="{{ url_for('license') }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <div class="form-group">
+                <label class="form-label" for="password">Contraseña de Desbloqueo</label>
+                <input type="password" id="password" name="password" class="form-control" placeholder="Ingrese la contraseña maestra..." required autofocus>
+            </div>
+            <button type="submit" class="btn-unlock">Desbloquear Sistema</button>
+        </form>
+    </div>
+</body>
+</html>
