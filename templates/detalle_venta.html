@@ -60,17 +60,17 @@
  <table>
  <thead>
  <tr>
- <th>#</th>
+ <th class="hide-mobile">#</th>
  <th>Producto</th>
  <th style="text-align: center;">Cantidad</th>
- <th style="text-align: right;">V/Unitario</th>
+ <th class="hide-mobile" style="text-align: right;">V/Unitario</th>
  <th style="text-align: right;">Subtotal</th>
  </tr>
  </thead>
  <tbody>
  {% for item in sale.items %}
  <tr>
- <td>{{ loop.index }}</td>
+ <td class="hide-mobile">{{ loop.index }}</td>
  <td>
  <strong>{{ item.product.name if item.product else 'Producto eliminado' }}</strong>
  {% if item.product and item.product.barcode %}
@@ -84,7 +84,7 @@
  {{ item.quantity }}
  {% endif %}
  </td>
- <td style="text-align: right;">{{ item.unit_price | cop }}</td>
+ <td class="hide-mobile" style="text-align: right;">{{ item.unit_price | cop }}</td>
  <td style="text-align: right; font-weight: 700; color: var(--accent-light);">{{ item.subtotal | cop }}</td>
  </tr>
  {% endfor %}
@@ -112,7 +112,7 @@
  <div class="card-header">
  <span class="card-title"> Información de Pago</span>
  </div>
- <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+ <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 16px;">
  <div>
  <div class="form-label">Método de Pago</div>
  <div style="font-weight: 700; font-size: 1.1rem;">

@@ -1,0 +1,697 @@
+/* ==========================================================================
+   MERKI — Asistente de Voz Inteligente para MercAPP IS2
+   Diseño de Visor Digital Redondo Negro con Ojos y Boca LED Neón Cyan
+   ========================================================================== */
+
+:root {
+    --merki-cyan: #00f2fe;
+    --merki-blue: #4facfe;
+    --merki-glow: rgba(0, 242, 254, 0.55);
+    --merki-dark-screen: radial-gradient(circle at 45% 35%, #152238 0%, #0b121e 50%, #03060a 100%);
+    --merki-surface: rgba(13, 20, 34, 0.96);
+    --merki-border: rgba(0, 242, 254, 0.35);
+}
+
+/* ============================================================
+   BOTÓN FLOTANTE LAUNCHER (Inferior Derecho en POS)
+   ============================================================ */
+.merki-launcher {
+    position: fixed;
+    bottom: 24px;
+    right: 28px;
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    background: transparent;
+    border: none;
+    outline: none;
+    padding: 0;
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.merki-launcher:hover {
+    transform: scale(1.1);
+}
+
+.merki-launcher:active {
+    transform: scale(0.95);
+}
+
+.merki-launcher-hint {
+    position: absolute;
+    bottom: 74px;
+    right: 0;
+    background: linear-gradient(135deg, rgba(13, 20, 34, 0.95), rgba(20, 35, 60, 0.95));
+    border: 1px solid var(--merki-cyan);
+    color: #e0f2fe;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 6px 14px;
+    border-radius: 999px;
+    white-space: nowrap;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5), 0 0 12px var(--merki-glow);
+    animation: merkiHintFloat 2.2s infinite ease-in-out;
+    pointer-events: none;
+    display: none;
+}
+
+.merki-launcher-hint.visible {
+    display: block;
+}
+
+@keyframes merkiHintFloat {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-5px); }
+}
+
+
+/* Pantalla redonda negra OLED en el launcher */
+.merki-launcher-avatar {
+    width: 62px;
+    height: 62px;
+    border-radius: 50%;
+    background: var(--merki-dark-screen);
+    box-shadow: 0 0 22px rgba(0, 242, 254, 0.45), inset 0 0 14px rgba(0, 0, 0, 0.95), 0 8px 24px rgba(0, 0, 0, 0.65);
+    border: 2px solid rgba(0, 242, 254, 0.7);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: visible;
+    gap: 4px;
+    transition: all 0.3s ease;
+}
+
+/* Anillo de pulso cuando está escuchando en segundo plano */
+.merki-launcher.listening .merki-launcher-avatar {
+    border-color: var(--merki-cyan);
+    animation: merkiWakePulse 2.5s infinite ease-in-out;
+}
+
+@keyframes merkiWakePulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(0, 242, 254, 0.55), 0 0 20px rgba(0, 242, 254, 0.4);
+    }
+    70% {
+        box-shadow: 0 0 0 16px rgba(0, 242, 254, 0), 0 0 28px rgba(0, 242, 254, 0.6);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(0, 242, 254, 0), 0 0 20px rgba(0, 242, 254, 0.4);
+    }
+}
+
+.merki-mini-eyes {
+    display: flex;
+    gap: 9px;
+    margin-top: 2px;
+}
+
+.merki-mini-eye {
+    width: 8px;
+    height: 7px;
+    border-radius: 50% 50% 30% 30%;
+    background: var(--merki-cyan);
+    box-shadow: 0 0 7px var(--merki-cyan);
+}
+
+.merki-mini-mouth {
+    width: 9px;
+    height: 3.5px;
+    border-radius: 1px 1px 4px 4px;
+    background: var(--merki-cyan);
+    box-shadow: 0 0 7px var(--merki-cyan);
+}
+
+/* Insignia pequeña de micrófono en el launcher */
+.merki-mini-mic {
+    position: absolute;
+    bottom: -2px;
+    right: -2px;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--merki-blue), var(--merki-cyan));
+    color: #030a14;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5), 0 0 10px var(--merki-cyan);
+    border: 1.5px solid #0b121e;
+}
+
+
+/* ============================================================
+   MODAL / DOCK PRINCIPAL DE MERKI
+   ============================================================ */
+.merki-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(5, 9, 18, 0.78);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.35s ease, visibility 0.35s ease;
+}
+
+.merki-overlay.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+.merki-modal {
+    width: 92%;
+    max-width: 500px;
+    background: var(--merki-surface);
+    border: 1px solid var(--merki-border);
+    border-radius: 28px;
+    padding: 30px 26px 24px;
+    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.8), 0 0 45px rgba(0, 242, 254, 0.25);
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    transform: translateY(30px) scale(0.95);
+    transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    color: #e2e8f0;
+}
+
+.merki-overlay.active .merki-modal {
+    transform: translateY(0) scale(1);
+}
+
+.merki-btn-close {
+    position: absolute;
+    top: 18px;
+    right: 18px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    color: #a0aec0;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.merki-btn-close:hover {
+    background: rgba(239, 68, 68, 0.2);
+    color: #ef4444;
+    border-color: rgba(239, 68, 68, 0.4);
+    transform: rotate(90deg);
+}
+
+/* ============================================================
+   AVATAR: PANTALLA REDONDA NEGRA CON OJOS Y BOCA LED
+   ============================================================ */
+.merki-robot-container {
+    width: 140px;
+    height: 140px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 16px;
+    animation: merkiFloating 3.6s infinite ease-in-out;
+}
+
+.merki-screen-round {
+    width: 130px;
+    height: 130px;
+    border-radius: 50%;
+    background: var(--merki-dark-screen);
+    border: 3px solid rgba(0, 242, 254, 0.5);
+    box-shadow: 0 0 28px rgba(0, 242, 254, 0.4), inset 0 0 22px rgba(0, 0, 0, 0.95), 0 12px 32px rgba(0, 0, 0, 0.7);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+/* Brillo perimetral al escuchar */
+.merki-robot-container.listening .merki-screen-round {
+    border-color: var(--merki-cyan);
+    box-shadow: 0 0 40px var(--merki-cyan), inset 0 0 20px rgba(0, 0, 0, 0.9);
+    animation: merkiVisorPulse 1.4s infinite alternate;
+}
+
+/* Brillo violeta al pensar */
+.merki-robot-container.thinking .merki-screen-round {
+    border-color: #c084fc;
+    box-shadow: 0 0 35px rgba(192, 132, 252, 0.5), inset 0 0 20px rgba(0, 0, 0, 0.9);
+}
+
+/* Ojos LED interactivos */
+.merki-eyes-row {
+    display: flex;
+    gap: 26px;
+    align-items: center;
+    justify-content: center;
+    margin-top: 4px;
+}
+
+.merki-eye {
+    width: 22px;
+    height: 16px;
+    background: var(--merki-cyan);
+    border-radius: 50% 50% 30% 30%;
+    box-shadow: 0 0 14px var(--merki-cyan), 0 0 28px rgba(0, 242, 254, 0.8);
+    transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+    position: relative;
+}
+
+/* Parpadeo automático */
+.merki-eyes-row.blinking .merki-eye {
+    height: 3px !important;
+    border-radius: 2px !important;
+    margin-top: 7px;
+    box-shadow: 0 0 8px var(--merki-cyan);
+}
+
+/* Escuchando (ojos grandes redondos atentos) */
+.merki-robot-container.listening .merki-eye {
+    width: 24px;
+    height: 22px;
+    border-radius: 50%;
+    box-shadow: 0 0 20px #00f2fe, 0 0 36px #00f2fe;
+    animation: merkiEyeDilate 1.1s infinite alternate;
+}
+
+/* Pensando (ojos mirando arriba con tinte violeta) */
+.merki-robot-container.thinking .merki-eye {
+    transform: translateY(-4px);
+    background: #c084fc;
+    box-shadow: 0 0 16px #c084fc, 0 0 30px #c084fc;
+}
+
+/* Hablando (ojos sonrientes felices) */
+.merki-robot-container.speaking .merki-eye {
+    height: 12px;
+    border-radius: 50% 50% 10% 10%;
+    box-shadow: 0 0 18px var(--merki-cyan);
+}
+
+/* Boca LED animada */
+.merki-mouth {
+    width: 22px;
+    height: 7px;
+    background: var(--merki-cyan);
+    border-radius: 2px 2px 10px 10px;
+    margin-top: 14px;
+    box-shadow: 0 0 12px var(--merki-cyan), 0 0 22px rgba(0, 242, 254, 0.6);
+    transition: all 0.12s ease;
+}
+
+/* Boca hablando (se abre y modula en ondas sincronizadas) */
+.merki-robot-container.speaking .merki-mouth {
+    animation: merkiMouthTalk 0.2s infinite alternate ease-in-out;
+}
+
+.merki-robot-container.thinking .merki-mouth {
+    width: 10px;
+    height: 4px;
+    border-radius: 4px;
+    background: #c084fc;
+    box-shadow: 0 0 10px #c084fc;
+}
+
+/* ============================================================
+   ESTADO Y ONDAS DE AUDIO (LISTENING VISUALIZER)
+   ============================================================ */
+.merki-status-text {
+    font-size: 13px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--merki-cyan);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 6px;
+    min-height: 20px;
+}
+
+.merki-status-text .status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--merki-cyan);
+    box-shadow: 0 0 8px var(--merki-cyan);
+}
+
+.merki-audio-wave {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    height: 24px;
+    margin-bottom: 12px;
+}
+
+.merki-audio-wave .wave-bar {
+    width: 4px;
+    height: 6px;
+    border-radius: 3px;
+    background: var(--merki-cyan);
+    box-shadow: 0 0 6px var(--merki-cyan);
+    transition: height 0.1s ease;
+}
+
+.merki-robot-container.listening .wave-bar {
+    animation: merkiWaveBounce 0.55s infinite ease-in-out alternate;
+}
+
+.merki-robot-container.speaking .wave-bar {
+    animation: merkiWaveBounce 0.38s infinite ease-in-out alternate;
+    background: #38bdf8;
+}
+
+.merki-audio-wave .wave-bar:nth-child(2) { animation-delay: 0.1s; }
+.merki-audio-wave .wave-bar:nth-child(3) { animation-delay: 0.2s; }
+.merki-audio-wave .wave-bar:nth-child(4) { animation-delay: 0.3s; }
+.merki-audio-wave .wave-bar:nth-child(5) { animation-delay: 0.15s; }
+
+/* Banner de permiso de micrófono si está bloqueado */
+.merki-mic-alert {
+    width: 100%;
+    background: rgba(239, 68, 68, 0.12);
+    border: 1px solid rgba(239, 68, 68, 0.4);
+    color: #fca5a5;
+    padding: 12px 16px;
+    border-radius: 12px;
+    font-size: 13px;
+    line-height: 1.45;
+    margin-bottom: 14px;
+    display: none;
+    align-items: flex-start;
+    gap: 12px;
+    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.35);
+}
+
+.merki-mic-alert.visible {
+    display: flex;
+}
+
+/* ============================================================
+   BURBUJAS DE CONVERSACIÓN (USER & MERKI)
+   ============================================================ */
+.merki-conversation-box {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    max-height: 200px;
+    overflow-y: auto;
+    padding-right: 4px;
+    margin-bottom: 14px;
+}
+
+.merki-bubble {
+    border-radius: 18px;
+    padding: 12px 18px;
+    font-size: 14.5px;
+    line-height: 1.45;
+    animation: merkiFadeUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.merki-bubble-user {
+    align-self: flex-end;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    color: #f1f5f9;
+    max-width: 85%;
+    border-bottom-right-radius: 4px;
+}
+
+.merki-bubble-bot {
+    align-self: flex-start;
+    background: linear-gradient(145deg, rgba(14, 165, 233, 0.18), rgba(0, 242, 254, 0.08));
+    border: 1px solid rgba(0, 242, 254, 0.35);
+    color: #ffffff;
+    max-width: 92%;
+    border-bottom-left-radius: 4px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+}
+
+/* ============================================================
+   SUGERENCIAS RÁPIDAS (CHIPS)
+   ============================================================ */
+.merki-suggestions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+    width: 100%;
+    margin-bottom: 14px;
+}
+
+.merki-chip {
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    color: #cbd5e1;
+    font-size: 12px;
+    font-weight: 500;
+    padding: 6px 12px;
+    border-radius: 999px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.merki-chip:hover {
+    background: rgba(0, 242, 254, 0.18);
+    border-color: var(--merki-cyan);
+    color: #ffffff;
+    transform: translateY(-2px);
+}
+
+/* ============================================================
+   ENTRADA DE TEXTO Y ACCIONES INFERIORES
+   ============================================================ */
+.merki-input-bar {
+    width: 100%;
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.merki-text-input {
+    flex: 1;
+    background: rgba(10, 16, 28, 0.85);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 999px;
+    padding: 10px 18px;
+    font-size: 14px;
+    color: #ffffff;
+    outline: none;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.merki-text-input:focus {
+    border-color: var(--merki-cyan);
+    box-shadow: 0 0 12px rgba(0, 242, 254, 0.3);
+}
+
+.merki-btn-mic {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--merki-blue), var(--merki-cyan));
+    border: none;
+    color: #07111e;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 4px 16px var(--merki-glow);
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+}
+
+.merki-btn-mic:hover {
+    transform: scale(1.08);
+    box-shadow: 0 6px 20px var(--merki-cyan);
+}
+
+.merki-btn-mic.active {
+    background: #ef4444;
+    color: #ffffff;
+    box-shadow: 0 0 16px rgba(239, 68, 68, 0.7);
+    animation: merkiMicGlow 1.2s infinite alternate;
+}
+
+.merki-btn-send {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+}
+
+.merki-btn-send:hover {
+    background: var(--merki-cyan);
+    color: #07111e;
+}
+
+/* ============================================================
+   KEYFRAMES DE ANIMACIONES
+   ============================================================ */
+@keyframes merkiFloating {
+    0%, 100% {
+        transform: translateY(0px) rotate(0deg);
+    }
+    50% {
+        transform: translateY(-8px) rotate(0.8deg);
+    }
+}
+
+@keyframes merkiVisorPulse {
+    from {
+        box-shadow: 0 0 25px rgba(0, 242, 254, 0.4), inset 0 0 15px rgba(0, 0, 0, 0.9);
+    }
+    to {
+        box-shadow: 0 0 45px var(--merki-cyan), inset 0 0 25px rgba(0, 242, 254, 0.2);
+    }
+}
+
+@keyframes merkiPillPulse {
+    0%, 100% {
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4), 0 0 12px var(--merki-glow);
+    }
+    50% {
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4), 0 0 24px var(--merki-cyan);
+    }
+}
+
+@keyframes merkiMicGlow {
+    from {
+        opacity: 0.6;
+        transform: scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1.15);
+    }
+}
+
+@keyframes merkiMouthTalk {
+    0% {
+        height: 5px;
+        width: 18px;
+        border-radius: 2px 2px 8px 8px;
+    }
+    100% {
+        height: 16px;
+        width: 24px;
+        border-radius: 4px 4px 14px 14px;
+    }
+}
+
+@keyframes merkiEyeDilate {
+    from {
+        transform: scale(1);
+    }
+    to {
+        transform: scale(1.18);
+    }
+}
+
+@keyframes merkiWaveBounce {
+    0% {
+        height: 5px;
+    }
+    100% {
+        height: 22px;
+    }
+}
+
+@keyframes merkiFadeUp {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ============================================================
+   RESPONSIVE — MERKI EN DISPOSITIVOS MÓVILES
+   ============================================================ */
+@media (max-width: 768px) {
+    .merki-launcher {
+        bottom: 74px; /* Flota encima de la barra de navegación inferior móvil */
+        right: 16px;
+    }
+
+    .merki-launcher-avatar {
+        width: 52px;
+        height: 52px;
+    }
+
+    .merki-modal {
+        width: 94%;
+        max-height: 88vh;
+        padding: 22px 16px 16px;
+        border-radius: 22px;
+    }
+
+    .merki-robot-container {
+        width: 100px;
+        height: 100px;
+        margin-bottom: 10px;
+    }
+
+    .merki-screen-round {
+        width: 95px;
+        height: 95px;
+    }
+
+    .merki-eyes-row {
+        gap: 18px;
+    }
+
+    .merki-eye {
+        width: 17px;
+        height: 13px;
+    }
+
+    .merki-mouth {
+        width: 17px;
+        height: 5px;
+        margin-top: 10px;
+    }
+
+    .merki-conversation-box {
+        max-height: 180px;
+    }
+
+    .merki-suggestions {
+        gap: 6px;
+        margin-bottom: 10px;
+    }
+
+    .merki-chip {
+        font-size: 11px;
+        padding: 5px 10px;
+    }
+}
+

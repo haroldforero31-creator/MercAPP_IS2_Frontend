@@ -132,3 +132,52 @@
 .debt-client-row td {
     transition: var(--transition);
 }
+
+/* ============================================================
+   RESPONSIVE — DEBT VIEWS
+   ============================================================ */
+@media (max-width: 768px) {
+    .debt-filters {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
+    }
+    .debt-filters input,
+    .debt-filters select,
+    .debt-filters button {
+        max-width: 100% !important;
+        width: 100%;
+    }
+}
+
+@media (max-width: 480px) {
+    .fiado-banner-content {
+        flex-wrap: wrap;
+        gap: 8px;
+        padding: 8px 12px;
+    }
+    .fiado-client-info {
+        order: 1;
+        flex: 1;
+        min-width: 120px;
+    }
+    .fiado-back-btn {
+        order: 0;
+        padding: 4px 8px;
+        font-size: 0.75rem;
+    }
+    .fiado-debt-display {
+        order: 2;
+        width: 100%;
+        align-items: flex-start;
+        padding-top: 4px;
+        border-top: 1px dashed rgba(255, 255, 255, 0.2);
+    }
+    .fiado-client-name {
+        font-size: 0.95rem;
+    }
+    .fiado-debt-value {
+        font-size: 1rem;
+    }
+}
+

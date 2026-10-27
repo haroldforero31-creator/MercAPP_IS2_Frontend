@@ -15,8 +15,8 @@
  <th>Cierre</th>
  <th>Estado</th>
  <th>Base Inicial</th>
- <th>Ventas Sist. (Efec)</th>
- <th>Efectivo Esperado</th>
+ <th class="hide-mobile">Ventas Sist. (Efec)</th>
+ <th class="hide-mobile">Efectivo Esperado</th>
  <th>Efectivo Físico Contado</th>
  <th>Diferencia</th>
  <th style="text-align: right;">Acciones</th>
@@ -35,8 +35,8 @@
  {% endif %}
  </td>
  <td>{{ session.base_amount | cop }}</td>
- <td>{{ session.cash_sales | cop }}</td>
- <td>{{ session.expected_cash | cop }}</td>
+ <td class="hide-mobile">{{ session.cash_sales | cop }}</td>
+ <td class="hide-mobile">{{ session.expected_cash | cop }}</td>
  <td style="font-weight: bold;">
  {% if session.actual_cash is not none %}
  {{ session.actual_cash | cop }}
@@ -67,7 +67,7 @@
  </tr>
  {% else %}
  <tr>
- <td colspan="8" style="text-align: center; padding: 20px; color: var(--text-secondary);">
+ <td colspan="9" style="text-align: center; padding: 20px; color: var(--text-secondary);">
  No hay sesiones de caja registradas.
  </td>
  </tr>

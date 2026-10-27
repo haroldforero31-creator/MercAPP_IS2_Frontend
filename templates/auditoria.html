@@ -39,19 +39,19 @@
             <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.9rem;">
                 <thead>
                     <tr style="background: var(--bg-card, #1f2937); border-bottom: 2px solid var(--border, #374151); color: var(--text-secondary, #9ca3af);">
-                        <th style="padding: 12px 16px;">#</th>
+                        <th class="hide-mobile" style="padding: 12px 16px;">#</th>
                         <th style="padding: 12px 16px;">Fecha y Hora</th>
                         <th style="padding: 12px 16px;">Usuario</th>
                         <th style="padding: 12px 16px;">Evento</th>
                         <th style="padding: 12px 16px;">Detalle</th>
-                        <th style="padding: 12px 16px;">IP</th>
+                        <th class="hide-mobile" style="padding: 12px 16px;">IP</th>
                         <th style="padding: 12px 16px;">Nivel</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for log in logs %}
                     <tr style="border-bottom: 1px solid var(--border, #374151);">
-                        <td style="padding: 12px 16px; color: var(--text-secondary);">{{ log.id }}</td>
+                        <td class="hide-mobile" style="padding: 12px 16px; color: var(--text-secondary);">{{ log.id }}</td>
                         <td style="padding: 12px 16px; white-space: nowrap; font-family: monospace;">
                             {{ log.created_at.strftime('%Y-%m-%d %H:%M:%S') }}
                         </td>
@@ -79,7 +79,7 @@
                             {% endif %}
                         </td>
                         <td style="padding: 12px 16px;">{{ log.description }}</td>
-                        <td style="padding: 12px 16px; font-family: monospace; font-size: 0.85rem; color: var(--text-secondary);">{{ log.ip_address }}</td>
+                        <td class="hide-mobile" style="padding: 12px 16px; font-family: monospace; font-size: 0.85rem; color: var(--text-secondary);">{{ log.ip_address }}</td>
                         <td style="padding: 12px 16px;">
                             {% if log.severity == 'CRITICAL' %}
                             <span style="background: rgba(239, 68, 68, 0.15); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3); padding: 3px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 600; text-transform: uppercase;">Crítico</span>

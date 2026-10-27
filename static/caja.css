@@ -1068,3 +1068,159 @@
 .btn-add-tab:hover {
     color: #ccc;
 }
+
+/* ============================================================
+   RESPONSIVE — TABLET (≤ 1024px)
+   ============================================================ */
+@media (max-width: 1024px) {
+    .pos-wrapper {
+        grid-template-columns: 1fr 320px;
+    }
+}
+
+/* ============================================================
+   RESPONSIVE — MOBILE (≤ 768px)
+   ============================================================ */
+@media (max-width: 768px) {
+    .pos-wrapper {
+        grid-template-columns: 1fr;
+        height: auto;
+        min-height: calc(100vh - 50px - 64px);
+        overflow: visible;
+    }
+
+    .pos-cart-panel {
+        border-right: none;
+        border-bottom: 1px solid var(--border);
+        min-height: auto;
+        overflow: visible;
+    }
+
+    .pos-catalog-panel {
+        max-height: none;
+        overflow: visible;
+    }
+
+    .scanner-area {
+        padding: 8px 10px;
+    }
+
+    .scanner-input {
+        padding: 10px 12px 10px 38px;
+        font-size: 0.95rem;
+    }
+
+    /* Cart items table */
+    .cart-table thead th {
+        padding: 6px 8px;
+        font-size: 0.7rem;
+    }
+
+    .cart-table tbody td {
+        padding: 6px 8px;
+        font-size: 0.8rem;
+    }
+
+    /* Cart footer / totals */
+    .cart-summary {
+        padding: 10px 12px;
+    }
+
+    .cart-total {
+        font-size: 1.3rem;
+    }
+
+    /* Action buttons */
+    .cart-actions {
+        flex-direction: column;
+        gap: 8px;
+        padding: 10px 12px;
+    }
+
+    .cart-actions .btn {
+        width: 100%;
+    }
+
+    /* Category & product grids inside POS */
+    .category-grid {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 6px;
+    }
+
+    .cat-img-wrapper {
+        height: 60px;
+    }
+
+    .product-grid {
+        grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+        gap: 4px;
+    }
+
+    .product-btn {
+        padding: 6px 4px;
+    }
+
+    .product-btn img {
+        width: 40px;
+        height: 40px;
+    }
+
+    .product-btn .prod-name {
+        font-size: 0.68rem;
+    }
+
+    .product-btn .prod-price {
+        font-size: 0.75rem;
+    }
+
+    /* Payment tabs */
+    .payment-tabs {
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+    }
+
+    .payment-tabs::-webkit-scrollbar {
+        display: none;
+    }
+
+    .payment-tab {
+        min-width: 80px;
+        font-size: 0.78rem;
+        padding: 8px 10px;
+    }
+
+    /* POS multi-tabs */
+    .pos-tabs-container {
+        overflow-x: auto;
+    }
+
+    .pos-tab {
+        min-width: 70px;
+        font-size: 0.78rem;
+        padding: 5px 10px;
+    }
+}
+
+/* ============================================================
+   RESPONSIVE — SMALL PHONES (≤ 480px)
+   ============================================================ */
+@media (max-width: 480px) {
+    .category-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .cat-img-wrapper {
+        height: 50px;
+    }
+
+    .category-btn .cat-name {
+        font-size: 0.7rem;
+        padding: 4px 4px 6px;
+    }
+
+    .product-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}

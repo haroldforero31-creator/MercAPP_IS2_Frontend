@@ -92,10 +92,25 @@
             .split-layout {
                 flex-direction: column;
             }
-            .customer-panel, .admin-panel {
+            .customer-panel {
                 flex: none;
-                height: 100vh;
+                min-height: 100vh;
                 width: 100%;
+                border-right: none;
+                border-bottom: 1px solid var(--border);
+                padding: 1.5rem 1rem;
+            }
+            .admin-panel {
+                flex: none;
+                min-height: 100vh;
+                width: 100%;
+                padding: 1.5rem 1rem;
+            }
+            .customer-welcome-card {
+                padding: 24px 16px;
+            }
+            .login-card {
+                padding: 24px 16px;
             }
         }
     </style>

@@ -68,6 +68,42 @@
             color: var(--text);
             text-decoration: underline;
         }
+
+        @media (max-width: 768px) {
+            .header {
+                padding: 0.8rem 1rem;
+                flex-wrap: wrap;
+                gap: 10px;
+            }
+            .header > div:first-child {
+                font-size: 1.15rem;
+            }
+            .nav-links {
+                flex-wrap: wrap;
+                gap: 8px !important;
+            }
+            .nav-links a {
+                margin-left: 0;
+                font-size: 0.85rem;
+            }
+            .container {
+                padding: 1rem;
+            }
+            .store-grid {
+                grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+                gap: 12px;
+            }
+            .store-card {
+                padding: 16px;
+            }
+            .store-icon {
+                font-size: 32px;
+                margin-bottom: 10px;
+            }
+            .store-name {
+                font-size: 16px;
+            }
+        }
     </style>
 </head>
 <body>

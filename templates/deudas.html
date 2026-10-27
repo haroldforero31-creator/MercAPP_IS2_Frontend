@@ -60,9 +60,9 @@
       <thead>
         <tr>
           <th>Cliente</th>
-          <th>Teléfono</th>
-          <th>Total Comprado</th>
-          <th>Total Pagado</th>
+          <th class="hide-mobile">Teléfono</th>
+          <th class="hide-mobile">Total Comprado</th>
+          <th class="hide-mobile">Total Pagado</th>
           <th style="text-align: right;">Deuda Actual</th>
           <th style="text-align: center;">Estado</th>
           <th style="text-align: center;">Acciones</th>
@@ -79,9 +79,9 @@
             </div>
             <div style="font-size: 0.75rem; color: var(--text-muted);">Desde {{ client.created_at.strftime('%d/%m/%Y') }}</div>
           </td>
-          <td>{{ client.phone or '—' }}</td>
-          <td>{{ client.total_purchased | cop }}</td>
-          <td style="color: var(--success);">{{ client.total_paid | cop }}</td>
+          <td class="hide-mobile">{{ client.phone or '—' }}</td>
+          <td class="hide-mobile">{{ client.total_purchased | cop }}</td>
+          <td class="hide-mobile" style="color: var(--success);">{{ client.total_paid | cop }}</td>
           <td style="text-align: right; font-weight: 700; font-size: 1.05rem;">
             <span class="{% if client.debt_status == 'pendiente' %}debt-amount-pending{% else %}debt-amount-paid{% endif %}">
               {{ client.total_debt | cop }}

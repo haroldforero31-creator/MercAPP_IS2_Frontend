@@ -25,7 +25,7 @@
   se hacen desde el botón <strong>Hardware</strong> dentro de la Caja.
  </p>
  
- <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+ <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px;">
   <!-- Manual Mode Card -->
   <label class="card" style="cursor: pointer; padding: 24px; text-align: center; border: 2px solid {{ 'var(--primary)' if settings.scale_mode == 'manual' else 'var(--border)' }}; transition: all 0.2s;">
    <input type="radio" name="scale_mode" value="manual" {{ 'checked' if settings.scale_mode == 'manual' }} style="display: none;" onchange="this.form.submit()">

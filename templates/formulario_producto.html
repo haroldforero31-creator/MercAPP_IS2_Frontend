@@ -20,7 +20,7 @@
       <!-- Category Selection with Visual Buttons -->
       <div class="form-group">
         <label class="form-label">Categoría *</label>
-        <div class="category-grid" style="grid-template-columns: repeat(3, 1fr); margin-bottom: 8px;">
+        <div class="category-grid" style="margin-bottom: 8px;">
           {% for cat in categories %}
           <label class="category-btn" style="cursor: pointer; position: relative;" id="catBtn{{ cat.id }}"
             onclick="selectCategory({{ cat.id }})">
@@ -166,11 +166,11 @@
       </div>
 
       <!-- Submit -->
-      <div style="display: flex; gap: 12px; margin-top: 24px;">
-        <button type="submit" class="btn btn-primary btn-lg" id="btnSubmitProduct">
+      <div style="display: flex; gap: 12px; margin-top: 24px; flex-wrap: wrap;">
+        <button type="submit" class="btn btn-primary btn-lg" id="btnSubmitProduct" style="flex: 1; min-width: 180px;">
           {{ ' Guardar Cambios' if editing else ' Agregar Producto' }}
         </button>
-        <a href="{{ url_for('products') }}" class="btn btn-outline btn-lg">Cancelar</a>
+        <a href="{{ url_for('products') }}" class="btn btn-outline btn-lg" style="flex: 1; min-width: 120px; text-align: center;">Cancelar</a>
       </div>
     </form>
   </div>

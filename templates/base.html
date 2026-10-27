@@ -75,6 +75,9 @@
     }
     </style>
     
+    {% if current_user and current_user.is_authenticated %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/merki.css') }}?v=4.0">
+    {% endif %}
     {% block extra_css %}{% endblock %}
     <link rel="icon"
         href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2343A047' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><circle cx='9' cy='21' r='1'/><circle cx='20' cy='21' r='1'/><path d='M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6'/></svg>">
@@ -88,7 +91,14 @@
             <span>MercAPP</span>
         </a>
 
-        <ul class="navbar-nav">
+        <!-- Mobile Menu Toggle Button -->
+        <button class="navbar-toggle" id="navbarToggle" aria-label="Abrir menú" onclick="toggleMobileNav()">
+            <span class="bar"></span>
+            <span class="bar"></span>
+            <span class="bar"></span>
+        </button>
+
+        <ul class="navbar-nav" id="navbarNav">
             <li>
                 <a href="{{ url_for('pos') }}" class="nav-link {% if request.endpoint == 'pos' %}active{% endif %}">
                     <svg class="nav-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M2 10h20"/><path d="M12 17v4"/><path d="M8 21h8"/></svg>
@@ -145,6 +155,12 @@
             </li>
             {% endif %}
             {% endif %}
+            <li class="network-status-item">
+                <div id="networkStatusBadge" class="network-status-badge online" title="Base local activa. Conexión a internet disponible.">
+                    <span class="status-indicator-dot"></span>
+                    <span class="status-indicator-text" id="networkStatusText">En Línea</span>
+                </div>
+            </li>
             <li>
                 <span class="nav-user" title="{{ active_cashier_name if cashier_mode else current_user.name }}">
                     <svg class="nav-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
@@ -167,6 +183,36 @@
             </li>
             {% endif %}
         </ul>
+    </nav>
+    <div class="navbar-backdrop" id="navbarBackdrop" onclick="closeMobileNav()"></div>
+
+    <!-- Bottom Navigation Bar for Mobile Devices -->
+    <nav class="mobile-bottom-nav" id="mobileBottomNav">
+        <a href="{{ url_for('pos') }}" class="mobile-nav-item {% if request.endpoint == 'pos' %}active{% endif %}">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M2 10h20"/><path d="M12 17v4"/><path d="M8 21h8"/></svg>
+            <span>Caja</span>
+        </a>
+        <a href="{{ url_for('orders') }}" class="mobile-nav-item {% if request.endpoint in ['orders', 'order_detail'] %}active{% endif %}">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+            <span>Pedidos</span>
+            {% if pending_orders_count > 0 %}
+            <span class="mobile-badge">{{ pending_orders_count }}</span>
+            {% endif %}
+        </a>
+        {% if not cashier_mode %}
+        <a href="{{ url_for('sales_history') }}" class="mobile-nav-item {% if request.endpoint in ['sales_history', 'sale_detail'] %}active{% endif %}">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+            <span>Ventas</span>
+        </a>
+        <a href="{{ url_for('debts') }}" class="mobile-nav-item {% if request.endpoint in ['debts', 'debt_client_pos', 'debt_new_client'] %}active{% endif %}">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+            <span>Deudas</span>
+        </a>
+        {% endif %}
+        <button class="mobile-nav-item" onclick="toggleMobileNav()" style="background: none; border: none; cursor: pointer;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+            <span>Menú</span>
+        </button>
     </nav>
     {% endif %}
 
@@ -235,6 +281,41 @@
     {% block content %}{% endblock %}
 
     <script>
+        // ——— Mobile Navigation ———
+        function toggleMobileNav() {
+            const nav = document.getElementById('navbarNav');
+            const backdrop = document.getElementById('navbarBackdrop');
+            const toggle = document.getElementById('navbarToggle');
+            if (!nav) return;
+
+            const isOpen = nav.classList.contains('open');
+            if (isOpen) {
+                closeMobileNav();
+            } else {
+                nav.classList.add('open');
+                if (backdrop) backdrop.classList.add('active');
+                if (toggle) toggle.classList.add('active');
+                document.body.style.overflow = 'hidden';
+            }
+        }
+
+        function closeMobileNav() {
+            const nav = document.getElementById('navbarNav');
+            const backdrop = document.getElementById('navbarBackdrop');
+            const toggle = document.getElementById('navbarToggle');
+            if (nav) nav.classList.remove('open');
+            if (backdrop) backdrop.classList.remove('active');
+            if (toggle) toggle.classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        // Auto-close mobile nav on resize to desktop
+        window.addEventListener('resize', function() {
+            if (window.innerWidth > 768) {
+                closeMobileNav();
+            }
+        });
+
         // Auto-dismiss flash messages after 5 seconds
         document.querySelectorAll('.flash-message').forEach(msg => {
             setTimeout(() => {
@@ -321,7 +402,32 @@
         document.addEventListener('keydown', function(e) {
             if (e.key === 'Escape') closeLogoutModal();
         });
+
+        // Offline / Online Status Manager
+        function updateNetworkStatus() {
+            const badge = document.getElementById('networkStatusBadge');
+            const text = document.getElementById('networkStatusText');
+            if (!badge || !text) return;
+            if (navigator.onLine) {
+                badge.className = 'network-status-badge online';
+                badge.title = 'Base local activa. Conexión a internet disponible.';
+                text.textContent = 'En Línea';
+            } else {
+                badge.className = 'network-status-badge offline';
+                badge.title = 'Operando 100% sobre base de datos local SQLite (Modo Offline).';
+                text.textContent = 'Offline (Local)';
+            }
+        }
+        window.addEventListener('online', updateNetworkStatus);
+        window.addEventListener('offline', updateNetworkStatus);
+        document.addEventListener('DOMContentLoaded', updateNetworkStatus);
     </script>
+    {% if current_user and current_user.is_authenticated %}
+    <script>
+        window.MERKI_STORE_ID = {{ current_user.store_id if current_user and current_user.store_id else 1 }};
+    </script>
+    <script src="{{ url_for('static', filename='js/merki.js') }}?v=4.0"></script>
+    {% endif %}
     {% block extra_js %}{% endblock %}
 </body>
 

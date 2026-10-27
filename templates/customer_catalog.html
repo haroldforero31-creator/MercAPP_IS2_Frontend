@@ -232,6 +232,72 @@
         .form-control:focus {
             border-color: var(--primary);
         }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header {
+                padding: 0.8rem 1rem;
+                flex-wrap: wrap;
+                gap: 10px;
+            }
+            .header > div:first-child {
+                font-size: 1.1rem;
+            }
+            .nav-links {
+                flex-wrap: wrap;
+                gap: 8px !important;
+            }
+            .nav-links a {
+                margin-left: 0;
+                font-size: 0.85rem;
+            }
+            .container {
+                flex-direction: column;
+                padding: 1rem;
+                gap: 1rem;
+            }
+            .main-content {
+                width: 100%;
+            }
+            .sidebar {
+                width: 100%;
+                position: static;
+                top: auto;
+            }
+            .products-grid {
+                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+                gap: 12px;
+            }
+            .product-card {
+                padding: 14px;
+            }
+            .category-tabs {
+                gap: 6px;
+            }
+            .category-tab {
+                padding: 6px 14px;
+                font-size: 0.82rem;
+            }
+            .cart-total {
+                font-size: 1.25rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .products-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 8px;
+            }
+            .product-card {
+                padding: 10px;
+            }
+            .product-name {
+                font-size: 0.95rem;
+            }
+            .product-price {
+                font-size: 1.1rem;
+            }
+        }
     </style>
 </head>
 <body>

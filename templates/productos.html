@@ -109,11 +109,11 @@
                     </th>
                     <th>Imagen</th>
                     <th>Producto</th>
-                    <th>Código de Barras</th>
-                    <th>Categoría</th>
+                    <th class="hide-mobile">Código de Barras</th>
+                    <th class="hide-mobile">Categoría</th>
                     <th style="text-align: right;">Precio</th>
                     <th style="text-align: center;">Stock</th>
-                    <th>Estado</th>
+                    <th class="hide-mobile">Estado</th>
                     <th style="text-align: center;">Acciones</th>
                 </tr>
             </thead>
@@ -136,7 +136,7 @@
                     <td>
                         <strong>{{ product.name }}</strong>
                     </td>
-                    <td>
+                    <td class="hide-mobile">
                         {% if product.barcode %}
                         <div style="display: flex; align-items: center; gap: 6px;">
                             <code style="background: var(--bg-input); padding: 4px 8px; border-radius: 4px; font-size: 0.85rem; font-family: monospace;">{{ product.barcode }}</code>
@@ -150,7 +150,7 @@
                         </a>
                         {% endif %}
                     </td>
-                    <td>{{ product.category.name if product.category else '-' }}</td>
+                    <td class="hide-mobile">{{ product.category.name if product.category else '-' }}</td>
                     <td style="text-align: right; font-weight: 700; color: var(--accent-light);" id="priceCell{{ product.id }}">
                         {{ product.price | cop }}
                     </td>
@@ -167,7 +167,7 @@
                         <span class="badge badge-success">{{ product.stock }} und.</span>
                         {% endif %}
                     </td>
-                    <td>
+                    <td class="hide-mobile">
                         {% if product.is_active %}
                         <span class="badge badge-success">Activo</span>
                         {% else %}
