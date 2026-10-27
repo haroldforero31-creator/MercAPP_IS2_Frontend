@@ -1,0 +1,293 @@
+{% extends "base.html" %}
+
+{% block title %}MercAPP — Panel de Proveedor | {{ supplier.company_name }}{% endblock %}
+
+{% block content %}
+<div class="page-container" style="max-width: 1200px; margin: 30px auto 60px;">
+  
+  <!-- Header Bar -->
+  <div style="background: rgba(18, 22, 34, 0.95); border: 1px solid rgba(255,167,38,0.25); border-radius: 18px; padding: 24px 30px; margin-bottom: 28px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 20px; box-shadow: 0 15px 35px rgba(0,0,0,0.5);">
+    <div style="display: flex; align-items: center; gap: 18px;">
+      <div style="width: 54px; height: 54px; border-radius: 14px; background: rgba(255, 167, 38, 0.15); border: 1px solid rgba(255, 167, 38, 0.4); display: flex; align-items: center; justify-content: center; font-size: 1.8rem; color: #FFA726;">
+        🚚
+      </div>
+      <div>
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <h1 style="margin: 0; font-size: 1.6rem; font-weight: 800; color: #FFFFFF;">{{ supplier.company_name }}</h1>
+          <span style="background: rgba(34,197,94,0.15); color: #4ADE80; font-size: 0.75rem; font-weight: 700; padding: 3px 10px; border-radius: 999px; border: 1px solid rgba(34,197,94,0.3);">
+            ● PROVEEDOR ACTIVO
+          </span>
+        </div>
+        <p style="margin: 4px 0 0; color: var(--text-secondary); font-size: 0.9rem;">
+          Tienda Vinculada: <strong style="color: #FFA726;">{{ supplier.store.name if supplier.store else 'Mi Tienda' }}</strong> 
+          • Asesor: <strong>{{ supplier.contact_name or 'Comercial' }}</strong> 
+          • Plazo: <strong>{{ supplier.payment_terms_days }} días</strong>
+        </p>
+      </div>
+    </div>
+
+    <div style="display: flex; align-items: center; gap: 12px;">
+      <a href="{{ url_for('proveedor_logout') }}" class="btn" style="background: rgba(239,68,68,0.15); border: 1px solid rgba(239,68,68,0.3); color: #F87171; padding: 10px 18px; border-radius: 10px; font-weight: 600; text-decoration: none; font-size: 0.9rem;">
+        Cerrar Sesión
+      </a>
+    </div>
+  </div>
+
+  <!-- Summary KPI Cards -->
+  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 18px; margin-bottom: 30px;">
+    <!-- KPI 1 -->
+    <div class="card" style="padding: 20px; border-radius: 14px; background: rgba(22, 27, 41, 0.8); border: 1px solid var(--border);">
+      <div style="font-size: 0.8rem; font-weight: 700; color: #94A3B8; text-transform: uppercase; margin-bottom: 8px;">Órdenes de Compra</div>
+      <div style="font-size: 1.8rem; font-weight: 800; color: #FFFFFF; line-height: 1.1;">{{ orders|length }}</div>
+      <div style="font-size: 0.8rem; color: #4ADE80; margin-top: 6px;">Pedidos emitidos por la tienda</div>
+    </div>
+
+    <!-- KPI 2 -->
+    <div class="card" style="padding: 20px; border-radius: 14px; background: rgba(22, 27, 41, 0.8); border: 1px solid rgba(255,167,38,0.3);">
+      <div style="font-size: 0.8rem; font-weight: 700; color: #FFA726; text-transform: uppercase; margin-bottom: 8px;">Saldo por Cobrar a Tienda</div>
+      <div style="font-size: 1.8rem; font-weight: 800; color: #FFA726; line-height: 1.1;">${{ "{:,}".format(total_pending).replace(',', '.') }}</div>
+      <div style="font-size: 0.8rem; color: #94A3B8; margin-top: 6px;">Facturación neta a crédito</div>
+    </div>
+
+    <!-- KPI 3 -->
+    <div class="card" style="padding: 20px; border-radius: 14px; background: rgba(22, 27, 41, 0.8); border: 1px solid var(--border);">
+      <div style="font-size: 0.8rem; font-weight: 700; color: #94A3B8; text-transform: uppercase; margin-bottom: 8px;">Abonos Recibidos</div>
+      <div style="font-size: 1.8rem; font-weight: 800; color: #4ADE80; line-height: 1.1;">${{ "{:,}".format(total_paid).replace(',', '.') }}</div>
+      <div style="font-size: 0.8rem; color: #94A3B8; margin-top: 6px;">Pagos conciliados</div>
+    </div>
+
+    <!-- KPI 4 -->
+    <div class="card" style="padding: 20px; border-radius: 14px; background: rgba(22, 27, 41, 0.8); border: 1px solid var(--border);">
+      <div style="font-size: 0.8rem; font-weight: 700; color: #94A3B8; text-transform: uppercase; margin-bottom: 8px;">Referencias de Productos</div>
+      <div style="font-size: 1.8rem; font-weight: 800; color: #FFFFFF; line-height: 1.1;">{{ products|length }}</div>
+      <div style="font-size: 0.8rem; color: #60A5FA; margin-top: 6px;">Catálogo activo en tienda</div>
+    </div>
+  </div>
+
+  <!-- Functional Tabs Navigation -->
+  <div style="display: flex; gap: 10px; border-bottom: 1px solid var(--border); margin-bottom: 24px; overflow-x: auto; padding-bottom: 4px;">
+    <button onclick="switchSupplierTab('tab-orders', this)" class="supplier-tab-btn active" style="padding: 12px 20px; border-radius: 10px 10px 0 0; background: rgba(255, 167, 38, 0.15); border: 1px solid rgba(255,167,38,0.4); border-bottom: none; color: #FFA726; font-weight: 700; font-size: 0.95rem; cursor: pointer;">
+      📦 Órdenes de Pedido ({{ orders|length }})
+    </button>
+    <button onclick="switchSupplierTab('tab-invoices', this)" class="supplier-tab-btn" style="padding: 12px 20px; border-radius: 10px 10px 0 0; background: rgba(255, 255, 255, 0.03); border: 1px solid var(--border); border-bottom: none; color: #94A3B8; font-weight: 600; font-size: 0.95rem; cursor: pointer;">
+      💳 Cuentas por Cobrar & Facturas
+    </button>
+    <button onclick="switchSupplierTab('tab-stock', this)" class="supplier-tab-btn" style="padding: 12px 20px; border-radius: 10px 10px 0 0; background: rgba(255, 255, 255, 0.03); border: 1px solid var(--border); border-bottom: none; color: #94A3B8; font-weight: 600; font-size: 0.95rem; cursor: pointer;">
+      📊 Monitoreo de Stock en Tienda
+    </button>
+  </div>
+
+  <!-- TAB 1: ÓRDENES DE COMPRA -->
+  <div id="tab-orders" class="supplier-tab-pane">
+    <div class="card" style="padding: 24px; border-radius: 16px; background: rgba(18, 22, 34, 0.9); border: 1px solid var(--border);">
+      <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px;">
+        <div>
+          <h2 style="font-size: 1.25rem; font-weight: 700; margin: 0 0 4px; color: #fff;">Órdenes de Reabastecimiento de la Tienda</h2>
+          <p style="color: var(--text-secondary); font-size: 0.88rem; margin: 0;">Gestiona el despacho y actualiza el estado de las entregas solicitadas.</p>
+        </div>
+      </div>
+
+      {% if orders %}
+        <div style="overflow-x: auto;">
+          <table style="width: 100%; border-collapse: collapse; font-size: 0.9rem;">
+            <thead>
+              <tr style="border-bottom: 1px solid var(--border); text-align: left; color: #94A3B8; font-size: 0.8rem; text-transform: uppercase;">
+                <th style="padding: 12px 14px;">No. Orden</th>
+                <th style="padding: 12px 14px;">Fecha</th>
+                <th style="padding: 12px 14px;">Total Estimado</th>
+                <th style="padding: 12px 14px;">Estado Actual</th>
+                <th style="padding: 12px 14px; text-align: right;">Acción de Despacho</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for order in orders %}
+                <tr style="border-bottom: 1px solid rgba(255,255,255,0.04);">
+                  <td style="padding: 14px; font-weight: 700; color: #FFA726;">{{ order.order_number }}</td>
+                  <td style="padding: 14px; color: #CBD5E1;">{{ order.created_at.strftime('%d/%m/%Y %I:%M %p') }}</td>
+                  <td style="padding: 14px; font-weight: 600; color: #fff;">${{ "{:,}".format(order.total_estimated).replace(',', '.') }}</td>
+                  <td style="padding: 14px;">
+                    <span id="badge-status-{{ order.id }}" style="display: inline-block; padding: 4px 10px; border-radius: 6px; font-size: 0.78rem; font-weight: 700;
+                      {% if order.status == 'PENDIENTE' %}background: rgba(245,158,11,0.15); color: #F59E0B;
+                      {% elif order.status == 'EN_CAMINO' %}background: rgba(59,130,246,0.15); color: #60A5FA;
+                      {% elif order.status == 'ENTREGADA' %}background: rgba(34,197,94,0.15); color: #4ADE80;
+                      {% else %}background: rgba(148,163,184,0.15); color: #94A3B8;{% endif %}">
+                      {{ order.status }}
+                    </span>
+                  </td>
+                  <td style="padding: 14px; text-align: right;">
+                    <select onchange="updateOrderStatus({{ order.id }}, this.value)" style="background: #181D2B; color: #fff; border: 1px solid var(--border); padding: 6px 12px; border-radius: 8px; font-size: 0.85rem; cursor: pointer;">
+                      <option value="">Cambiar Estado...</option>
+                      <option value="CONFIRMADA" {% if order.status == 'CONFIRMADA' %}selected{% endif %}>Confirmar Pedido</option>
+                      <option value="EN_CAMINO" {% if order.status == 'EN_CAMINO' %}selected{% endif %}>En Camino / Despachado</option>
+                      <option value="ENTREGADA" {% if order.status == 'ENTREGADA' %}selected{% endif %}>Entregado en Tienda</option>
+                    </select>
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      {% else %}
+        <div style="text-align: center; padding: 40px 20px; color: var(--text-muted);">
+          <div style="font-size: 2.5rem; margin-bottom: 10px;">📋</div>
+          <h3 style="color: #fff; font-size: 1.1rem; margin: 0 0 6px;">No hay órdenes pendientes</h3>
+          <p style="font-size: 0.9rem; margin: 0;">Cuando la tienda genere un pedido de reposición, aparecerá aquí automáticamente.</p>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- TAB 2: CUENTAS POR COBRAR & FACTURAS -->
+  <div id="tab-invoices" class="supplier-tab-pane" style="display: none;">
+    <div class="card" style="padding: 24px; border-radius: 16px; background: rgba(18, 22, 34, 0.9); border: 1px solid var(--border);">
+      <div style="margin-bottom: 20px;">
+        <h2 style="font-size: 1.25rem; font-weight: 700; margin: 0 0 4px; color: #fff;">Cartera y Cuentas por Cobrar a Crédito</h2>
+        <p style="color: var(--text-secondary); font-size: 0.88rem; margin: 0;">Seguimiento transparente de facturas radicadas, plazos y pagos realizados.</p>
+      </div>
+
+      {% if invoices %}
+        <div style="overflow-x: auto;">
+          <table style="width: 100%; border-collapse: collapse; font-size: 0.9rem;">
+            <thead>
+              <tr style="border-bottom: 1px solid var(--border); text-align: left; color: #94A3B8; font-size: 0.8rem; text-transform: uppercase;">
+                <th style="padding: 12px 14px;">No. Factura / Remisión</th>
+                <th style="padding: 12px 14px;">Fecha Radicación</th>
+                <th style="padding: 12px 14px;">Vencimiento</th>
+                <th style="padding: 12px 14px;">Valor Total</th>
+                <th style="padding: 12px 14px;">Abonado</th>
+                <th style="padding: 12px 14px;">Saldo Pendiente</th>
+                <th style="padding: 12px 14px;">Estado</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for inv in invoices %}
+                <tr style="border-bottom: 1px solid rgba(255,255,255,0.04);">
+                  <td style="padding: 14px; font-weight: 700; color: #FFA726;">{{ inv.invoice_number }}</td>
+                  <td style="padding: 14px; color: #94A3B8;">{{ inv.issue_date.strftime('%d/%m/%Y') }}</td>
+                  <td style="padding: 14px; color: #CBD5E1;">{{ inv.due_date.strftime('%d/%m/%Y') }}</td>
+                  <td style="padding: 14px; font-weight: 600; color: #fff;">${{ "{:,}".format(inv.total_amount).replace(',', '.') }}</td>
+                  <td style="padding: 14px; color: #4ADE80;">${{ "{:,}".format(inv.paid_amount).replace(',', '.') }}</td>
+                  <td style="padding: 14px; font-weight: 700; color: #FFA726;">${{ "{:,}".format(inv.balance).replace(',', '.') }}</td>
+                  <td style="padding: 14px;">
+                    <span style="display: inline-block; padding: 4px 8px; border-radius: 6px; font-size: 0.75rem; font-weight: 700;
+                      {% if inv.status == 'PAGADA' %}background: rgba(34,197,94,0.15); color: #4ADE80;
+                      {% elif inv.status == 'VENCIDA' %}background: rgba(239,68,68,0.15); color: #FCA5A5;
+                      {% else %}background: rgba(245,158,11,0.15); color: #F59E0B;{% endif %}">
+                      {{ inv.status }}
+                    </span>
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      {% else %}
+        <div style="text-align: center; padding: 40px 20px; color: var(--text-muted);">
+          <div style="font-size: 2.5rem; margin-bottom: 10px;">💳</div>
+          <h3 style="color: #fff; font-size: 1.1rem; margin: 0 0 6px;">No hay facturas pendientes de pago</h3>
+          <p style="font-size: 0.9rem; margin: 0;">Todas las cuentas comerciales se encuentran al día con la tienda.</p>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- TAB 3: MONITOREO DE STOCK -->
+  <div id="tab-stock" class="supplier-tab-pane" style="display: none;">
+    <div class="card" style="padding: 24px; border-radius: 16px; background: rgba(18, 22, 34, 0.9); border: 1px solid var(--border);">
+      <div style="margin-bottom: 20px;">
+        <h2 style="font-size: 1.25rem; font-weight: 700; margin: 0 0 4px; color: #fff;">Monitoreo de Existencias en Tiempo Real</h2>
+        <p style="color: var(--text-secondary); font-size: 0.88rem; margin: 0;">Supervisa el stock en góndola de tus productos para prevenir roturas de inventario.</p>
+      </div>
+
+      <div style="overflow-x: auto;">
+        <table style="width: 100%; border-collapse: collapse; font-size: 0.9rem;">
+          <thead>
+            <tr style="border-bottom: 1px solid var(--border); text-align: left; color: #94A3B8; font-size: 0.8rem; text-transform: uppercase;">
+              <th style="padding: 12px 14px;">Producto</th>
+              <th style="padding: 12px 14px;">Código de Barras</th>
+              <th style="padding: 12px 14px;">Precio Venta</th>
+              <th style="padding: 12px 14px;">Stock Actual</th>
+              <th style="padding: 12px 14px;">Estado de Stock</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for p in products[:15] %}
+              <tr style="border-bottom: 1px solid rgba(255,255,255,0.04);">
+                <td style="padding: 14px; font-weight: 600; color: #fff;">{{ p.name }}</td>
+                <td style="padding: 14px; color: #94A3B8; font-family: monospace;">{{ p.barcode or p.plu_code or 'S/C' }}</td>
+                <td style="padding: 14px; color: #CBD5E1;">${{ "{:,}".format(p.price).replace(',', '.') }}</td>
+                <td style="padding: 14px; font-weight: 700; color: {% if (p.stock or 0) <= 5 %}#EF4444{% else %}#22C55E{% endif %};">
+                  {{ p.stock if p.stock is not none else 'N/A' }}
+                </td>
+                <td style="padding: 14px;">
+                  {% if (p.stock or 0) <= 5 %}
+                    <span style="background: rgba(239,68,68,0.15); color: #FCA5A5; font-size: 0.75rem; padding: 3px 8px; border-radius: 6px; font-weight: 700;">
+                      ⚠️ CRÍTICO — REPOSICIÓN
+                    </span>
+                  {% else %}
+                    <span style="background: rgba(34,197,94,0.15); color: #4ADE80; font-size: 0.75rem; padding: 3px 8px; border-radius: 6px; font-weight: 600;">
+                      ✓ Óptimo
+                    </span>
+                  {% endif %}
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+function switchSupplierTab(tabId, btn) {
+  document.querySelectorAll('.supplier-tab-pane').forEach(p => p.style.display = 'none');
+  document.querySelectorAll('.supplier-tab-btn').forEach(b => {
+    b.style.background = 'rgba(255, 255, 255, 0.03)';
+    b.style.color = '#94A3B8';
+    b.style.borderColor = 'var(--border)';
+  });
+
+  document.getElementById(tabId).style.display = 'block';
+  btn.style.background = 'rgba(255, 167, 38, 0.15)';
+  btn.style.color = '#FFA726';
+  btn.style.borderColor = 'rgba(255,167,38,0.4)';
+}
+
+function updateOrderStatus(orderId, newStatus) {
+  if (!newStatus) return;
+  fetch(`/api/p/order/${orderId}/status`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ status: newStatus })
+  })
+  .then(res => res.json())
+  .then(data => {
+    if (data.success) {
+      const badge = document.getElementById(`badge-status-${orderId}`);
+      if (badge) {
+        badge.innerText = newStatus;
+        if (newStatus === 'ENTREGADA') {
+          badge.style.background = 'rgba(34,197,94,0.15)';
+          badge.style.color = '#4ADE80';
+        } else if (newStatus === 'EN_CAMINO') {
+          badge.style.background = 'rgba(59,130,246,0.15)';
+          badge.style.color = '#60A5FA';
+        } else {
+          badge.style.background = 'rgba(245,158,11,0.15)';
+          badge.style.color = '#F59E0B';
+        }
+      }
+      alert(`Estado de la orden actualizado a: ${newStatus}`);
+    } else {
+      alert(data.message || 'Error actualizando orden');
+    }
+  })
+  .catch(err => {
+    console.error(err);
+    alert('Error de conexión');
+  });
+}
+</script>
+{% endblock %}

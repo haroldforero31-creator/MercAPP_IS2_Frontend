@@ -1,0 +1,909 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MercAPP — Sistema POS para Supermercados, Tiendas y Retail en Colombia</title>
+  <meta name="description" content="MercAPP es el sistema POS todo en uno que agiliza tus ventas, gestiona inventarios en tiempo real, factura legalmente y conecta con portal de domicilios y proveedores.">
+  <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='mercapp.ico') }}">
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Montserrat:wght@400;600;700;800&family=Outfit:wght@300;400;500;600;700;800;900&family=Poppins:wght@400;600;700;800&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/landing.css') }}">
+</head>
+<body class="lp-body">
+
+  <!-- Ambient Glow Orbs -->
+  <div class="lp-ambient-glow">
+    <div class="lp-glow-1"></div>
+    <div class="lp-glow-2"></div>
+    <div class="lp-glow-3"></div>
+  </div>
+
+  <!-- Header / Navigation -->
+  <header class="lp-header">
+    <div class="lp-container">
+      <nav class="lp-nav">
+        <a href="#inicio" class="lp-brand">
+          <div class="lp-brand-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="9" cy="21" r="1"></circle>
+              <circle cx="20" cy="21" r="1"></circle>
+              <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+            </svg>
+          </div>
+          <span>MercAPP</span>
+        </a>
+
+        <ul class="lp-nav-links">
+          <li><a href="#inicio" class="active">Inicio</a></li>
+          <li><a href="#funciones">Funciones</a></li>
+          <li><a href="#domicilios">Portal de domicilios</a></li>
+          <li><a href="#proveedores">Proveedores</a></li>
+          <li><a href="#descarga">Descarga</a></li>
+          <li><a href="#contacto">Contacto</a></li>
+        </ul>
+
+        <div class="lp-nav-actions">
+          {% if current_user.is_authenticated %}
+            <a href="{{ url_for('pos') }}" class="lp-btn lp-btn-secondary lp-btn-sm">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+                <line x1="8" y1="21" x2="16" y2="21"></line>
+                <line x1="12" y1="17" x2="12" y2="21"></line>
+              </svg>
+              Ir a mi POS
+            </a>
+          {% else %}
+            <a href="{{ url_for('login') }}" class="lp-btn lp-btn-secondary lp-btn-sm">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path>
+                <polyline points="10 17 15 12 10 7"></polyline>
+                <line x1="15" y1="12" x2="3" y2="12"></line>
+              </svg>
+              Iniciar Sesión
+            </a>
+          {% endif %}
+
+          <button onclick="openDemoModal()" class="lp-btn lp-btn-primary lp-btn-sm" id="btn-nav-demo">
+            Solicitar demo
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+              <polyline points="12 5 19 12 12 19"></polyline>
+            </svg>
+          </button>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <section class="lp-hero-section" id="inicio">
+    <div class="lp-container">
+      <div class="lp-hero-grid">
+        <div class="lp-hero-text">
+          <div class="lp-pill-badge">
+            <span class="pulse-dot"></span>
+            SISTEMA POS TODO EN UNO
+          </div>
+          <h1 class="lp-hero-title">
+            Vende más.<br>
+            Controla todo.<br>
+            <span class="text-green">Haz crecer tu negocio.</span>
+          </h1>
+          <p class="lp-hero-desc">
+            MercAPP es el sistema POS que agiliza tus ventas, gestiona tu inventario, conecta tus equipos y te da el control total de tu negocio, desde cualquier lugar.
+          </p>
+
+          <div class="lp-hero-cta">
+            <button onclick="openDemoModal()" class="lp-btn lp-btn-primary lp-btn-lg" id="btn-hero-demo">
+              Solicitar Demo
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+                <polyline points="12 5 19 12 12 19"></polyline>
+              </svg>
+            </button>
+
+            <a href="{{ url_for('download_pos') }}" class="lp-btn lp-btn-secondary lp-btn-lg" id="btn-hero-download">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="7 10 12 15 17 10"></polyline>
+                <line x1="12" y1="15" x2="12" y2="3"></line>
+              </svg>
+              Descargar Ahora (RAR)
+            </a>
+          </div>
+
+          <div class="lp-hero-trust">
+            <div class="lp-trust-item">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg>
+              <span>Fácil de usar</span>
+            </div>
+            <div class="lp-trust-item">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg>
+              <span>Sin pagos ocultos</span>
+            </div>
+            <div class="lp-trust-item">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg>
+              <span>Soporte en Colombia</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 3D Perspective Laptop Mockup -->
+        <div class="lp-mockup-wrap">
+          <div class="lp-laptop">
+            <div class="lp-laptop-camera"></div>
+            <div class="lp-laptop-screen">
+              <!-- Top bar inside screen -->
+              <div style="background: #121622; padding: 10px 16px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.08);">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <span style="color: #22C55E; font-weight: 800; font-size: 0.9rem;">🛒 MercAPP</span>
+                  <span style="font-size: 0.75rem; color: #64748B;">| Centro de Control</span>
+                </div>
+                <div style="display: flex; gap: 10px; font-size: 0.75rem; color: #94A3B8;">
+                  <span>Caja</span>
+                  <span>Ventas</span>
+                  <span>Inventario</span>
+                  <span>Cajeros</span>
+                  <span style="color: #22C55E;">● Online</span>
+                </div>
+              </div>
+
+              <!-- Grid cards inside laptop screen -->
+              <div style="padding: 16px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; background: #0B0E14;">
+                <div style="background: #141926; border: 1px solid rgba(255,255,255,0.06); border-radius: 8px; padding: 12px; text-align: center;">
+                  <div style="font-size: 1.2rem; margin-bottom: 4px;">📦</div>
+                  <div style="font-weight: 700; font-size: 0.78rem; color: #FFA726;">Gestión de Productos</div>
+                  <div style="font-size: 0.65rem; color: #94A3B8; margin-top: 4px;">Añade nuevos artículos, ajusta precios y stock.</div>
+                </div>
+
+                <div style="background: #141926; border: 1px solid rgba(255,255,255,0.06); border-radius: 8px; padding: 12px; text-align: center;">
+                  <div style="font-size: 1.2rem; margin-bottom: 4px;">🏷️</div>
+                  <div style="font-weight: 700; font-size: 0.78rem; color: #FFA726;">Gestión de Categorías</div>
+                  <div style="font-size: 0.65rem; color: #94A3B8; margin-top: 4px;">Organiza familias de productos y fotos de portada.</div>
+                </div>
+
+                <div style="background: #141926; border: 1px solid rgba(255,255,255,0.06); border-radius: 8px; padding: 12px; text-align: center;">
+                  <div style="font-size: 1.2rem; margin-bottom: 4px;">🏪</div>
+                  <div style="font-weight: 700; font-size: 0.78rem; color: #FFA726;">Datos del Negocio</div>
+                  <div style="font-size: 0.65rem; color: #94A3B8; margin-top: 4px;">Razón social, NIT, RUT y resolución DIAN legal.</div>
+                </div>
+
+                <div style="background: #141926; border: 1px solid rgba(255,255,255,0.06); border-radius: 8px; padding: 12px; text-align: center;">
+                  <div style="font-size: 1.2rem; margin-bottom: 4px;">🔌</div>
+                  <div style="font-weight: 700; font-size: 0.78rem; color: #FFA726;">Hardware y Equipos</div>
+                  <div style="font-size: 0.65rem; color: #94A3B8; margin-top: 4px;">Básculas seriales, impresoras térmicas y gaveta.</div>
+                </div>
+
+                <div style="background: #141926; border: 1px solid rgba(255,255,255,0.06); border-radius: 8px; padding: 12px; text-align: center;">
+                  <div style="font-size: 1.2rem; margin-bottom: 4px;">🔒</div>
+                  <div style="font-weight: 700; font-size: 0.78rem; color: #FFA726;">Licencia del Sistema</div>
+                  <div style="font-size: 0.65rem; color: #22C55E; margin-top: 4px;">Licencia Activa — 60 días sin interrupciones.</div>
+                </div>
+
+                <div style="background: #141926; border: 1px solid rgba(34,197,94,0.3); border-radius: 8px; padding: 12px; text-align: center;">
+                  <div style="font-size: 1.2rem; margin-bottom: 4px;">🚚</div>
+                  <div style="font-weight: 700; font-size: 0.78rem; color: #22C55E;">Portal Proveedores</div>
+                  <div style="font-size: 0.65rem; color: #94A3B8; margin-top: 4px;">Órdenes de compra y recepción digital de stock.</div>
+                </div>
+              </div>
+            </div>
+            <div class="lp-laptop-base"></div>
+          </div>
+
+          <!-- Floating Accent Badge -->
+          <div class="lp-floating-badge">
+            <div class="badge-icon">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+              </svg>
+            </div>
+            <p>Optimiza tu negocio con control total.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Social Proof Brands -->
+  <section class="lp-social-proof">
+    <div class="lp-container">
+      <div class="lp-proof-title">Confianza de negocios en Colombia</div>
+      <div class="lp-brands-grid">
+        <div class="lp-brand-badge"><span>🛒</span> SuperAhorro</div>
+        <div class="lp-brand-badge"><span>🧺</span> LaCanasta</div>
+        <div class="lp-brand-badge"><span>⚡</span> MiTienda Express</div>
+        <div class="lp-brand-badge"><span>👕</span> ModaXpress</div>
+        <div class="lp-brand-badge"><span>💊</span> Droguería+</div>
+        <div class="lp-brand-badge"><span>🌾</span> Abarrotes del Sur</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Feature 6-Grid Section -->
+  <section class="lp-section" id="funciones">
+    <div class="lp-container">
+      <div class="lp-section-header">
+        <div class="lp-pill-badge">TODO LO QUE NECESITAS</div>
+        <h2 class="lp-section-title">Un sistema completo para negocios que quieren más</h2>
+        <p class="lp-section-desc">
+          MercAPP centraliza tus operaciones y te ofrece herramientas poderosas para que tomes el control y tomes mejores decisiones.
+        </p>
+      </div>
+
+      <div class="lp-features-grid">
+        <!-- Feature 1 -->
+        <div class="lp-feature-card">
+          <div class="lp-feature-icon">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+              <line x1="3" y1="6" x2="21" y2="6"></line>
+              <path d="M16 10a4 4 0 0 1-8 0"></path>
+            </svg>
+          </div>
+          <h3>Ventas ágiles</h3>
+          <p>Interfaz intuitiva y ultrarrápida para atender clientes en segundos. Soporta códigos de barra, balanzas y múltiples carritos abiertos a la vez.</p>
+        </div>
+
+        <!-- Feature 2 -->
+        <div class="lp-feature-card">
+          <div class="lp-feature-icon">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+              <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+              <line x1="12" y1="22.08" x2="12" y2="12"></line>
+            </svg>
+          </div>
+          <h3>Inventario inteligente</h3>
+          <p>Controla existencias en tiempo real con reducción atómica de stock. Alertas automáticas de quiebres y sugerencias de reabastecimiento.</p>
+        </div>
+
+        <!-- Feature 3 -->
+        <div class="lp-feature-card">
+          <div class="lp-feature-icon">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+              <polyline points="14 2 14 8 20 8"></polyline>
+              <line x1="16" y1="13" x2="8" y2="13"></line>
+              <line x1="16" y1="17" x2="8" y2="17"></line>
+              <polyline points="10 9 9 9 8 9"></polyline>
+            </svg>
+          </div>
+          <h3>Reportes claros</h3>
+          <p>Historial detallado de ventas, auditoría de cajeros, cuadre ciego de caja y envío automático del reporte diario por correo al administrador.</p>
+        </div>
+
+        <!-- Feature 4 -->
+        <div class="lp-feature-card">
+          <div class="lp-feature-icon">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1z"></path>
+              <line x1="8" y1="8" x2="16" y2="8"></line>
+              <line x1="8" y1="12" x2="16" y2="12"></line>
+              <line x1="8" y1="16" x2="12" y2="16"></line>
+            </svg>
+          </div>
+          <h3>Facturación legal</h3>
+          <p>Genera recibos y facturas oficiales con resolución DIAN, prefijos, rangos autorizados y régimen tributario para cumplir con la ley.</p>
+        </div>
+
+        <!-- Feature 5 -->
+        <div class="lp-feature-card">
+          <div class="lp-feature-icon">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="2" y="2" width="20" height="8" rx="2" ry="2"></rect>
+              <rect x="2" y="14" width="20" height="8" rx="2" ry="2"></rect>
+              <line x1="6" y1="6" x2="6.01" y2="6"></line>
+              <line x1="6" y1="18" x2="6.01" y2="18"></line>
+            </svg>
+          </div>
+          <h3>Conexión con equipos</h3>
+          <p>Integración directa plug-and-play con básculas de peso continuo (Torrey, Systel, Dibal), impresoras térmicas ESC/POS y apertura de cajón monedero.</p>
+        </div>
+
+        <!-- Feature 6 -->
+        <div class="lp-feature-card">
+          <div class="lp-feature-icon">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="3"></circle>
+              <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+            </svg>
+          </div>
+          <h3>Personalizable</h3>
+          <p>Adapta colores, fuentes, catálogos, imágenes y logo a la identidad exacta de tu negocio: supermercados, minimarkets, tiendas de ropa o droguerías.</p>
+        </div>
+      </div>
+
+      <!-- Stats Bar -->
+      <div class="lp-stats-bar">
+        <div class="lp-stat-item">
+          <div class="lp-stat-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+              <circle cx="9" cy="7" r="4"></circle>
+              <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+              <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+            </svg>
+          </div>
+          <div class="lp-stat-data">
+            <h4>+2.000</h4>
+            <p>Negocios confían en MercAPP</p>
+          </div>
+        </div>
+
+        <div class="lp-stat-item">
+          <div class="lp-stat-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="12" y1="1" x2="12" y2="23"></line>
+              <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+            </svg>
+          </div>
+          <div class="lp-stat-data">
+            <h4>+1M</h4>
+            <p>Transacciones procesadas</p>
+          </div>
+        </div>
+
+        <div class="lp-stat-item">
+          <div class="lp-stat-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"></circle>
+              <polyline points="12 6 12 12 16 14"></polyline>
+            </svg>
+          </div>
+          <div class="lp-stat-data">
+            <h4>99.9%</h4>
+            <p>Disponibilidad del sistema</p>
+          </div>
+        </div>
+
+        <div class="lp-stat-item">
+          <div class="lp-stat-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+            </svg>
+          </div>
+          <div class="lp-stat-data">
+            <h4>24/7</h4>
+            <p>Soporte en Colombia</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Detailed Showcase 1: CONTROL TOTAL -->
+  <section class="lp-section">
+    <div class="lp-container">
+      <div class="lp-showcase-row">
+        <div class="lp-showcase-content">
+          <div class="lp-pill-badge">CONTROL TOTAL</div>
+          <h2 class="lp-showcase-title">Gestiona y supervisa cada detalle</h2>
+          <p class="lp-showcase-desc">
+            Desde el centro de control puedes administrar productos, categorías, datos de tu negocio, hardware y licencias. Todo en un solo lugar con auditoría precisa y sesiones de caja blindadas.
+          </p>
+          <a href="{{ url_for('login') }}" class="lp-link-arrow">
+            Explorar funciones
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+              <polyline points="12 5 19 12 12 19"></polyline>
+            </svg>
+          </a>
+        </div>
+
+        <div class="lp-ui-window">
+          <div class="lp-ui-window-header">
+            <div class="lp-ui-dots">
+              <span class="lp-ui-dot red"></span>
+              <span class="lp-ui-dot yellow"></span>
+              <span class="lp-ui-dot green"></span>
+            </div>
+            <div class="lp-ui-window-title">Historial de Sesiones de Caja — MercAPP</div>
+            <div style="font-size: 0.72rem; color: #22C55E;">● Auditoría Activa</div>
+          </div>
+          <div class="lp-ui-window-body">
+            <table class="lp-table-mock">
+              <thead>
+                <tr>
+                  <th>Apertura</th>
+                  <th>Estado</th>
+                  <th>Base Inicial</th>
+                  <th>Ventas</th>
+                  <th>Efectivo Real</th>
+                  <th>Diferencia</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Hoy 08:00 AM</td>
+                  <td><span class="lp-table-tag open">ABIERTA</span></td>
+                  <td>$100.000</td>
+                  <td style="color: #22C55E; font-weight:700;">$540.200</td>
+                  <td>--</td>
+                  <td>$0</td>
+                </tr>
+                <tr>
+                  <td>Ayer 08:00 AM</td>
+                  <td><span class="lp-table-tag closed">CERRADA</span></td>
+                  <td>$100.000</td>
+                  <td style="color: #22C55E; font-weight:700;">$895.000</td>
+                  <td>$995.000</td>
+                  <td style="color: #22C55E; font-weight:600;">$0 (Exacto)</td>
+                </tr>
+                <tr>
+                  <td>25/10 08:00 AM</td>
+                  <td><span class="lp-table-tag closed">CERRADA</span></td>
+                  <td>$100.000</td>
+                  <td style="color: #22C55E; font-weight:700;">$720.500</td>
+                  <td>$820.500</td>
+                  <td style="color: #22C55E; font-weight:600;">$0 (Exacto)</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Detailed Showcase 2: VENTAS SIN COMPLICACIONES (Reverse) -->
+      <div class="lp-showcase-row reverse">
+        <div class="lp-showcase-content">
+          <div class="lp-pill-badge">VENTAS SIN COMPLICACIONES</div>
+          <h2 class="lp-showcase-title">Todo lo que necesitas en el punto de venta</h2>
+          <p class="lp-showcase-desc">
+            Realiza ventas ágiles, aplica descuentos, acepta pagos mixtos (Efectivo, Nequi, Daviplata, Tarjeta), registra clientes con crédito fiado y ofrece la mejor experiencia a tus clientes.
+          </p>
+          <a href="{{ url_for('login') }}" class="lp-link-arrow">
+            Ver POS en acción
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+              <polyline points="12 5 19 12 12 19"></polyline>
+            </svg>
+          </a>
+        </div>
+
+        <!-- POS UI Preview -->
+        <div class="lp-ui-window">
+          <div class="lp-ui-window-header">
+            <div class="lp-ui-dots">
+              <span class="lp-ui-dot red"></span>
+              <span class="lp-ui-dot yellow"></span>
+              <span class="lp-ui-dot green"></span>
+            </div>
+            <div class="lp-ui-window-title">Punto de Venta — Venta 1 (Activa)</div>
+            <div style="font-size: 0.72rem; color: #FFA726;">⚡ Conexión Directa</div>
+          </div>
+          <div class="lp-ui-window-body">
+            <div class="lp-pos-mockup">
+              <div class="lp-pos-search">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                <span>Código de barras o nombre del producto...</span>
+              </div>
+
+              <div class="lp-pos-items-list">
+                <div class="lp-pos-row">
+                  <div>
+                    <strong style="color: #fff;">Pan Bimbo Artesanal 450g</strong>
+                    <div style="font-size: 0.72rem; color: #64748B;">7702004001928 — 2 un x $6.500</div>
+                  </div>
+                  <span style="color: #FFA726; font-weight:700;">$13.000</span>
+                </div>
+
+                <div class="lp-pos-row">
+                  <div>
+                    <strong style="color: #fff;">Aceite Diana 900ml</strong>
+                    <div style="font-size: 0.72rem; color: #64748B;">7702500123984 — 1 un x $9.800</div>
+                  </div>
+                  <span style="color: #FFA726; font-weight:700;">$9.800</span>
+                </div>
+
+                <div class="lp-pos-row">
+                  <div>
+                    <strong style="color: #fff;">Queso Campesino (Granel)</strong>
+                    <div style="font-size: 0.72rem; color: #64748B;">PLU 104 — 0.45 kg x $18.000/kg</div>
+                  </div>
+                  <span style="color: #FFA726; font-weight:700;">$8.100</span>
+                </div>
+              </div>
+
+              <div class="lp-pos-total-row">
+                <span style="color: #94A3B8;">TOTAL A COBRAR</span>
+                <span style="color: #22C55E; font-size: 1.4rem;">$30.900</span>
+              </div>
+
+              <div class="lp-pos-charge-btn">
+                COBRAR (F12)
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Detailed Showcase 3: PORTAL DE DOMICILIOS -->
+      <div class="lp-showcase-row" id="domicilios">
+        <div class="lp-showcase-content">
+          <div class="lp-pill-badge">PORTAL DE DOMICILIOS B2C</div>
+          <h2 class="lp-showcase-title">Lleva tu negocio más lejos con ventas en línea</h2>
+          <p class="lp-showcase-desc">
+            Tus clientes encuentran tu tienda desde cualquier celular o computador, consultan tu catálogo actualizado en tiempo real, arman su carrito y piden a domicilio. Tú recibes el pedido en tu POS y lo despachas.
+          </p>
+
+          <div class="lp-bullets-grid">
+            <div class="lp-bullet-card">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+              <span>Tiendas cercanas</span>
+            </div>
+            <div class="lp-bullet-card">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path></svg>
+              <span>Catálogos en vivo</span>
+            </div>
+            <div class="lp-bullet-card">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
+              <span>Pedidos fáciles</span>
+            </div>
+            <div class="lp-bullet-card">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect><line x1="1" y1="10" x2="23" y2="10"></line></svg>
+              <span>Pagos seguros</span>
+            </div>
+          </div>
+
+          <a href="{{ url_for('customer_stores') }}" class="lp-btn lp-btn-outline-green">
+            Ver tiendas y catálogo de domicilios
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+          </a>
+        </div>
+
+        <div class="lp-domicilios-preview">
+          <!-- Mobile Phone Mockup -->
+          <div class="lp-phone-frame">
+            <div class="lp-phone-screen">
+              <div class="lp-phone-header">
+                <span>📍 Bogotá, Col</span>
+                <span style="color: #22C55E;">MercAPP</span>
+              </div>
+              <div style="font-weight: 800; font-size: 0.82rem; margin-bottom: 8px;">¡Hola! Encuentra tu tienda cercana</div>
+              
+              <div class="lp-store-card-mini">
+                <div class="store-name">SuperAhorro Express</div>
+                <div class="store-cat">Supermercado & Granero • 15-25 min</div>
+              </div>
+              <div class="lp-store-card-mini">
+                <div class="store-name">La Canasta Campesina</div>
+                <div class="store-cat">Frutas & Verduras frescas • 20 min</div>
+              </div>
+              <div class="lp-store-card-mini">
+                <div class="store-name">ModaXpress Boutique</div>
+                <div class="store-cat">Ropa y Calzado • Domicilios hoy</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Detailed Showcase 4: TU TIENDA, TU MARCA (Personalización) -->
+      <div class="lp-showcase-row reverse">
+        <div class="lp-showcase-content">
+          <div class="lp-pill-badge">TU TIENDA, TU MARCA</div>
+          <h2 class="lp-showcase-title">Personaliza tu sistema a tu propio estilo</h2>
+          <p class="lp-showcase-desc">
+            Adapta colores primarios, botones de cobro, logo corporativo, familias de categorías y tipografías. Haz que MercAPP refleje fielmente la marca y espíritu de tu negocio.
+          </p>
+          <a href="{{ url_for('login') }}" class="lp-link-arrow">
+            Conoce la personalización
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+              <polyline points="12 5 19 12 12 19"></polyline>
+            </svg>
+          </a>
+        </div>
+
+        <!-- Interactive Playground -->
+        <div class="lp-custom-playground">
+          <div style="font-size: 0.85rem; color: #94A3B8; text-transform: uppercase; font-weight: 700; letter-spacing: 1px;">Probar paleta de color en vivo:</div>
+          <div class="lp-colors-row">
+            <div class="lp-color-dot green active" onclick="setPreviewTheme('#22C55E', this)" title="Verde Esmeralda"></div>
+            <div class="lp-color-dot orange" onclick="setPreviewTheme('#FFA726', this)" title="Naranja Ámbar"></div>
+            <div class="lp-color-dot blue" onclick="setPreviewTheme('#3B82F6', this)" title="Azul Corporativo"></div>
+            <div class="lp-color-dot purple" onclick="setPreviewTheme('#A855F7', this)" title="Púrpura Boutique"></div>
+          </div>
+
+          <div style="font-size: 0.85rem; color: #94A3B8; text-transform: uppercase; font-weight: 700; letter-spacing: 1px;">Probar tipografía:</div>
+          <div class="lp-fonts-row">
+            <div class="lp-font-pill active" onclick="setPreviewFont('Outfit', this)">Outfit</div>
+            <div class="lp-font-pill" onclick="setPreviewFont('Inter', this)">Inter</div>
+            <div class="lp-font-pill" onclick="setPreviewFont('Poppins', this)">Poppins</div>
+            <div class="lp-font-pill" onclick="setPreviewFont('Montserrat', this)">Montserrat</div>
+          </div>
+
+          <div id="live-theme-preview" style="background: #0B0E14; border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 18px; transition: all 0.3s ease;">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <div id="preview-logo-badge" style="width: 24px; height: 24px; background: #22C55E; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 0.75rem;">🛒</div>
+                <strong id="preview-store-name" style="color: #fff; font-size: 0.95rem;">Mi Tienda — MercAPP</strong>
+              </div>
+              <span id="preview-status-pill" style="background: rgba(34,197,94,0.15); color: #22C55E; font-size: 0.75rem; padding: 2px 8px; border-radius: 4px; font-weight: 600;">Caja Abierta</span>
+            </div>
+
+            <div style="display: flex; gap: 10px; margin-bottom: 12px;">
+              <div style="flex: 1; background: #161B28; padding: 10px; border-radius: 8px; font-size: 0.8rem; color: #94A3B8;">Abarrotes</div>
+              <div style="flex: 1; background: #161B28; padding: 10px; border-radius: 8px; font-size: 0.8rem; color: #94A3B8;">Lácteos</div>
+              <div style="flex: 1; background: #161B28; padding: 10px; border-radius: 8px; font-size: 0.8rem; color: #94A3B8;">Bebidas</div>
+            </div>
+
+            <button id="preview-btn-charge" style="width: 100%; padding: 10px; background: #22C55E; border: none; border-radius: 8px; font-weight: 700; color: #000; cursor: pointer;">
+              BOTÓN DE COBRO PERSONALIZADO ($45.000)
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Showcase 5: NUEVO ROL — PORTAL DE PROVEEDORES -->
+  <section class="lp-section" id="proveedores">
+    <div class="lp-container">
+      <div class="lp-supplier-promo-card">
+        <div class="lp-supplier-promo-content">
+          <div class="lp-pill-badge" style="border-color: rgba(255,167,38,0.4); background: rgba(255,167,38,0.1); color: #FFA726;">
+            NUEVO ROL EN MERCAPP
+          </div>
+          <h4>Portal Exclusivo para Proveedores de cada Negocio</h4>
+          <p>
+            Conecta tu negocio directamente con tus distribuidores y proveedores. Automatiza órdenes de pedido al agotarse el stock, recibe mercancía de forma digital con actualización instantánea de inventario, y mantén las cuentas por pagar y créditos comerciales 100% al día sin errores contables.
+          </p>
+        </div>
+        <div>
+          <a href="{{ url_for('proveedor_login') }}" class="lp-btn lp-btn-secondary" style="border-color: rgba(255,167,38,0.4); color: #FFA726; white-space: nowrap;">
+            Ingresar al Portal Proveedores
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Download POS Package Section -->
+  <section class="lp-section" id="descarga">
+    <div class="lp-container">
+      <div class="lp-download-box">
+        <div class="lp-download-info">
+          <div class="lp-pill-badge">DISTRIBUCIÓN OFICIAL MERCAPP</div>
+          <h3>Descarga MercAPP para Windows (.RAR / .EXE)</h3>
+          <p>
+            Obtén el paquete completo del sistema POS con ejecutable nativo, base de datos de alta concurrencia SQLite WAL, servidor integrado Waitress y soporte de hardware listo para usar.
+          </p>
+          <div class="lp-download-specs">
+            <span>💻 Windows 10/11 (64-bit)</span>
+            <span>📦 Paquete RAR (~76 MB)</span>
+            <span>⚡ Modo Offline & Alta Concurrencia</span>
+          </div>
+        </div>
+
+        <div>
+          <a href="{{ url_for('download_pos') }}" class="lp-btn lp-btn-primary lp-btn-lg" style="white-space: nowrap;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+              <polyline points="7 10 12 15 17 10"></polyline>
+              <line x1="12" y1="15" x2="12" y2="3"></line>
+            </svg>
+            Descargar MercAPP (.RAR)
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Final CTA Banner -->
+  <section class="lp-section" id="contacto">
+    <div class="lp-container">
+      <div class="lp-banner-cta">
+        <div>
+          <h2 class="lp-banner-title">Lleva tu negocio al siguiente nivel</h2>
+          <p class="lp-banner-desc">
+            Solicita una demo gratuita o adquiere tu licencia hoy mismo. Nuestro equipo te acompaña en cada paso de la configuración.
+          </p>
+
+          <button onclick="openDemoModal()" class="lp-btn lp-btn-primary lp-btn-lg">
+            Solicitar Demo Ahora
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+          </button>
+
+          <div class="lp-banner-checks">
+            <div class="lp-check-card">
+              <h5>🚀 Instalación rápida</h5>
+              <p>Listo para usar en minutos con tus productos.</p>
+            </div>
+            <div class="lp-check-card">
+              <h5>👨‍💻 Soporte dedicado</h5>
+              <p>Equipo en Colombia listo para ayudarte.</p>
+            </div>
+            <div class="lp-check-card">
+              <h5>🔄 Actualizaciones constantes</h5>
+              <p>Mejoras continuas para tu tranquilidad.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="lp-banner-visual">
+          <div class="lp-avatar-badge">
+            <div class="lp-avatar-img">🛒</div>
+            <h4 style="margin: 0 0 6px; font-size: 1.15rem;">Hecho para Comerciantes</h4>
+            <p style="margin: 0; color: #94A3B8; font-size: 0.85rem;">Potenciando a miles de tiendas y supermercados en Colombia.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="lp-footer">
+    <div class="lp-container">
+      <div class="lp-footer-grid">
+        <div class="lp-footer-col">
+          <div class="lp-brand" style="margin-bottom: 14px;">
+            <div class="lp-brand-icon">🛒</div>
+            <span>MercAPP</span>
+          </div>
+          <p style="color: var(--lp-text-secondary); font-size: 0.9rem; max-width: 300px; margin-bottom: 20px;">
+            El software POS inteligente para supermercados, droguerías, tiendas de ropa y retail moderno en Colombia.
+          </p>
+          <div style="display: flex; gap: 10px; color: #22C55E; font-size: 0.85rem; font-weight: 600;">
+            <span>● Servidor Estable</span>
+            <span>• Concurrencia 500+</span>
+          </div>
+        </div>
+
+        <div class="lp-footer-col">
+          <h5>Producto</h5>
+          <ul>
+            <li><a href="#inicio">POS Desktop Windows</a></li>
+            <li><a href="#funciones">Control de Inventario</a></li>
+            <li><a href="#domicilios">Portal de Domicilios B2C</a></li>
+            <li><a href="#proveedores">Portal de Proveedores B2B</a></li>
+            <li><a href="{{ url_for('download_pos') }}">Descargar .RAR</a></li>
+          </ul>
+        </div>
+
+        <div class="lp-footer-col">
+          <h5>Portales y Accesos</h5>
+          <ul>
+            <li><a href="{{ url_for('login') }}">Acceso Administrador POS</a></li>
+            <li><a href="{{ url_for('customer_login') }}">Acceso Clientes Domicilios</a></li>
+            <li><a href="{{ url_for('proveedor_login') }}">Acceso Proveedores</a></li>
+            <li><a href="{{ url_for('customer_stores') }}">Ver Tiendas Afiliadas</a></li>
+          </ul>
+        </div>
+
+        <div class="lp-footer-col">
+          <h5>Contacto & Soporte</h5>
+          <ul>
+            <li><a href="https://wa.me/573000000000" target="_blank">WhatsApp Soporte</a></li>
+            <li><a href="mailto:mercapp.services@gmail.com">mercapp.services@gmail.com</a></li>
+            <li><span style="color: #64748B; font-size: 0.88rem;">Bogotá D.C., Colombia</span></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="lp-footer-bottom">
+        <div>© 2026 MercAPP. Todos los derechos reservados. Desarrollado con excelencia técnica.</div>
+        <div style="display: flex; gap: 20px;">
+          <a href="#" style="color: #64748B; text-decoration: none;">Términos</a>
+          <a href="#" style="color: #64748B; text-decoration: none;">Privacidad</a>
+          <a href="#" style="color: #64748B; text-decoration: none;">Resolución DIAN</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Modal Solicitar Demo -->
+  <div class="lp-modal-backdrop" id="demoModal">
+    <div class="lp-modal-card">
+      <button class="lp-modal-close" onclick="closeDemoModal()">&times;</button>
+      <h3 class="lp-modal-title">Solicitar Demo Gratuita</h3>
+      <p class="lp-modal-subtitle">Déjanos tus datos y un especialista te contactará en menos de 15 minutos.</p>
+
+      <form id="demoForm" onsubmit="handleDemoSubmit(event)">
+        <div class="lp-form-group">
+          <label>Nombre completo</label>
+          <input type="text" id="demo-name" class="lp-form-input" placeholder="Ej. Carlos Rodríguez" required>
+        </div>
+
+        <div class="lp-form-group">
+          <label>Nombre de tu negocio</label>
+          <input type="text" id="demo-store" class="lp-form-input" placeholder="Ej. Supermercado El Ahorro" required>
+        </div>
+
+        <div class="lp-form-group">
+          <label>Tipo de negocio</label>
+          <select id="demo-type" class="lp-form-select">
+            <option value="Supermercado / Minimarket">Supermercado / Minimarket / Granero</option>
+            <option value="Tienda de Ropa / Calzado">Tienda de Ropa / Calzado</option>
+            <option value="Droguería / Farmacia">Droguería / Farmacia</option>
+            <option value="Restaurante / Comidas Rápidas">Restaurante / Comidas Rápidas</option>
+            <option value="Otro Comercio">Otro Comercio</option>
+          </select>
+        </div>
+
+        <div class="lp-form-group">
+          <label>Celular / WhatsApp</label>
+          <input type="tel" id="demo-phone" class="lp-form-input" placeholder="Ej. 310 123 4567" required>
+        </div>
+
+        <div class="lp-form-group">
+          <label>Ciudad</label>
+          <input type="text" id="demo-city" class="lp-form-input" placeholder="Ej. Bogotá, Medellín, Cali..." required>
+        </div>
+
+        <button type="submit" class="lp-btn lp-btn-primary" style="width: 100%; margin-top: 10px; padding: 13px;">
+          Enviar Solicitud de Demo
+        </button>
+      </form>
+
+      <div id="demoSuccess" style="display: none; text-align: center; padding: 20px 0;">
+        <div style="font-size: 3rem; margin-bottom: 10px;">🎉</div>
+        <h4 style="margin: 0 0 8px; color: #22C55E; font-size: 1.3rem;">¡Solicitud Recibida!</h4>
+        <p style="color: #94A3B8; font-size: 0.95rem; margin-bottom: 20px;">
+          Un asesor de MercAPP se comunicará contigo vía WhatsApp para coordinar tu demo personalizada.
+        </p>
+        <button onclick="closeDemoModal()" class="lp-btn lp-btn-secondary">Entendido</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Interactive Scripts -->
+  <script>
+    function openDemoModal() {
+      document.getElementById('demoModal').classList.add('active');
+    }
+
+    function closeDemoModal() {
+      document.getElementById('demoModal').classList.remove('active');
+      document.getElementById('demoForm').style.display = 'block';
+      document.getElementById('demoSuccess').style.display = 'none';
+    }
+
+    function handleDemoSubmit(e) {
+      e.preventDefault();
+      document.getElementById('demoForm').style.display = 'none';
+      document.getElementById('demoSuccess').style.display = 'block';
+    }
+
+    // Interactive Theme Switcher in Showcase 4
+    function setPreviewTheme(colorHex, el) {
+      document.querySelectorAll('.lp-color-dot').forEach(d => d.classList.remove('active'));
+      el.classList.add('active');
+      
+      const badge = document.getElementById('preview-logo-badge');
+      const btn = document.getElementById('preview-btn-charge');
+      const pill = document.getElementById('preview-status-pill');
+      
+      badge.style.background = colorHex;
+      btn.style.background = colorHex;
+      pill.style.color = colorHex;
+      pill.style.background = colorHex + '25';
+    }
+
+    function setPreviewFont(fontName, el) {
+      document.querySelectorAll('.lp-font-pill').forEach(p => p.classList.remove('active'));
+      el.classList.add('active');
+      
+      const preview = document.getElementById('live-theme-preview');
+      preview.style.fontFamily = `'${fontName}', sans-serif`;
+    }
+
+    // Close modal on Escape
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeDemoModal();
+    });
+  </script>
+</body>
+</html>
