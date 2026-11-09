@@ -1,3 +1,14 @@
+
+function escapeHtml(str) {
+    if (!str) return '';
+    return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+}
+
 /* ============================================================
    MercAPP — POS JavaScript Engine
    Cart management, barcode scanning, payments, receipts
@@ -660,11 +671,14 @@ function createProductButton(product) {
            <span style="display: none; font-size: 2rem;"></span>`
         : `<span style="font-size: 2rem;"></span>`;
     
+    const safeName = escapeHtml(product.name);
+    const safePrice = escapeHtml(product.price_formatted);
+    const safeJson = escapeHtml(JSON.stringify(product));
     return `
-        <button class="product-btn" onclick='addToCartFromBtn(${JSON.stringify(product)})'>
+        <button class="product-btn" onclick='addToCartFromBtn(JSON.parse(this.dataset.product))' data-product='${safeJson}'>
             ${imgHtml}
-            <span class="prod-name">${product.name}</span>
-            <span class="prod-price">${product.price_formatted}</span>
+            <span class="prod-name">${safeName}</span>
+            <span class="prod-price">${safePrice}</span>
         </button>`;
 }
 

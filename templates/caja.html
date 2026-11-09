@@ -704,7 +704,8 @@ function loadOrderIntoPOS(orderId) {
                 // Show banner
                 const banner = document.createElement('div');
                 banner.style = "background: rgba(33, 150, 243, 0.2); color: #64b5f6; padding: 12px; border-radius: 8px; margin-bottom: 16px; font-weight: 700; display: flex; justify-content: space-between; align-items: center;";
-                banner.innerHTML = `<span>Facturando Pedido #${data.order.id} - ${data.order.customer_name}</span> <a href="/orders" style="color: #64b5f6; font-size: 0.8rem; text-decoration: none;">✕ Cancelar</a>`;
+                const safeCustomer = String(data.order.customer_name || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+                banner.innerHTML = `<span>Facturando Pedido #${data.order.id} - ${safeCustomer}</span> <a href="/orders" style="color: #64b5f6; font-size: 0.8rem; text-decoration: none;">✕ Cancelar</a>`;
                 document.querySelector('.cart-container').insertBefore(banner, document.getElementById('cartItemsList'));
                 
             } else {

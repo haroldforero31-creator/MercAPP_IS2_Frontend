@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+
+{% block title %}MercAPP — Verificación de Correo Proveedor{% endblock %}
+
+{% block content %}
+<div class="page-container" style="max-width: 440px; margin: 40px auto 60px;">
+  <div class="card" style="padding: 34px 28px; border-radius: 18px; border: 1px solid rgba(255,167,38,0.3); box-shadow: 0 20px 50px rgba(0,0,0,0.6); background: rgba(18, 22, 34, 0.95); backdrop-filter: blur(15px); text-align: center;">
+    
+    <div style="width: 58px; height: 58px; border-radius: 14px; background: rgba(255, 167, 38, 0.12); border: 1px solid rgba(255, 167, 38, 0.35); display: flex; align-items: center; justify-content: center; margin: 0 auto 14px; color: #FFA726; font-size: 1.8rem;">
+      📬
+    </div>
+    
+    <h1 style="font-size: 1.6rem; font-weight: 800; margin: 0 0 6px; color: #FFFFFF;">Verifica tu Correo</h1>
+    <p style="color: var(--text-secondary); font-size: 0.9rem; margin: 0 0 20px;">
+      Hemos enviado un código de 6 dígitos a:<br>
+      <strong style="color: #FFA726;">{{ email }}</strong>
+    </p>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div style="margin-bottom: 20px; text-align: left;">
+          {% for category, message in messages %}
+            <div style="padding: 12px 16px; border-radius: 10px; font-size: 0.88rem; margin-bottom: 8px; {% if category == 'error' %}background: rgba(239,68,68,0.15); border: 1px solid rgba(239,68,68,0.3); color: #FCA5A5;{% else %}background: rgba(34,197,94,0.15); border: 1px solid rgba(34,197,94,0.3); color: #86EFAC;{% endif %}">
+              {{ message }}
+            </div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+
+    <form method="POST" action="{{ url_for('proveedor_verify_email') }}">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+      <div style="margin-bottom: 24px;">
+        <input type="text" name="code" maxlength="6" pattern="[0-9]{6}" placeholder="000000" autofocus required
+               style="width: 100%; text-align: center; font-size: 2.2rem; font-weight: 800; letter-spacing: 12px; padding: 12px 0; border-radius: 12px; background: #0E121B; border: 2px solid rgba(255,167,38,0.4); color: #FFA726; box-sizing: border-box; font-family: monospace;">
+        <p style="color: #94A3B8; font-size: 0.8rem; margin: 8px 0 0;">Ingresa el código numérico recibido.</p>
+      </div>
+
+      <button type="submit" class="btn" style="width: 100%; padding: 13px; font-weight: 700; font-size: 1rem; border-radius: 10px; background: linear-gradient(135deg, #FFA726, #F57C00); color: #000; border: none; cursor: pointer; box-shadow: 0 4px 15px rgba(255, 167, 38, 0.35);">
+        Validar y Entrar al Sistema
+      </button>
+    </form>
+
+    <div style="margin-top: 24px; padding-top: 18px; border-top: 1px solid rgba(255,255,255,0.06);">
+      <form method="POST" action="{{ url_for('proveedor_resend_code') }}">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+        <p style="color: var(--text-secondary); font-size: 0.85rem; margin-bottom: 8px;">¿No te llegó el código o ya expiró?</p>
+        <button type="submit" style="background: transparent; border: none; color: #FFA726; font-weight: 700; cursor: pointer; text-decoration: underline; font-size: 0.88rem;">
+          Reenviar código de verificación
+        </button>
+      </form>
+    </div>
+
+    <div style="margin-top: 18px;">
+      <a href="{{ url_for('proveedor_register') }}" style="color: var(--text-muted); text-decoration: none; font-size: 0.82rem;">
+        ← Corregir datos de registro
+      </a>
+    </div>
+  </div>
+</div>
+{% endblock %}

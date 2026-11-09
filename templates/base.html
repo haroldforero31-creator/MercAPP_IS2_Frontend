@@ -81,6 +81,33 @@
     {% block extra_css %}{% endblock %}
     <link rel="icon"
         href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2343A047' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><circle cx='9' cy='21' r='1'/><circle cx='20' cy='21' r='1'/><path d='M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6'/></svg>">
+    <!-- P0 FIX: Meta tag CSRF para requests AJAX -->
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <script>
+    // Interceptor global: agrega X-CSRFToken a todos los fetch() no-GET automaticamente
+    (function() {
+        var _origFetch = window.fetch;
+        window.fetch = function(url, opts) {
+            opts = opts || {};
+            var method = (opts.method || 'GET').toUpperCase();
+            if (method !== 'GET' && method !== 'HEAD') {
+                opts.headers = opts.headers || {};
+                if (opts.headers instanceof Headers) {
+                    if (!opts.headers.has('X-CSRFToken')) {
+                        var token = document.querySelector('meta[name="csrf-token"]');
+                        if (token) opts.headers.set('X-CSRFToken', token.content);
+                    }
+                } else {
+                    if (!opts.headers['X-CSRFToken']) {
+                        var token = document.querySelector('meta[name="csrf-token"]');
+                        if (token) opts.headers['X-CSRFToken'] = token.content;
+                    }
+                }
+            }
+            return _origFetch.call(this, url, opts);
+        };
+    })();
+    </script>
 </head>
 
 <body>

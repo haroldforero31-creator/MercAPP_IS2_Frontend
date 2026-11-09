@@ -259,7 +259,7 @@ function updateOrderStatus(orderId, newStatus) {
   if (!newStatus) return;
   fetch(`/api/p/order/${orderId}/status`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json', 'X-CSRFToken': '{{ csrf_token() }}' },
     body: JSON.stringify({ status: newStatus })
   })
   .then(res => res.json())

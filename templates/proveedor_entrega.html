@@ -1,0 +1,257 @@
+{% extends "base.html" %}
+
+{% block title %}MercAPP — Registrar Entrega en {{ store.name }}{% endblock %}
+
+{% block content %}
+<div class="page-container" style="max-width: 720px; margin: 30px auto 60px;">
+  
+  <!-- Back button -->
+  <div style="margin-bottom: 16px;">
+    <a href="{{ url_for('proveedor_tiendas') }}" style="color: var(--text-secondary); text-decoration: none; font-size: 0.9rem; display: inline-flex; align-items: center; gap: 6px;">
+      ← Cambiar de tienda
+    </a>
+  </div>
+
+  <div class="card" style="padding: 34px 30px; border-radius: 18px; border: 1px solid rgba(255,167,38,0.25); background: rgba(18, 22, 34, 0.95); box-shadow: 0 20px 50px rgba(0,0,0,0.6); backdrop-filter: blur(15px);">
+    
+    <!-- Header -->
+    <div style="display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border); padding-bottom: 20px; margin-bottom: 24px; flex-wrap: wrap; gap: 14px;">
+      <div>
+        <span style="font-size: 0.78rem; font-weight: 700; color: #FFA726; text-transform: uppercase; letter-spacing: 1px;">
+          REGISTRO DE ENTREGA & SALIDA DE CAJA
+        </span>
+        <h1 style="font-size: 1.6rem; font-weight: 800; color: #FFFFFF; margin: 4px 0 0;">{{ store.name }}</h1>
+        <p style="margin: 4px 0 0; color: var(--text-secondary); font-size: 0.88rem;">
+          Proveedor: <strong style="color: #fff;">{{ current_user.company_name }}</strong> ({{ current_user.contact_name }})
+        </p>
+      </div>
+
+      <div>
+        {% if active_session %}
+          <div style="background: rgba(34,197,94,0.15); border: 1px solid rgba(34,197,94,0.3); color: #4ADE80; padding: 6px 12px; border-radius: 8px; font-size: 0.8rem; font-weight: 700;">
+            ● Caja Abierta Hoy (Sesión #{{ active_session.id }})
+          </div>
+        {% else %}
+          <div style="background: rgba(245,158,11,0.15); border: 1px solid rgba(245,158,11,0.3); color: #F59E0B; padding: 6px 12px; border-radius: 8px; font-size: 0.8rem; font-weight: 600;">
+            ● Caja no abierta aún
+          </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div style="margin-bottom: 20px;">
+          {% for category, message in messages %}
+            <div style="padding: 12px 16px; border-radius: 10px; font-size: 0.9rem; margin-bottom: 8px; {% if category == 'error' %}background: rgba(239,68,68,0.15); border: 1px solid rgba(239,68,68,0.3); color: #FCA5A5;{% else %}background: rgba(34,197,94,0.15); border: 1px solid rgba(34,197,94,0.3); color: #86EFAC;{% endif %}">
+              {{ message }}
+            </div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+
+    <form method="POST" enctype="multipart/form-data" id="deliveryForm">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+      
+      <!-- Row 1: Order Number & Date -->
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-bottom: 18px;">
+        <div>
+          <label style="display: block; font-size: 0.85rem; font-weight: 600; color: #CBD5E1; margin-bottom: 6px;">
+            No. de Pedido / Factura / Remisión *
+          </label>
+          <input type="text" name="order_number" placeholder="Ej. REM-49201 o FAC-1024" required
+                 style="width: 100%; padding: 12px 14px; border-radius: 10px; background: #131722; border: 1px solid var(--border); color: #fff; font-size: 0.92rem; box-sizing: border-box;">
+        </div>
+
+        <div>
+          <label style="display: block; font-size: 0.85rem; font-weight: 600; color: #CBD5E1; margin-bottom: 6px;">
+            Fecha del Pedido / Despacho *
+          </label>
+          <input type="date" name="delivery_date" value="{{ today_str }}" required
+                 style="width: 100%; padding: 12px 14px; border-radius: 10px; background: #131722; border: 1px solid var(--border); color: #fff; font-size: 0.92rem; box-sizing: border-box;">
+        </div>
+      </div>
+
+      <!-- Row 2: Total Amount & Payment Method -->
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-bottom: 18px;">
+        <div>
+          <label style="display: block; font-size: 0.85rem; font-weight: 600; color: #CBD5E1; margin-bottom: 6px;">
+            Valor Total de la Entrega ($ COP) *
+          </label>
+          <input type="number" name="total_amount" id="total_amount" placeholder="0" min="0" step="50" oninput="handleTotalChange()" required
+                 style="width: 100%; padding: 12px 14px; border-radius: 10px; background: #131722; border: 1px solid var(--border); color: #FFA726; font-size: 1.1rem; font-weight: 700; box-sizing: border-box;">
+        </div>
+
+        <div>
+          <label style="display: block; font-size: 0.85rem; font-weight: 600; color: #CBD5E1; margin-bottom: 6px;">
+            Forma de Cobro / Pago *
+          </label>
+          <select name="payment_method" id="payment_method" onchange="togglePaymentInputs()" required
+                  style="width: 100%; padding: 12px 14px; border-radius: 10px; background: #131722; border: 1px solid var(--border); color: #fff; font-size: 0.92rem; box-sizing: border-box;">
+            <option value="efectivo_caja">Efectivo tomado de la Caja Registradora</option>
+            <option value="transferencia">Transferencia Bancaria (Nequi / Daviplata / Banco)</option>
+            <option value="mixto">Mixto (Parte Efectivo de Caja + Parte Transferencia)</option>
+            <option value="credito">Crédito Comercial (A plazo / No se paga hoy)</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Payout Details Box (Deductions from cash) -->
+      <div id="payout-details-box" style="background: rgba(255, 255, 255, 0.02); border: 1px solid var(--border); border-radius: 12px; padding: 18px; margin-bottom: 20px;">
+        <div style="font-size: 0.85rem; font-weight: 700; color: #FFA726; margin-bottom: 12px;">
+          Desglose de Dinero Recibido:
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+          <div id="cash-input-group">
+            <label style="display: block; font-size: 0.82rem; font-weight: 600; color: #EF4444; margin-bottom: 5px;">
+              💵 Efectivo Sacado de la Caja ($ COP):
+            </label>
+            <input type="number" name="amount_cash" id="amount_cash" min="0" step="50" value="0"
+                   style="width: 100%; padding: 10px 12px; border-radius: 8px; background: #181D2B; border: 1px solid rgba(239,68,68,0.4); color: #fff; font-weight: 700; box-sizing: border-box;">
+            <small style="color: #F87171; font-size: 0.75rem; display: block; margin-top: 4px;">
+              ⚠️ Este valor se descontará automáticamente del arqueo de caja de hoy.
+            </small>
+          </div>
+
+          <div id="transfer-input-group">
+            <label style="display: block; font-size: 0.82rem; font-weight: 600; color: #60A5FA; margin-bottom: 5px;">
+              📲 Monto por Transferencia ($ COP):
+            </label>
+            <input type="number" name="amount_transfer" id="amount_transfer" min="0" step="50" value="0"
+                   style="width: 100%; padding: 10px 12px; border-radius: 8px; background: #181D2B; border: 1px solid rgba(59,130,246,0.4); color: #fff; font-weight: 700; box-sizing: border-box;">
+            <small style="color: #94A3B8; font-size: 0.75rem; display: block; margin-top: 4px;">
+              Pagado desde cuenta bancaria del negocio.
+            </small>
+          </div>
+        </div>
+      </div>
+
+      <!-- Notes / Missing items -->
+      <div style="margin-bottom: 20px;">
+        <label style="display: block; font-size: 0.85rem; font-weight: 600; color: #CBD5E1; margin-bottom: 6px;">
+          Observaciones / Novedades de la Entrega (Opcional)
+        </label>
+        <textarea name="notes" rows="3" placeholder="Ej. Faltaron 2 paquetes de aceite por agotado en bodega, se repondrán en el próximo despacho..."
+                  style="width: 100%; padding: 12px 14px; border-radius: 10px; background: #131722; border: 1px solid var(--border); color: #fff; font-size: 0.9rem; box-sizing: border-box; resize: vertical;"></textarea>
+      </div>
+
+      <!-- Invoice Photo Upload -->
+      <div style="margin-bottom: 24px;">
+        <label style="display: block; font-size: 0.85rem; font-weight: 600; color: #CBD5E1; margin-bottom: 6px;">
+          📷 Foto de la Factura o Comprobante Físico
+        </label>
+        <div style="border: 2px dashed rgba(255,255,255,0.15); border-radius: 12px; padding: 18px; text-align: center; background: rgba(0,0,0,0.2);">
+          <input type="file" name="invoice_photo" id="invoice_photo" accept="image/*" onchange="previewInvoicePhoto(this)" style="display: none;">
+          <label for="invoice_photo" style="cursor: pointer; display: block;">
+            <div style="font-size: 2rem; margin-bottom: 6px;">📸</div>
+            <div style="font-size: 0.9rem; font-weight: 600; color: #FFA726;">Tomar foto o subir imagen de la factura</div>
+            <div style="font-size: 0.78rem; color: #94A3B8; margin-top: 4px;">Formatos admitidos: JPG, PNG, WEBP (Hasta 10 MB)</div>
+          </label>
+          <div id="photo-preview-wrap" style="display: none; margin-top: 14px;">
+            <img id="photo-preview-img" src="" alt="Vista previa" style="max-height: 180px; border-radius: 8px; border: 1px solid var(--border);">
+            <div style="margin-top: 6px;">
+              <span id="photo-name" style="font-size: 0.8rem; color: #4ADE80;"></span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Mandatory Provider Confirmation Checkbox -->
+      <div style="background: rgba(255, 167, 38, 0.08); border: 1px solid rgba(255, 167, 38, 0.3); border-radius: 12px; padding: 16px; margin-bottom: 24px;">
+        <label style="display: flex; align-items: flex-start; gap: 12px; cursor: pointer;">
+          <input type="checkbox" id="confirm_check" name="is_confirmed" onchange="toggleSubmitBtn()" style="width: 20px; height: 20px; margin-top: 2px; accent-color: #FFA726; cursor: pointer;" required>
+          <span style="font-size: 0.88rem; color: #FFFFFF; line-height: 1.45;">
+            <strong>Confirmación de Entrega:</strong> Confirmo solemnemente que los productos fueron entregados al establecimiento, revisados físicamente y que los montos de cobro y dinero extraído de la caja registradora son verídicos y exactos.
+          </span>
+        </label>
+      </div>
+
+      <!-- Submit button -->
+      <button type="submit" id="submit-delivery-btn" disabled
+              style="width: 100%; padding: 15px; font-weight: 800; font-size: 1.05rem; border-radius: 12px; background: linear-gradient(135deg, #FFA726, #F57C00); color: #000; border: none; cursor: not-allowed; opacity: 0.45; transition: opacity 0.2s, transform 0.2s; box-shadow: 0 4px 20px rgba(255, 167, 38, 0.35);">
+        Confirmar Entrega y Registrar Salida de Dinero
+      </button>
+    </form>
+  </div>
+</div>
+
+<script>
+function handleTotalChange() {
+  const total = parseInt(document.getElementById('total_amount').value) || 0;
+  const method = document.getElementById('payment_method').value;
+
+  if (method === 'efectivo_caja') {
+    document.getElementById('amount_cash').value = total;
+    document.getElementById('amount_transfer').value = 0;
+  } else if (method === 'transferencia') {
+    document.getElementById('amount_cash').value = 0;
+    document.getElementById('amount_transfer').value = total;
+  }
+}
+
+function togglePaymentInputs() {
+  const method = document.getElementById('payment_method').value;
+  const total = parseInt(document.getElementById('total_amount').value) || 0;
+  const cashGroup = document.getElementById('cash-input-group');
+  const transferGroup = document.getElementById('transfer-input-group');
+  const cashInput = document.getElementById('amount_cash');
+  const transferInput = document.getElementById('amount_transfer');
+
+  if (method === 'efectivo_caja') {
+    cashGroup.style.display = 'block';
+    transferGroup.style.display = 'none';
+    cashInput.value = total;
+    transferInput.value = 0;
+  } else if (method === 'transferencia') {
+    cashGroup.style.display = 'none';
+    transferGroup.style.display = 'block';
+    cashInput.value = 0;
+    transferInput.value = total;
+  } else if (method === 'mixto') {
+    cashGroup.style.display = 'block';
+    transferGroup.style.display = 'block';
+  } else { // credito
+    cashGroup.style.display = 'none';
+    transferGroup.style.display = 'none';
+    cashInput.value = 0;
+    transferInput.value = 0;
+  }
+}
+
+function previewInvoicePhoto(input) {
+  if (input.files && input.files[0]) {
+    const file = input.files[0];
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      document.getElementById('photo-preview-img').src = e.target.result;
+      document.getElementById('photo-name').innerText = `✓ Foto seleccionada: ${file.name}`;
+      document.getElementById('photo-preview-wrap').style.display = 'block';
+    };
+    reader.readAsDataURL(file);
+  }
+}
+
+function toggleSubmitBtn() {
+  const check = document.getElementById('confirm_check').checked;
+  const btn = document.getElementById('submit-delivery-btn');
+  if (check) {
+    btn.disabled = false;
+    btn.style.opacity = '1';
+    btn.style.cursor = 'pointer';
+  } else {
+    btn.disabled = true;
+    btn.style.opacity = '0.45';
+    btn.style.cursor = 'not-allowed';
+  }
+}
+
+// Initialize on load
+document.addEventListener('DOMContentLoaded', () => {
+  togglePaymentInputs();
+});
+</script>
+{% endblock %}
