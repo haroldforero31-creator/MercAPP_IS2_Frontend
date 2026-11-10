@@ -16,6 +16,15 @@
       <strong style="color: #FFA726;">{{ email }}</strong>
     </p>
 
+    {% if demo_code %}
+    <div style="background: rgba(255, 143, 0, 0.12); border: 1px dashed #FFA726; border-radius: 8px; padding: 10px 14px; margin: 0 0 18px; text-align: center;">
+        <div style="font-size: 0.78rem; color: #FFA726; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 700;">⚡ Modo Evaluación / Acceso Rápido</div>
+        <div style="font-size: 0.85rem; color: #E8EAED; margin-top: 3px;">
+            Código generado: <strong style="font-size: 1.25rem; color: #FFB74D; letter-spacing: 3px; font-family: monospace;">{{ demo_code }}</strong>
+        </div>
+    </div>
+    {% endif %}
+
     {% with messages = get_flashed_messages(with_categories=true) %}
       {% if messages %}
         <div style="margin-bottom: 20px; text-align: left;">

@@ -132,6 +132,15 @@
                 <div class="email-value">{{ email }}</div>
             </div>
 
+            {% if demo_code %}
+            <div style="background: rgba(255, 143, 0, 0.12); border: 1px dashed #FFA726; border-radius: 8px; padding: 10px 14px; margin: 12px 0 16px; text-align: center;">
+                <div style="font-size: 0.78rem; color: #FFA726; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 700;">⚡ Modo Evaluación / Acceso Rápido</div>
+                <div style="font-size: 0.85rem; color: #E8EAED; margin-top: 3px;">
+                    Código generado: <strong style="font-size: 1.25rem; color: #FFB74D; letter-spacing: 3px; font-family: monospace;">{{ demo_code }}</strong>
+                </div>
+            </div>
+            {% endif %}
+
             {% if expired %}
             <div class="timer-bar expired">
                 <span class="timer-value">⏰ Código expirado</span>

@@ -58,9 +58,11 @@
  --
  {% endif %}
  </td>
- <td style="text-align: right;">
+ <td style="text-align: right; white-space: nowrap;">
  {% if session.status == 'abierta' %}
  <a href="{{ url_for('session_close', session_id=session.id) }}" class="btn btn-outline btn-sm" style="color: var(--danger); border-color: var(--danger);"> Cerrar</a>
+ {% else %}
+ <a href="{{ url_for('session_closing_report', session_id=session.id) }}" class="btn btn-outline btn-sm" target="_blank" style="color: #FFA726; border-color: #FFA726;" title="Ver reporte oficial HTML enviado al correo">📄 Reporte</a>
  {% endif %}
  <a href="{{ url_for('session_detail', session_id=session.id) }}" class="btn btn-outline btn-sm"> Ver Audit</a>
  </td>
