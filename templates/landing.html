@@ -68,13 +68,13 @@
             </a>
           {% endif %}
 
-          <button onclick="openDemoModal()" class="lp-btn lp-btn-primary lp-btn-sm" id="btn-nav-demo">
-            Solicitar demo
+          <a href="{{ url_for('proveedor_login') }}" class="lp-btn lp-btn-primary lp-btn-sm" id="btn-nav-proveedor" style="background: linear-gradient(135deg, #FFA726, #F57C00); color: #000; font-weight: 700;">
+            Portal Proveedor
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
               <line x1="5" y1="12" x2="19" y2="12"></line>
               <polyline points="12 5 19 12 12 19"></polyline>
             </svg>
-          </button>
+          </a>
         </div>
       </nav>
     </div>
@@ -98,14 +98,24 @@
             MercAPP es el sistema POS que agiliza tus ventas, gestiona tu inventario, conecta tus equipos y te da el control total de tu negocio, desde cualquier lugar.
           </p>
 
-          <div class="lp-hero-cta">
-            <button onclick="openDemoModal()" class="lp-btn lp-btn-primary lp-btn-lg" id="btn-hero-demo">
-              Solicitar Demo
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                <line x1="5" y1="12" x2="19" y2="12"></line>
-                <polyline points="12 5 19 12 12 19"></polyline>
-              </svg>
-            </button>
+          <div class="lp-hero-cta" style="flex-wrap: wrap; gap: 12px;">
+            {% if current_user.is_authenticated %}
+              <a href="{{ url_for('pos') }}" class="lp-btn lp-btn-primary lp-btn-lg" id="btn-hero-pos">
+                Ingresar a mi POS
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                  <line x1="5" y1="12" x2="19" y2="12"></line>
+                  <polyline points="12 5 19 12 12 19"></polyline>
+                </svg>
+              </a>
+            {% else %}
+              <a href="{{ url_for('login') }}" class="lp-btn lp-btn-primary lp-btn-lg" id="btn-hero-web">
+                Ingresar a MercAPP Web
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                  <line x1="5" y1="12" x2="19" y2="12"></line>
+                  <polyline points="12 5 19 12 12 19"></polyline>
+                </svg>
+              </a>
+            {% endif %}
 
             <a href="{{ url_for('download_pos') }}" class="lp-btn lp-btn-secondary lp-btn-lg" id="btn-hero-download">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
@@ -114,6 +124,16 @@
                 <line x1="12" y1="15" x2="12" y2="3"></line>
               </svg>
               Descargar Ahora (RAR)
+            </a>
+
+            <a href="{{ url_for('proveedor_login') }}" class="lp-btn lp-btn-secondary lp-btn-lg" id="btn-hero-proveedor" style="border: 1px solid rgba(255,167,38,0.5); color: #FFA726; background: rgba(255,167,38,0.08);">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="1" y="3" width="15" height="13"></rect>
+                <polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon>
+                <circle cx="5.5" cy="18.5" r="2.5"></circle>
+                <circle cx="18.5" cy="18.5" r="2.5"></circle>
+              </svg>
+              Portal Proveedores
             </a>
           </div>
 
@@ -709,13 +729,21 @@
         <div>
           <h2 class="lp-banner-title">Lleva tu negocio al siguiente nivel</h2>
           <p class="lp-banner-desc">
-            Solicita una demo gratuita o adquiere tu licencia hoy mismo. Nuestro equipo te acompaña en cada paso de la configuración.
+            Accede a la plataforma web de MercAPP, descarga el aplicativo ejecutable para Windows o ingresa como proveedor para gestionar entregas.
           </p>
 
-          <button onclick="openDemoModal()" class="lp-btn lp-btn-primary lp-btn-lg">
-            Solicitar Demo Ahora
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
-          </button>
+          <div style="display: flex; gap: 12px; flex-wrap: wrap; margin-top: 18px;">
+            <a href="{{ url_for('login') if not current_user.is_authenticated else url_for('pos') }}" class="lp-btn lp-btn-primary lp-btn-lg">
+              Ingresar a MercAPP Web
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+            </a>
+            <a href="{{ url_for('download_pos') }}" class="lp-btn lp-btn-secondary lp-btn-lg">
+              Descargar POS (RAR)
+            </a>
+            <a href="{{ url_for('proveedor_login') }}" class="lp-btn lp-btn-secondary lp-btn-lg" style="border: 1px solid rgba(255,167,38,0.5); color: #FFA726; background: rgba(255,167,38,0.08);">
+              Portal Proveedores
+            </a>
+          </div>
 
           <div class="lp-banner-checks">
             <div class="lp-check-card">
