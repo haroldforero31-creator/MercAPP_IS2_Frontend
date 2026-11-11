@@ -109,11 +109,11 @@
                     </th>
                     <th>Imagen</th>
                     <th>Producto</th>
-                    <th>Código de Barras</th>
-                    <th>Categoría</th>
+                    <th class="hide-mobile">Código de Barras</th>
+                    <th class="hide-mobile">Categoría</th>
                     <th style="text-align: right;">Precio</th>
                     <th style="text-align: center;">Stock</th>
-                    <th>Estado</th>
+                    <th class="hide-mobile">Estado</th>
                     <th style="text-align: center;">Acciones</th>
                 </tr>
             </thead>
@@ -136,14 +136,21 @@
                     <td>
                         <strong>{{ product.name }}</strong>
                     </td>
-                    <td>
+                    <td class="hide-mobile">
                         {% if product.barcode %}
-                        <code style="background: var(--bg-input); padding: 4px 8px; border-radius: 4px; font-size: 0.85rem;">{{ product.barcode }}</code>
+                        <div style="display: flex; align-items: center; gap: 6px;">
+                            <code style="background: var(--bg-input); padding: 4px 8px; border-radius: 4px; font-size: 0.85rem; font-family: monospace;">{{ product.barcode }}</code>
+                            <button type="button" class="btn btn-outline btn-sm" onclick="printProductBarcode('{{ product.barcode }}', '{{ product.name | replace("'", "\\'") }}', {{ product.price }})" title="Imprimir etiqueta de código de barras" style="padding: 2px 7px; font-size: 0.85rem; line-height: 1.2;">
+                                🖨️
+                            </button>
+                        </div>
                         {% else %}
-                        <span class="text-muted">Sin código</span>
+                        <a href="{{ url_for('product_edit', product_id=product.id) }}" class="btn btn-outline btn-sm" style="font-size: 0.75rem; padding: 2px 8px; color: var(--primary); border-color: var(--primary);">
+                            + Asignar
+                        </a>
                         {% endif %}
                     </td>
-                    <td>{{ product.category.name if product.category else '-' }}</td>
+                    <td class="hide-mobile">{{ product.category.name if product.category else '-' }}</td>
                     <td style="text-align: right; font-weight: 700; color: var(--accent-light);" id="priceCell{{ product.id }}">
                         {{ product.price | cop }}
                     </td>
@@ -160,7 +167,7 @@
                         <span class="badge badge-success">{{ product.stock }} und.</span>
                         {% endif %}
                     </td>
-                    <td>
+                    <td class="hide-mobile">
                         {% if product.is_active %}
                         <span class="badge badge-success">Activo</span>
                         {% else %}
@@ -221,7 +228,7 @@
 
     <!-- Export Modal -->
     <div id="exportModal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center; backdrop-filter: blur(3px);">
-        <div style="background: var(--bg-card); padding: 24px; border-radius: 12px; width: 400px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); border: 1px solid var(--bg-input);">
+        <div style="background: var(--bg-card); padding: 24px; border-radius: var(--radius-lg); width: 400px; box-shadow: var(--shadow-lg); border: 1px solid var(--border);">
             <h3 style="margin-top: 0; color: var(--primary);">Exportar Inventario</h3>
             <p style="color: var(--text-muted); margin-bottom: 20px;">¿Qué productos deseas descargar a Excel (CSV)?</p>
             
@@ -439,5 +446,45 @@ function applyBulkPrice() {
         btn.textContent = 'Aplicar Precio';
     });
 }
+
+function printProductBarcode(barcode, name, price) {
+    const hwPrinter = localStorage.getItem('mercapp_hw_printer');
+    const csrfToken = document.querySelector('input[name="csrf_token"]') ? document.querySelector('input[name="csrf_token"]').value : '';
+    if (hwPrinter) {
+        fetch('/api/hardware/print-barcode', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json', 'X-CSRFToken': csrfToken},
+            body: JSON.stringify({
+                printer_name: hwPrinter,
+                barcode: barcode,
+                product_name: name,
+                price: price,
+                copies: 1
+            })
+        }).then(r => r.json()).then(res => {
+            if (res.success) {
+                alert('✅ Etiqueta enviada a la impresora: ' + hwPrinter);
+            } else {
+                window.open(`/products/barcode-label?barcode=${encodeURIComponent(barcode)}&name=${encodeURIComponent(name)}&price=${encodeURIComponent(price)}&autoprint=1`, '_blank');
+            }
+        }).catch(() => {
+            window.open(`/products/barcode-label?barcode=${encodeURIComponent(barcode)}&name=${encodeURIComponent(name)}&price=${encodeURIComponent(price)}&autoprint=1`, '_blank');
+        });
+    } else {
+        window.open(`/products/barcode-label?barcode=${encodeURIComponent(barcode)}&name=${encodeURIComponent(name)}&price=${encodeURIComponent(price)}&autoprint=1`, '_blank');
+    }
+}
 </script>
+
+{% if session.get('print_barcode_popup') %}
+{% set pop = session.pop('print_barcode_popup') %}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const hwPrinter = localStorage.getItem('mercapp_hw_printer');
+    if (!hwPrinter) {
+        window.open('/products/barcode-label?barcode={{ pop.barcode | urlencode }}&name={{ pop.name | urlencode }}&price={{ pop.price }}&autoprint=1', '_blank');
+    }
+});
+</script>
+{% endif %}
 {% endblock %}

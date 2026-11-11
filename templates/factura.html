@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+ <meta charset="UTF-8">
+ <title>Factura {{ sale.receipt_number }} — {{ settings.store_name }}</title>
+ <style>
+ /* Thermal Receipt 80mm - Colombian POS Invoice */
+ @import url('https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;700&display=swap');
+ 
+ * {
+ margin: 0;
+ padding: 0;
+ box-sizing: border-box;
+ }
+ 
+ body {
+ font-family: 'Roboto Mono', 'Courier New', monospace;
+ font-size: 12px;
+ line-height: 1.4;
+ color: #000;
+ background: #f0f0f0;
+ }
+ 
+ .receipt-wrapper {
+ display: flex;
+ justify-content: center;
+ padding: 20px;
+ }
+ 
+ .receipt {
+ width: 80mm;
+ background: #fff;
+ padding: 8mm 5mm;
+ box-shadow: 0 2px 20px rgba(0,0,0,0.15);
+ }
+ 
+ .receipt-print {
+ width: 80mm;
+ }
+ 
+ .text-center { text-align: center; }
+ .text-right { text-align: right; }
+ .bold { font-weight: 700; }
+ .separator {
+ border: none;
+ border-top: 1px dashed #000;
+ margin: 6px 0;
+ }
+ .double-separator {
+ border: none;
+ border-top: 2px solid #000;
+ margin: 6px 0;
+ }
+ 
+ /* Header / Store Info */
+ .store-logo {
+ text-align: center;
+ margin-bottom: 6px;
+ }
+ .store-logo img {
+ max-width: 50mm;
+ max-height: 20mm;
+ }
+ .store-name {
+ font-size: 18px;
+ font-weight: 700;
+ text-align: center;
+ margin-bottom: 2px;
+ letter-spacing: 1px;
+ }
+ .store-type {
+ font-size: 11px;
+ text-align: center;
+ margin-bottom: 6px;
+ }
+ .store-info {
+ text-align: center;
+ font-size: 10px;
+ line-height: 1.5;
+ margin-bottom: 4px;
+ }
+ .store-info .info-line {
+ margin-bottom: 1px;
+ }
+ 
+ /* Invoice Header */
+ .invoice-header {
+ text-align: center;
+ font-size: 11px;
+ margin: 4px 0;
+ }
+ .invoice-title {
+ font-weight: 700;
+ font-size: 12px;
+ margin-bottom: 2px;
+ }
+ 
+ /* Products Table */
+ .items-header {
+ display: flex;
+ justify-content: space-between;
+ font-weight: 700;
+ font-size: 10px;
+ padding: 4px 0;
+ border-bottom: 1px solid #000;
+ }
+ .item-row {
+ display: flex;
+ justify-content: space-between;
+ padding: 2px 0;
+ font-size: 11px;
+ }
+ .item-name {
+ flex: 1;
+ overflow: hidden;
+ text-overflow: ellipsis;
+ white-space: nowrap;
+ }
+ .item-detail {
+ display: flex;
+ gap: 8px;
+ font-size: 10px;
+ color: #444;
+ padding-left: 12px;
+ }
+ 
+ /* Totals */
+ .total-row {
+ display: flex;
+ justify-content: space-between;
+ padding: 2px 0;
+ }
+ .grand-total {
+ font-size: 16px;
+ font-weight: 700;
+ padding: 6px 0;
+ }
+ 
+ /* Footer */
+ .receipt-footer {
+ text-align: center;
+ font-size: 10px;
+ line-height: 1.5;
+ margin-top: 8px;
+ }
+ .receipt-footer .thanks {
+ font-size: 12px;
+ font-weight: 700;
+ margin: 6px 0;
+ }
+ .legal-text {
+ font-size: 9px;
+ color: #333;
+ line-height: 1.4;
+ }
+ 
+ /* Print button (hidden on print) */
+ .print-actions {
+ text-align: center;
+ padding: 20px;
+ }
+ .print-btn {
+ padding: 14px 32px;
+ background: #2E7D32;
+ color: #fff;
+ border: none;
+ border-radius: 8px;
+ font-size: 16px;
+ font-weight: 700;
+ cursor: pointer;
+ font-family: 'Inter', sans-serif;
+ margin: 0 8px;
+ }
+ .print-btn:hover {
+ background: #1B5E20;
+ }
+ .print-btn.secondary {
+ background: #555;
+ }
+ 
+ /* Print styles */
+ @media print {
+ body {
+ background: #fff;
+ }
+ .receipt-wrapper {
+ padding: 0;
+ }
+ .receipt {
+ box-shadow: none;
+ padding: 2mm;
+ }
+ .print-actions {
+ display: none;
+ }
+ }
+ </style>
+</head>
+<body>
+ <div class="print-actions no-print">
+ <button class="print-btn" onclick="window.print()">Imprimir Factura</button>
+ <button class="print-btn secondary" onclick="window.close()">Cerrar</button>
+ </div>
+
+ <div class="receipt-wrapper">
+ <div class="receipt receipt-print">
+ <!-- ===== ENCABEZADO DEL SUPERMERCADO ===== -->
+ {% if settings.logo and settings.logo != 'logo.png' %}
+ <div class="store-logo">
+ <img src="{{ url_for('user_images', filename='' + settings.logo) }}" alt="{{ settings.store_name }}">
+ </div>
+ {% endif %}
+ 
+ <div class="store-name">{{ settings.store_name }}</div>
+ <div class="store-type">SUPERMERCADO</div>
+ 
+ <hr class="separator">
+ 
+ <div class="store-info">
+ {% if settings.razon_social %}
+ <div class="info-line bold">{{ settings.razon_social }}</div>
+ {% endif %}
+ {% if settings.nit and settings.nit != '000.000.000-0' %}
+ <div class="info-line">NIT: {{ settings.nit }}</div>
+ {% endif %}
+ {% if settings.rut %}
+ <div class="info-line">RUT: {{ settings.rut }}</div>
+ {% endif %}
+ {% if settings.gran_contribuyente %}
+ <div class="info-line">{{ settings.gran_contribuyente }}</div>
+ {% endif %}
+ {% if settings.regimen_tributario %}
+ <div class="info-line">{{ settings.regimen_tributario }}</div>
+ {% endif %}
+ {% if settings.agente_retencion %}
+ <div class="info-line">{{ settings.agente_retencion }}</div>
+ {% endif %}
+ {% if settings.direccion %}
+ <div class="info-line">{{ settings.direccion }}</div>
+ {% endif %}
+ {% if settings.telefono %}
+ <div class="info-line">Tel: {{ settings.telefono }}</div>
+ {% endif %}
+ {% if settings.ciudad %}
+ <div class="info-line">{{ settings.ciudad }}</div>
+ {% endif %}
+ </div>
+ 
+ <hr class="double-separator">
+ 
+ <!-- ===== DATOS DE LA FACTURA ===== -->
+ <div class="invoice-header">
+ <div class="invoice-title">FACTURA DE VENTA POS</div>
+ {% if settings.resolucion_dian %}
+ <div>Aut. DIAN {{ settings.resolucion_dian }}</div>
+ {% endif %}
+ {% if settings.resolucion_fecha %}
+ <div>{{ settings.resolucion_fecha }}</div>
+ {% endif %}
+ {% if settings.rango_desde and settings.rango_hasta %}
+ <div>Rango {{ settings.rango_desde }} a {{ settings.rango_hasta }}</div>
+ {% endif %}
+ </div>
+ 
+ <hr class="separator">
+ 
+ <div style="font-size: 11px;">
+ <div class="total-row">
+ <span>FACTURA No:</span>
+ <span class="bold">{{ sale.receipt_number }}</span>
+ </div>
+ <div class="total-row">
+ <span>Fecha:</span>
+ <span>{{ sale.sale_date.strftime('%d/%m/%Y') }}</span>
+ </div>
+ <div class="total-row">
+ <span>Hora:</span>
+ <span>{{ sale.sale_date.strftime('%H:%M:%S') }}</span>
+ </div>
+ </div>
+ 
+ <hr class="separator">
+ 
+ <!-- ===== PRODUCTOS ===== -->
+ <div class="items-header">
+ <span>Artículo / Descripción</span>
+ <span>Valor</span>
+ </div>
+ 
+ {% for item in sale.items %}
+ <div>
+ {% if item.product and item.product.barcode %}
+ <div style="font-size: 9px; color: #666;">{{ item.product.barcode }}</div>
+ {% endif %}
+ <div class="item-row">
+ <span class="item-name">{{ item.product.name if item.product else 'Producto' }}</span>
+ <span class="bold">{{ item.subtotal | cop }}</span>
+ </div>
+ <div class="item-detail">
+ {% if item.weight_grams and item.weight_unit %}
+ <span> {{ item.weight_grams | format_weight(item.weight_unit) }} x {{ item.unit_price | cop }} / {{ item.weight_unit }}</span>
+ {% elif item.quantity > 1 %}
+ <span>{{ item.quantity }} x {{ item.unit_price | cop }}</span>
+ {% endif %}
+ </div>
+ </div>
+ {% endfor %}
+ 
+ <hr class="double-separator">
+ 
+ <!-- ===== TOTALES ===== -->
+ <div class="total-row">
+ <span>Artículos vendidos:</span>
+ <span class="bold">{{ sale.items_count }}</span>
+ </div>
+ <div class="total-row">
+ <span>Subtotal:</span>
+ <span>{{ sale.subtotal | cop }}</span>
+ </div>
+ <div class="total-row" style="font-size: 10px; color: #555;">
+ <span>*** IVA INCLUIDO ***</span>
+ </div>
+ <div class="total-row grand-total">
+ <span>TOTAL:</span>
+ <span>{{ sale.total | cop }}</span>
+ </div>
+ 
+ <hr class="separator">
+ 
+ <!-- ===== PAGO ===== -->
+  <div style="font-size: 11px;">
+  <div class="total-row">
+  <span>Forma de pago:</span>
+  <span class="bold">
+  {% if sale.payment_method == 'efectivo' %}Efectivo
+  {% elif sale.payment_method == 'tarjeta' %}Tarjeta
+  {% elif sale.payment_method == 'transferencia' %}Transferencia
+  {% elif sale.payment_method == 'fiado' %}Fiado
+  {% elif sale.payment_method == 'mixto' %}Mixto
+  {% else %}{{ sale.payment_method.capitalize() }}{% endif %}
+  </span>
+  </div>
+  {% if sale.payment_method == 'mixto' %}
+  <div style="font-size: 10px; padding-left: 6px; color: #333;">
+    {% if sale.amount_cash %}
+    <div class="total-row">
+      <span>- Efectivo:</span>
+      <span>{{ sale.amount_cash | cop }}</span>
+    </div>
+    {% endif %}
+    {% if sale.amount_card %}
+    <div class="total-row">
+      <span>- Tarjeta:</span>
+      <span>{{ sale.amount_card | cop }}</span>
+    </div>
+    {% endif %}
+    {% if sale.amount_transfer %}
+    <div class="total-row">
+      <span>- Transferencia:</span>
+      <span>{{ sale.amount_transfer | cop }}</span>
+    </div>
+    {% endif %}
+  </div>
+  {% endif %}
+  {% if sale.payment_method == 'efectivo' or sale.payment_method == 'mixto' %}
+  <div class="total-row">
+  <span>Recibido:</span>
+  <span>{{ sale.amount_received | cop }}</span>
+  </div>
+  <div class="total-row bold">
+  <span>Cambio:</span>
+  <span>{{ sale.change_given | cop }}</span>
+  </div>
+  {% endif %}
+  {% if sale.payment_ref %}
+  <div class="total-row" style="font-size: 10px;">
+  <span>Ref:</span>
+  <span>{{ sale.payment_ref }}</span>
+  </div>
+  {% endif %}
+  </div>
+ 
+ <hr class="separator">
+ 
+ <!-- ===== CAJERO ===== -->
+ <div class="total-row" style="font-size: 11px;">
+ <span>ATENDIDO POR:</span>
+ <span class="bold">{{ sale.cashier.name }}</span>
+ </div>
+ 
+ <hr class="double-separator">
+ 
+ <!-- ===== PIE DE FACTURA ===== -->
+ <div class="receipt-footer">
+ <div class="thanks">{{ settings.mensaje_ticket or '¡Gracias por su compra!' }}</div>
+ <div style="font-size: 10px; margin-bottom: 4px;">Vuelva pronto a {{ settings.store_name }}</div>
+ 
+ <hr class="separator">
+ 
+ <div class="legal-text">
+ Documento equivalente POS<br>
+ Art. 616-1 del Estatuto Tributario<br>
+ {% if settings.resolucion_dian %}
+ Res. DIAN {{ settings.resolucion_dian }}<br>
+ {% endif %}
+ {{ sale.sale_date.strftime('%Y-%m-%d %H:%M:%S') }}
+ </div>
+ </div>
+ </div>
+ </div>
+ 
+ {% if ghost %}
+ <!-- Ghost Print Mode: invisible content, triggers cash drawer via print driver -->
+ <div class="receipt-print" style="width: 80mm; height: 1mm; overflow: hidden;">
+ <span style="font-size: 1px; color: #fff;">.</span>
+ </div>
+ <script>
+ window.onload = function() {
+ setTimeout(function() {
+ window.print();
+ }, 300);
+ };
+ window.onafterprint = function() {
+ window.close();
+ };
+ </script>
+ {% else %}
+ <script>
+ // Auto-open print dialog when the page loads for faster POS workflow
+ window.onload = function() {
+ setTimeout(function() {
+ window.print();
+ }, 500);
+ };
+ </script>
+ {% endif %}
+</body>
+</html>
+

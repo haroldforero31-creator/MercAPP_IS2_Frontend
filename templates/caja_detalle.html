@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+
+{% block title %}MercAPP — Detalle de Caja{% endblock %}
+
+{% block content %}
+<div class="page-container">
+ <div class="page-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+ <h1 class="page-title">
+ <span class="title-icon"></span> Detalle de Sesión: {{ session_obj.opened_at.strftime('%d/%m/%Y') }}
+ </h1>
+ <a href="{{ url_for('session_history') }}" class="btn btn-outline"> Volver al Historial</a>
+ </div>
+
+ <!-- Stats -->
+ <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 30px;">
+ <div class="card" style="text-align: center;">
+ <div style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 5px;">Base Inicial</div>
+ <div style="font-size: 1.5rem; font-weight: 700; color: var(--primary);">{{ session_obj.base_amount | cop }}</div>
+ </div>
+ <div class="card" style="text-align: center;">
+ <div style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 5px;">Ventas en Efectivo</div>
+ <div style="font-size: 1.5rem; font-weight: 700; color: var(--success);">{{ cash_total | cop }}</div>
+ </div>
+ <div class="card" style="text-align: center;">
+ <div style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 5px;">Efectivo Esperado (Cajón)</div>
+ <div style="font-size: 1.5rem; font-weight: 700; color: var(--blue-dark);">{{ expected_cash_live | cop }}</div>
+ </div>
+ <div class="card" style="text-align: center;">
+ <div style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 5px;">Ventas por Transferencia</div>
+ <div style="font-size: 1.5rem; font-weight: 700; color: var(--purple);">{{ transfer_total | cop }}</div>
+ </div>
+ <div class="card" style="text-align: center;">
+ <div style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 5px;">Diferencia Arqueo</div>
+ {% if session_obj.status == 'cerrada' %}
+ {% set diff = session_obj.actual_cash - session_obj.expected_cash %}
+ {% if diff > 0 %}
+ <div style="font-size: 1.5rem; font-weight: 700; color: #e67e22;">+ {{ diff | cop }}</div>
+ {% elif diff < 0 %}
+ <div style="font-size: 1.5rem; font-weight: 700; color: var(--danger);">- {{ (diff | abs) | cop }}</div>
+ {% else %}
+ <div style="font-size: 1.5rem; font-weight: 700; color: var(--success);">$0</div>
+ {% endif %}
+ {% else %}
+ <div style="font-size: 1.5rem; font-weight: 700; color: var(--text-secondary);">Pendiente</div>
+ {% endif %}
+ </div>
+ </div>
+
+ <!-- Sales Table -->
+ <div class="card" style="padding: 0; overflow: hidden;">
+ <div style="padding: 15px; border-bottom: 1px solid var(--border); font-weight: bold; background: var(--bg-card-hover);">
+ Ventas Realizadas en esta Sesión
+ </div>
+ <table class="data-table">
+ <thead>
+ <tr>
+ <th>Factura</th>
+ <th>Hora</th>
+ <th>Método</th>
+ <th style="text-align: right;">Total</th>
+ <th style="text-align: right;">Acciones</th>
+ </tr>
+ </thead>
+ <tbody>
+ {% for sale in sales %}
+ <tr>
+ <td><strong>{{ sale.receipt_number }}</strong></td>
+ <td>{{ sale.sale_date.strftime('%H:%M:%S') }}</td>
+ <td>
+ {% if sale.payment_method == 'efectivo' %} Efectivo
+ {% elif sale.payment_method == 'tarjeta' %} Tarjeta {% if sale.payment_ref %}({{ sale.payment_ref }}){% endif %}
+ {% elif sale.payment_method == 'fiado' %} Fiado
+ {% else %} Transferencia {% if sale.payment_ref %}({{ sale.payment_ref }}){% endif %}{% endif %}
+ </td>
+ <td style="text-align: right; font-weight: 700;">{{ sale.total | cop }}</td>
+ <td style="text-align: right;">
+ <a href="{{ url_for('sale_detail', sale_id=sale.id) }}" class="btn btn-outline btn-sm">Ver Ticket</a>
+ </td>
+ </tr>
+ {% else %}
+ <tr>
+ <td colspan="5" style="text-align: center; padding: 20px; color: var(--text-secondary);">
+ No hay ventas registradas en este turno aún.
+ </td>
+ </tr>
+ {% endfor %}
+ </tbody>
+ </table>
+ </div>
+</div>
+{% endblock %}

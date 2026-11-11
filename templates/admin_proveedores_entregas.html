@@ -1,0 +1,177 @@
+{% extends "base.html" %}
+
+{% block title %}MercAPP — Control de Entregas y Pagos a Proveedores{% endblock %}
+
+{% block content %}
+<div class="page-container" style="max-width: 1200px; margin: 30px auto 60px;">
+  
+  <!-- Header -->
+  <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 26px; flex-wrap: wrap; gap: 16px;">
+    <div>
+      <div style="margin-bottom: 6px;">
+        <a href="{{ url_for('settings') }}" style="color: var(--text-secondary); text-decoration: none; font-size: 0.88rem;">
+          ← Volver a Centro de Control
+        </a>
+      </div>
+      <h1 style="margin: 0; font-size: 1.6rem; font-weight: 800; color: #FFFFFF;">
+        🚚 Entregas y Pagos a Proveedores
+      </h1>
+      <p style="margin: 4px 0 0; color: var(--text-secondary); font-size: 0.9rem;">
+        Historial de mercancía recibida, salidas de efectivo de caja y facturas físicas adjuntas.
+      </p>
+    </div>
+
+    <div>
+      <a href="{{ url_for('pos') }}" class="btn btn-primary" style="padding: 10px 18px; font-weight: 700; border-radius: 10px;">
+        Ir a Caja (POS)
+      </a>
+    </div>
+  </div>
+
+  <!-- KPI Summary Cards -->
+  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 18px; margin-bottom: 30px;">
+    <!-- KPI 1 -->
+    <div class="card" style="padding: 20px; border-radius: 14px; background: rgba(22, 27, 41, 0.85); border: 1px solid var(--border);">
+      <div style="font-size: 0.78rem; font-weight: 700; color: #94A3B8; text-transform: uppercase; margin-bottom: 6px;">Total Entregas Registradas</div>
+      <div style="font-size: 1.8rem; font-weight: 800; color: #FFFFFF;">{{ deliveries|length }}</div>
+      <div style="font-size: 0.8rem; color: #60A5FA; margin-top: 4px;">Despachos confirmados</div>
+    </div>
+
+    <!-- KPI 2 -->
+    <div class="card" style="padding: 20px; border-radius: 14px; background: rgba(22, 27, 41, 0.85); border: 1px solid rgba(239,68,68,0.3);">
+      <div style="font-size: 0.78rem; font-weight: 700; color: #EF4444; text-transform: uppercase; margin-bottom: 6px;">Total Efectivo Sacado de Caja</div>
+      <div style="font-size: 1.8rem; font-weight: 800; color: #F87171;">${{ "{:,}".format(total_cash_out).replace(',', '.') }}</div>
+      <div style="font-size: 0.8rem; color: #FCA5A5; margin-top: 4px;">Descontado del arqueo de caja</div>
+    </div>
+
+    <!-- KPI 3 -->
+    <div class="card" style="padding: 20px; border-radius: 14px; background: rgba(22, 27, 41, 0.85); border: 1px solid var(--border);">
+      <div style="font-size: 0.78rem; font-weight: 700; color: #94A3B8; text-transform: uppercase; margin-bottom: 6px;">Total Pagado por Transferencia</div>
+      <div style="font-size: 1.8rem; font-weight: 800; color: #60A5FA;">${{ "{:,}".format(total_transfer_out).replace(',', '.') }}</div>
+      <div style="font-size: 0.8rem; color: #94A3B8; margin-top: 4px;">Nequi / Daviplata / Bancos</div>
+    </div>
+
+    <!-- KPI 4 -->
+    <div class="card" style="padding: 20px; border-radius: 14px; background: rgba(22, 27, 41, 0.85); border: 1px solid rgba(255,167,38,0.3);">
+      <div style="font-size: 0.78rem; font-weight: 700; color: #FFA726; text-transform: uppercase; margin-bottom: 6px;">Total Mercancía Pagada</div>
+      <div style="font-size: 1.8rem; font-weight: 800; color: #FFA726;">${{ "{:,}".format(total_overall).replace(',', '.') }}</div>
+      <div style="font-size: 0.8rem; color: #94A3B8; margin-top: 4px;">Suma total cobrada por proveedores</div>
+    </div>
+  </div>
+
+  <!-- Deliveries Table -->
+  <div class="card" style="padding: 24px; border-radius: 16px; background: rgba(18, 22, 34, 0.9); border: 1px solid var(--border);">
+    <div style="margin-bottom: 18px;">
+      <h2 style="font-size: 1.2rem; font-weight: 800; color: #fff; margin: 0 0 4px;">Registro Cronológico de Despachos</h2>
+      <p style="color: var(--text-secondary); font-size: 0.85rem; margin: 0;">Revisa cada factura, comprobante y dinero descontado de tu caja registradora.</p>
+    </div>
+
+    {% if deliveries %}
+      <div style="overflow-x: auto;">
+        <table style="width: 100%; border-collapse: collapse; font-size: 0.88rem;">
+          <thead>
+            <tr style="border-bottom: 1px solid var(--border); text-align: left; color: #94A3B8; font-size: 0.78rem; text-transform: uppercase;">
+              <th style="padding: 12px 14px;">Fecha</th>
+              <th style="padding: 12px 14px;">Proveedor / Repartidor</th>
+              <th style="padding: 12px 14px;">No. Factura</th>
+              <th style="padding: 12px 14px;">Total Cobrado</th>
+              <th style="padding: 12px 14px;">Efectivo de Caja</th>
+              <th style="padding: 12px 14px;">Transferencia</th>
+              <th style="padding: 12px 14px; text-align: center;">Factura Adjunta</th>
+              <th style="padding: 12px 14px;">Novedades</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for d in deliveries %}
+              <tr style="border-bottom: 1px solid rgba(255,255,255,0.04);">
+                <td style="padding: 14px; color: #CBD5E1; white-space: nowrap;">
+                  {{ d.delivery_date.strftime('%d/%m/%Y %I:%M %p') }}
+                  {% if d.cash_session_id %}
+                    <div style="font-size: 0.72rem; color: #94A3B8;">Sesión #{{ d.cash_session_id }}</div>
+                  {% endif %}
+                </td>
+                <td style="padding: 14px;">
+                  <strong style="color: #fff; display: block;">{{ d.supplier.company_name if d.supplier else 'Proveedor' }}</strong>
+                  <span style="font-size: 0.78rem; color: #94A3B8;">{{ d.supplier.contact_name if d.supplier else '' }}</span>
+                </td>
+                <td style="padding: 14px; font-weight: 700; color: #FFA726;">
+                  {{ d.order_number }}
+                </td>
+                <td style="padding: 14px; font-weight: 700; color: #fff;">
+                  ${{ "{:,}".format(d.total_amount).replace(',', '.') }}
+                </td>
+                <td style="padding: 14px;">
+                  {% if d.amount_cash and d.amount_cash > 0 %}
+                    <span style="background: rgba(239,68,68,0.15); color: #F87171; font-weight: 700; padding: 3px 8px; border-radius: 6px; font-size: 0.85rem;">
+                      -${{ "{:,}".format(d.amount_cash).replace(',', '.') }}
+                    </span>
+                  {% else %}
+                    <span style="color: #64748B;">$0</span>
+                  {% endif %}
+                </td>
+                <td style="padding: 14px;">
+                  {% if d.amount_transfer and d.amount_transfer > 0 %}
+                    <span style="color: #60A5FA; font-weight: 600;">
+                      ${{ "{:,}".format(d.amount_transfer).replace(',', '.') }}
+                    </span>
+                  {% else %}
+                    <span style="color: #64748B;">$0</span>
+                  {% endif %}
+                </td>
+                <td style="padding: 14px; text-align: center;">
+                  {% if d.invoice_photo %}
+                    <button onclick="viewPhoto('{{ url_for('static', filename='images/invoices/' ~ d.invoice_photo) }}')"
+                            style="background: rgba(34,197,94,0.15); border: 1px solid rgba(34,197,94,0.3); color: #4ADE80; padding: 4px 10px; border-radius: 6px; font-size: 0.78rem; font-weight: 700; cursor: pointer;">
+                      📷 Ver Foto
+                    </button>
+                  {% else %}
+                    <span style="color: #64748B; font-size: 0.8rem;">Sin foto</span>
+                  {% endif %}
+                </td>
+                <td style="padding: 14px; color: #94A3B8; max-width: 220px; font-size: 0.82rem;">
+                  {{ d.notes or 'Sin novedades' }}
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <div style="text-align: center; padding: 50px 20px; color: var(--text-muted);">
+        <div style="font-size: 3rem; margin-bottom: 10px;">📋</div>
+        <h3 style="color: #fff; font-size: 1.15rem; margin: 0 0 6px;">No hay entregas registradas aún</h3>
+        <p style="font-size: 0.9rem; margin: 0;">Cuando los proveedores despachen pedidos a tu tienda, aparecerán aquí con sus fotos y descuentos de caja.</p>
+      </div>
+    {% endif %}
+  </div>
+</div>
+
+<!-- Modal para Ver Foto Ampliada -->
+<div id="photoModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); backdrop-filter: blur(10px); z-index: 1000; align-items: center; justify-content: center; padding: 20px; box-sizing: border-box;" onclick="closePhotoModal()">
+  <div style="position: relative; max-width: 750px; width: 100%; background: #121622; border: 1px solid var(--border); border-radius: 16px; padding: 20px; box-shadow: 0 25px 60px rgba(0,0,0,0.8);" onclick="event.stopPropagation()">
+    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px;">
+      <h3 style="margin: 0; font-size: 1.1rem; color: #fff;">Comprobante de Factura Adjunto</h3>
+      <button onclick="closePhotoModal()" style="background: transparent; border: none; color: #94A3B8; font-size: 1.5rem; cursor: pointer;">&times;</button>
+    </div>
+    <div style="text-align: center;">
+      <img id="modalImg" src="" alt="Foto factura" style="max-height: 520px; max-width: 100%; border-radius: 10px; object-fit: contain;">
+    </div>
+  </div>
+</div>
+
+<script>
+function viewPhoto(src) {
+  document.getElementById('modalImg').src = src;
+  const modal = document.getElementById('photoModal');
+  modal.style.display = 'flex';
+}
+
+function closePhotoModal() {
+  document.getElementById('photoModal').style.display = 'none';
+}
+
+window.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') closePhotoModal();
+});
+</script>
+{% endblock %}

@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block title %}MercAPP — Verificación de Seguridad{% endblock %}
+
+{% block content %}
+<div class="page-container" style="display: flex; align-items: center; justify-content: center; min-height: 80vh;">
+    <div class="login-card" style="max-width: 400px; width: 100%; border-top: 4px solid var(--accent);">
+        <div class="login-logo" style="margin-bottom: 24px;">
+            <span class="logo-icon" style="color: var(--accent);">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                    <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                </svg>
+            </span>
+            <h2 style="margin-top: 16px; font-size: 1.5rem;">Acceso Protegido</h2>
+            <p style="color: var(--text-secondary); font-size: 0.9rem;">Se requiere confirmar tu identidad para entrar a esta sección.</p>
+        </div>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="flash-messages" style="margin-bottom: 20px;">
+                    {% for category, message in messages %}
+                        <div class="flash-message {{ category }}" style="display: flex; align-items: center; gap: 8px;">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                            <span>{{ message }}</span>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        <form method="POST" action="{{ url_for('verify_admin', next=next) }}" class="login-form">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            
+            <div class="form-group">
+                <label class="form-label" for="password">Contraseña de Administrador</label>
+                <input type="password" id="password" name="password" class="form-control" 
+                       placeholder="Ingresa tu contraseña" required autofocus autocomplete="current-password"
+                       style="text-align: center; font-size: 1.1rem; letter-spacing: 2px;">
+            </div>
+
+            <div style="margin-top: 24px; display: flex; flex-direction: column; gap: 12px;">
+                <button type="submit" class="btn btn-accent btn-lg" style="width: 100%;">
+                    Desbloquear Acceso
+                </button>
+                <a href="{{ url_for('pos') }}" class="btn btn-outline" style="text-align: center; padding: 12px;">
+                    Volver a la Caja
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

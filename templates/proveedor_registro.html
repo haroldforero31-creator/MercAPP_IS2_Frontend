@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+
+{% block title %}MercAPP — Registro de Proveedor{% endblock %}
+
+{% block content %}
+<div class="page-container" style="max-width: 480px; margin: 30px auto 60px;">
+  <div class="card" style="padding: 34px 28px; border-radius: 18px; border: 1px solid rgba(255,167,38,0.25); box-shadow: 0 20px 50px rgba(0,0,0,0.6); background: rgba(18, 22, 34, 0.95); backdrop-filter: blur(15px);">
+    
+    <!-- Header -->
+    <div style="text-align: center; margin-bottom: 24px;">
+      <div style="width: 58px; height: 58px; border-radius: 14px; background: rgba(255, 167, 38, 0.12); border: 1px solid rgba(255, 167, 38, 0.35); display: flex; align-items: center; justify-content: center; margin: 0 auto 12px; color: #FFA726; font-size: 1.8rem;">
+        🚚
+      </div>
+      <h1 style="font-size: 1.6rem; font-weight: 800; margin: 0 0 6px; color: #FFFFFF;">Registro de Proveedor</h1>
+      <p style="color: var(--text-secondary); font-size: 0.9rem; margin: 0;">
+        Crea tu cuenta de distribuidor para registrar entregas, cobros y comprobantes en tiendas asociadas.
+      </p>
+    </div>
+
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div style="margin-bottom: 20px;">
+          {% for category, message in messages %}
+            <div style="padding: 12px 16px; border-radius: 10px; font-size: 0.88rem; margin-bottom: 8px; {% if category == 'error' %}background: rgba(239,68,68,0.15); border: 1px solid rgba(239,68,68,0.3); color: #FCA5A5;{% else %}background: rgba(34,197,94,0.15); border: 1px solid rgba(34,197,94,0.3); color: #86EFAC;{% endif %}">
+              {{ message }}
+            </div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+
+    <form method="POST" action="{{ url_for('proveedor_register') }}">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+      <div style="margin-bottom: 14px;">
+        <label style="display: block; font-size: 0.85rem; font-weight: 600; color: #CBD5E1; margin-bottom: 5px;">
+          Nombre de Empresa o Distribuidora *
+        </label>
+        <input type="text" name="company_name" class="form-control" placeholder="Ej. Distribuidora Postobón, Lácteos del Campo..." required
+               style="width: 100%; padding: 11px 14px; border-radius: 10px; background: #131722; border: 1px solid var(--border); color: #fff; font-size: 0.92rem; box-sizing: border-box;">
+      </div>
+
+      <div style="margin-bottom: 14px;">
+        <label style="display: block; font-size: 0.85rem; font-weight: 600; color: #CBD5E1; margin-bottom: 5px;">
+          Nombre del Preventista / Repartidor *
+        </label>
+        <input type="text" name="contact_name" class="form-control" placeholder="Ej. Carlos Mendoza" required
+               style="width: 100%; padding: 11px 14px; border-radius: 10px; background: #131722; border: 1px solid var(--border); color: #fff; font-size: 0.92rem; box-sizing: border-box;">
+      </div>
+
+      <div style="margin-bottom: 14px;">
+        <label style="display: block; font-size: 0.85rem; font-weight: 600; color: #CBD5E1; margin-bottom: 5px;">
+          Celular / WhatsApp de Contacto *
+        </label>
+        <input type="tel" name="phone" class="form-control" placeholder="Ej. 312 456 7890" required
+               style="width: 100%; padding: 11px 14px; border-radius: 10px; background: #131722; border: 1px solid var(--border); color: #fff; font-size: 0.92rem; box-sizing: border-box;">
+      </div>
+
+      <div style="margin-bottom: 14px;">
+        <label style="display: block; font-size: 0.85rem; font-weight: 600; color: #CBD5E1; margin-bottom: 5px;">
+          Correo Electrónico *
+        </label>
+        <input type="email" name="email" class="form-control" placeholder="proveedor@empresa.com" required
+               style="width: 100%; padding: 11px 14px; border-radius: 10px; background: #131722; border: 1px solid var(--border); color: #fff; font-size: 0.92rem; box-sizing: border-box;">
+        <small style="color: #94A3B8; font-size: 0.78rem;">Te enviaremos un código de seguridad de 6 dígitos para verificar tu cuenta.</small>
+      </div>
+
+      <div style="margin-bottom: 22px;">
+        <label style="display: block; font-size: 0.85rem; font-weight: 600; color: #CBD5E1; margin-bottom: 5px;">
+          Contraseña *
+        </label>
+        <input type="password" name="password" class="form-control" placeholder="Mínimo 6 caracteres" minlength="6" required
+               style="width: 100%; padding: 11px 14px; border-radius: 10px; background: #131722; border: 1px solid var(--border); color: #fff; font-size: 0.92rem; box-sizing: border-box;">
+      </div>
+
+      <button type="submit" class="btn" style="width: 100%; padding: 13px; font-weight: 700; font-size: 1rem; border-radius: 10px; background: linear-gradient(135deg, #FFA726, #F57C00); color: #000; border: none; cursor: pointer; box-shadow: 0 4px 15px rgba(255, 167, 38, 0.35);">
+        Continuar y Verificar Correo ➔
+      </button>
+    </form>
+
+    <div style="text-align: center; margin-top: 22px; padding-top: 18px; border-top: 1px solid rgba(255,255,255,0.06);">
+      <span style="color: var(--text-secondary); font-size: 0.88rem;">¿Ya tienes una cuenta de proveedor?</span>
+      <a href="{{ url_for('proveedor_login') }}" style="color: #FFA726; font-weight: 700; text-decoration: none; margin-left: 6px; font-size: 0.88rem;">
+        Inicia sesión aquí
+      </a>
+    </div>
+
+    <div style="text-align: center; margin-top: 14px;">
+      <a href="{{ url_for('index') }}" style="color: var(--text-muted); text-decoration: none; font-size: 0.82rem;">
+        ← Volver al inicio de MercAPP
+      </a>
+    </div>
+  </div>
+</div>
+{% endblock %}

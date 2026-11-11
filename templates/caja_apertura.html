@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
+ <title>MercAPP — Apertura de Caja</title>
+ <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+ <link rel="icon"
+ href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'></text></svg>">
+</head>
+
+<body>
+ <!-- Navbar -->
+ <nav class="navbar">
+ <div class="nav-brand">
+ <span class="nav-logo"></span>
+ <span class="nav-name">MercAPP - Apertura de Caja</span>
+ </div>
+ <div class="nav-user">
+ <span class="user-greeting">👋 Hola, {{ current_user.name }}</span>
+ <a href="{{ url_for('logout') }}" onclick="confirmAppLogout(event, '{{ url_for('logout') }}')" class="btn btn-outline btn-sm">Cerrar Sesión</a>
+ </div>
+ </nav>
+
+ <!-- Flash Messages -->
+ {% with messages = get_flashed_messages(with_categories=true) %}
+ {% if messages %}
+ <div class="flash-container">
+ {% for category, message in messages %}
+ <div class="flash-message {{ category }}" onclick="this.remove()">
+ {% if category == 'success' %}{% elif category == 'error' %}{% else %}{% endif %}
+ <span>{{ message }}</span>
+ </div>
+ {% endfor %}
+ </div>
+ {% endif %}
+ {% endwith %}
+
+ <div class="login-wrapper">
+ <div class="login-card" style="max-width: 450px;">
+ <div class="login-logo">
+ <span class="logo-icon"></span>
+ <h1>Apertura de Caja</h1>
+ <p>Ingresa la base en efectivo para iniciar el día</p>
+ </div>
+
+ <form method="POST" action="{{ url_for('session_open') }}" class="login-form">
+ <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+ <div class="form-group">
+ <label class="form-label" for="base_amount">Monto Base o Sencillo (Efectivo)</label>
+ <input type="number" id="base_amount" name="base_amount" class="form-control" placeholder="0"
+ min="0" step="50" required autofocus
+ style="font-size: 1.8rem; font-weight: bold; text-align: center;">
+ <div id="montoError"
+ style="color: var(--danger); font-size: 0.85rem; margin-top: 5px; text-align: center; display: none;">
+ Solo se permiten divisas válidas (Múltiplo de $50).
+ </div>
+ </div>
+
+ <div class="quick-money-buttons"
+ style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 15px;">
+ <button type="button" class="btn btn-outline money-btn" data-val="100000">+ $100.000</button>
+ <button type="button" class="btn btn-outline money-btn" data-val="50000">+ $50.000</button>
+ <button type="button" class="btn btn-outline money-btn" data-val="20000">+ $20.000</button>
+ <button type="button" class="btn btn-outline money-btn" data-val="10000">+ $10.000</button>
+ <button type="button" class="btn btn-outline money-btn" data-val="5000">+ $5.000</button>
+ <button type="button" class="btn btn-outline money-btn" data-val="2000">+ $2.000</button>
+ <button type="button" class="btn btn-outline money-btn" data-val="1000">+ $1.000</button>
+ <button type="button" class="btn btn-outline money-btn" data-val="500">+ $500</button>
+ <button type="button" class="btn btn-outline money-btn" data-val="200">+ $200</button>
+ <button type="button" class="btn btn-outline money-btn" data-val="100">+ $100</button>
+ <button type="button" class="btn btn-outline money-btn" data-val="50">+ $50</button>
+ <button type="button" class="btn btn-outline"
+ style="background-color: var(--background-dark); color: var(--text-color); border: none;"
+ onclick="document.getElementById('base_amount').value=''">Borrar todo</button>
+ </div>
+
+ <button type="submit" class="btn btn-primary" id="submitBtn"
+ style="margin-top: 10px; font-size: 1.1rem; padding: 12px; width: 100%;">
+ 🔓 Abrir Caja y Comenzar a Vender
+ </button>
+ </form>
+ </div>
+ </div>
+
+ <script>
+ document.querySelectorAll('.flash-message').forEach(msg => {
+ setTimeout(() => {
+ msg.style.opacity = '0';
+ msg.style.transform = 'translateX(100%)';
+ setTimeout(() => msg.remove(), 300);
+ }, 5000);
+ });
+
+ const baseInput = document.getElementById('base_amount');
+ const submitBtn = document.getElementById('submitBtn');
+ const montoError = document.getElementById('montoError');
+
+ function validateAmount() {
+ let val = parseInt(baseInput.value, 10);
+ if (isNaN(val) || val < 0) {
+ baseInput.value = '';
+ val = 0;
+ }
+ if (val > 0 && val % 50 !== 0) {
+ montoError.style.display = 'block';
+ submitBtn.disabled = true;
+ } else {
+ montoError.style.display = 'none';
+ submitBtn.disabled = false;
+ }
+ }
+
+ baseInput.addEventListener('input', validateAmount);
+
+ document.querySelectorAll('.money-btn').forEach(btn => {
+ btn.addEventListener('click', () => {
+ let current = parseInt(baseInput.value, 10) || 0;
+ let add = parseInt(btn.getAttribute('data-val'), 10);
+ baseInput.value = current + add;
+ validateAmount();
+ });
+ });
+    <!-- Modal de confirmación para cerrar sesión -->
+    <div class="modal-overlay" id="logoutConfirmModal">
+        <div class="modal" style="max-width: 380px;">
+            <div class="modal-header">
+                <span class="modal-title" style="display: flex; align-items: center; gap: 8px;">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                    Cerrar Sesión
+                </span>
+                <button class="modal-close" onclick="closeLogoutModal()">✕</button>
+            </div>
+            <div class="modal-body" style="padding: 24px; text-align: center;">
+                <div style="width: 54px; height: 54px; border-radius: 50%; background: rgba(239, 68, 68, 0.12); display: flex; align-items: center; justify-content: center; margin: 0 auto 16px auto;">
+                    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2.2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                </div>
+                <h3 style="margin: 0 0 8px 0; font-size: 1.15rem; color: var(--text); font-weight: 600;">¿Estás seguro de cerrar sesión?</h3>
+                <p style="margin: 0 0 24px 0; color: var(--text-secondary); font-size: 0.9rem; line-height: 1.4;">Tendrás que volver a ingresar tus credenciales para acceder nuevamente al sistema.</p>
+                <div style="display: flex; gap: 12px;">
+                    <button type="button" class="btn btn-outline" style="flex: 1;" onclick="closeLogoutModal()">Cancelar</button>
+                    <a id="confirmLogoutBtn" href="{{ url_for('logout') }}" class="btn" style="flex: 1; text-align: center; text-decoration: none; display: flex; align-items: center; justify-content: center; background-color: var(--error); color: white; border: none; border-radius: var(--radius-sm); font-weight: 600; padding: 10px 16px; transition: var(--transition);">Cerrar Sesión</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let pendingLogoutUrl = '';
+        function confirmAppLogout(event, url) {
+            if (event) {
+                event.preventDefault();
+                event.stopPropagation();
+            }
+            pendingLogoutUrl = url || "{{ url_for('logout') }}";
+            const modal = document.getElementById('logoutConfirmModal');
+            const confirmBtn = document.getElementById('confirmLogoutBtn');
+            if (confirmBtn && pendingLogoutUrl) {
+                confirmBtn.href = pendingLogoutUrl;
+            }
+            if (modal) {
+                modal.classList.add('active');
+            }
+        }
+
+        function closeLogoutModal() {
+            const modal = document.getElementById('logoutConfirmModal');
+            if (modal) {
+                modal.classList.remove('active');
+            }
+        }
+
+        document.getElementById('logoutConfirmModal')?.addEventListener('click', function(e) {
+            if (e.target === this) closeLogoutModal();
+        });
+
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') closeLogoutModal();
+        });
+    </script>
+</body>
+
+</html>

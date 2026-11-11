@@ -14,11 +14,14 @@
 <body>
  <!-- Global Page Loader -->
  <div class="page-loader" id="pageLoader">
- <div class="loader-content">
- <div class="loader-cart"><svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg></div>
- <div class="loader-shadow"></div>
- </div>
- <div class="loader-text">MercAPP</div>
+     <div class="loader-content">
+         <div class="loader-brand-container">
+             <img src="{{ url_for('static', filename='images/mercapp_cart_icon.png') }}" class="loader-cart-m" alt="M">
+             <img src="{{ url_for('static', filename='images/mercapp_text_part.png') }}" class="loader-text-rest" alt="ercAPP">
+         </div>
+         <div class="loader-shadow"></div>
+         <div class="loader-tagline">Sistema de Supermercado</div>
+     </div>
  </div>
 
  <!-- Flash Messages -->
@@ -101,8 +104,8 @@
  if (loader) {
  setTimeout(() => {
  loader.classList.add('hidden');
- setTimeout(() => loader.remove(), 600);
- }, 1500); // Allow animation to be seen
+ setTimeout(() => loader.remove(), 400);
+ }, 800);
  }
  });
 
