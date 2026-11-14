@@ -77,6 +77,12 @@
  <span>Ventas en Efectivo:</span>
  <span>+ {{ cash_sales | cop }}</span>
  </div>
+ {% if supplier_cash_out and supplier_cash_out > 0 %}
+ <div class="summary-row" style="color: #EF4444; font-weight: 700;">
+ <span>Pagos a Proveedores (Efectivo de Caja):</span>
+ <span>- {{ supplier_cash_out | cop }}</span>
+ </div>
+ {% endif %}
  <div class="summary-row">
  <span>Ventas con Tarjeta:</span>
  <span>{{ card | cop }}</span>

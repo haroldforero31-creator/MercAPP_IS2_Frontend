@@ -11,34 +11,31 @@
         .split-layout {
             display: flex;
             width: 100%;
-            height: 100vh;
+            min-height: 100vh;
             background: var(--bg);
-        }
-        
-        .customer-panel {
-            flex: 1;
-            background: var(--bg);
-            display: flex;
-            flex-direction: column;
             align-items: center;
             justify-content: center;
-            padding: 2rem;
-            color: var(--text);
-            text-align: center;
-            border-right: 1px solid var(--border);
+            gap: 24px;
+            padding: 40px 20px;
+            box-sizing: border-box;
+            flex-wrap: wrap;
         }
         
-        .customer-welcome-card {
+        .role-panel-card {
             background: var(--bg-card);
             border: 1px solid var(--border);
-            padding: 40px;
+            padding: 36px 28px;
             border-radius: var(--radius);
-            box-shadow: var(--shadow);
-            max-width: 400px;
+            box-shadow: var(--shadow-lg);
+            max-width: 380px;
             width: 100%;
+            min-height: 480px;
             display: flex;
             flex-direction: column;
             align-items: center;
+            justify-content: space-between;
+            text-align: center;
+            box-sizing: border-box;
         }
 
         .customer-icon {
@@ -50,17 +47,17 @@
             color: var(--primary);
         }
 
-        .customer-panel h2 {
-            font-size: 24px;
-            margin-bottom: 15px;
-            font-weight: 600;
+        .role-panel-card h2 {
+            font-size: 22px;
+            margin-bottom: 12px;
+            font-weight: 700;
             color: var(--text);
             line-height: 1.3;
         }
 
-        .customer-panel p {
-            font-size: 15px;
-            margin-bottom: 30px;
+        .role-panel-card p {
+            font-size: 14px;
+            margin-bottom: 24px;
             color: var(--text-secondary);
             line-height: 1.5;
         }
@@ -70,47 +67,29 @@
             text-decoration: underline !important;
         }
 
-        .admin-panel {
-            flex: 1;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: #111620;
-        }
-
-        .login-card {
+        .admin-login-card {
             background: var(--bg-card);
-            padding: 40px;
+            padding: 36px 28px;
             border-radius: var(--radius);
             border: 1px solid var(--border);
             box-shadow: var(--shadow-lg);
             width: 100%;
-            max-width: 400px;
+            max-width: 380px;
+            min-height: 480px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            box-sizing: border-box;
         }
 
-        @media (max-width: 768px) {
+        @media (max-width: 1100px) {
             .split-layout {
                 flex-direction: column;
+                align-items: center;
             }
-            .customer-panel {
-                flex: none;
-                min-height: 100vh;
-                width: 100%;
-                border-right: none;
-                border-bottom: 1px solid var(--border);
-                padding: 1.5rem 1rem;
-            }
-            .admin-panel {
-                flex: none;
-                min-height: 100vh;
-                width: 100%;
-                padding: 1.5rem 1rem;
-            }
-            .customer-welcome-card {
-                padding: 24px 16px;
-            }
-            .login-card {
-                padding: 24px 16px;
+            .role-panel-card, .admin-login-card {
+                max-width: 420px;
+                min-height: auto;
             }
         }
     </style>
@@ -149,63 +128,89 @@
  {% endwith %}
 
     <div class="split-layout">
-        <!-- Customer Panel (Left) -->
-        <div class="customer-panel">
-            <div class="customer-welcome-card">
+        <!-- Panel 1: Clientes (Haz tus pedidos aquí) -->
+        <div class="role-panel-card">
+            <div>
                 <div class="customer-icon">
-                    <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="9" cy="21" r="1"></circle>
+                        <circle cx="20" cy="21" r="1"></circle>
+                        <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+                    </svg>
+                </div>
+                <h2>Haz tus pedidos aquí</h2>
+                <p>Pide para recoger o solicita envío a domicilio. Inicia sesión para ver las tiendas cercanas.</p>
+            </div>
+            
+            <div style="width: 100%;">
+                <a href="{{ url_for('customer_login') }}" class="btn btn-primary" style="display: block; text-decoration: none; text-align: center; margin-bottom: 16px; line-height: 24px; background-color: var(--primary); font-weight: 700;">
+                    Iniciar Sesión Clientes
+                </a>
+                
+                <div style="color: var(--text-secondary); font-size: 0.9rem;">
+                    ¿No tienes una cuenta aún? <a href="{{ url_for('customer_register') }}" class="customer-register-link" style="color: var(--primary); text-decoration: none; font-weight: 600;">Regístrate aquí</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Panel 2: Proveedores (Portal de Proveedores) -->
+        <div class="role-panel-card" style="border-color: rgba(255, 167, 38, 0.35); background: rgba(18, 22, 34, 0.95);">
+            <div>
+                <div class="customer-icon" style="background: rgba(255, 167, 38, 0.12); border-color: rgba(255, 167, 38, 0.35); color: #FFA726;">
+                    <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <rect x="1" y="3" width="15" height="13"></rect>
                         <polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon>
                         <circle cx="5.5" cy="18.5" r="2.5"></circle>
                         <circle cx="18.5" cy="18.5" r="2.5"></circle>
                     </svg>
                 </div>
-                <h2>Haz tus pedidos aquí</h2>
-                <p>Pide para recoger o solicita envío a domicilio. Inicia sesión para ver las tiendas cercanas.</p>
-                
-                <a href="{{ url_for('customer_login') }}" class="btn btn-primary" style="display: block; text-decoration: none; text-align: center; margin-bottom: 20px; line-height: 24px; background-color: var(--primary);">
-                    Iniciar Sesión Clientes
+                <h2 style="color: #FFFFFF;">Portal de Proveedores</h2>
+                <p>Ingresa tus despachos, reporta novedades de mercancía y solicita pagos a tiendas aliadas.</p>
+            </div>
+            
+            <div style="width: 100%;">
+                <a href="{{ url_for('proveedor_login') }}" class="btn" style="display: block; text-decoration: none; text-align: center; margin-bottom: 16px; line-height: 24px; background: linear-gradient(135deg, #FFA726, #F57C00); color: #000; font-weight: 800; border-radius: var(--radius); padding: 10px 18px;">
+                    Iniciar Sesión Proveedor
                 </a>
                 
-                <div style="color: var(--text-secondary); font-size: 0.95rem;">
-                    ¿No tienes una cuenta aún? <a href="{{ url_for('customer_register') }}" class="customer-register-link" style="color: var(--primary); text-decoration: none; font-weight: 500;">Regístrate aquí</a>
+                <div style="color: var(--text-secondary); font-size: 0.9rem;">
+                    ¿Eres proveedor nuevo? <a href="{{ url_for('proveedor_register') }}" class="customer-register-link" style="color: #FFA726; text-decoration: none; font-weight: 600;">Regístrate aquí</a>
                 </div>
             </div>
         </div>
 
-        <!-- Admin Panel (Right) -->
-        <div class="admin-panel">
-            <div class="login-card">
-                <div class="login-logo" style="text-align: center; margin-bottom: 24px;">
+        <!-- Panel 3: Administrador (MercAPP Sistema de Supermercado) -->
+        <div class="admin-login-card">
+            <div>
+                <div class="login-logo" style="text-align: center; margin-bottom: 20px;">
                     <img src="{{ url_for('static', filename='images/mercapp_brand_logo.png') }}" alt="MercAPP" class="login-brand-logo">
-                    <p style="color: var(--text-secondary); font-size: 0.9rem; margin-top: 4px;">Sistema de Supermercado</p>
+                    <p style="color: var(--text-secondary); font-size: 0.88rem; margin-top: 4px;">Sistema de Supermercado</p>
                 </div>
 
                 <form method="POST" class="login-form" id="loginForm">
                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 
-                    
-                    <div class="form-group">
-                        <label class="form-label" for="email">Correo Electrónico (Administrador)</label>
+                    <div class="form-group" style="margin-bottom: 14px;">
+                        <label class="form-label" for="email" style="font-size: 0.85rem;">Correo Electrónico (Administrador)</label>
                         <input aria-label="Correo Electrónico" type="email" id="email" name="email" class="form-control" 
-                        placeholder="correo@ejemplo.com" required autocomplete="username" autofocus>
+                        placeholder="correo@ejemplo.com" required autocomplete="username">
                     </div>
 
-                    <div class="form-group">
-                        <label class="form-label" for="password">Contraseña</label>
+                    <div class="form-group" style="margin-bottom: 14px;">
+                        <label class="form-label" for="password" style="font-size: 0.85rem;">Contraseña</label>
                         <input aria-label="Contraseña" type="password" id="password" name="password" class="form-control" 
                         placeholder="••••••••" required autocomplete="current-password">
-                        <div style="text-align: right; margin-top: 8px;">
-                            <a href="{{ url_for('forgot_password') }}" style="font-size: 0.85rem; color: var(--text-secondary); text-decoration: none;">¿Olvidaste tu contraseña?</a>
+                        <div style="text-align: right; margin-top: 6px;">
+                            <a href="{{ url_for('forgot_password') }}" style="font-size: 0.82rem; color: var(--text-secondary); text-decoration: none;">¿Olvidaste tu contraseña?</a>
                         </div>
                     </div>
 
-                    <button type="submit" class="btn btn-primary" id="loginBtn" style="margin-top: 10px;">
+                    <button type="submit" class="btn btn-primary" id="loginBtn" style="width: 100%; margin-top: 6px; font-weight: 700;">
                         Iniciar Sesión
                     </button>
  
-                    <div style="text-align: center; margin-top: 20px; color: var(--text-secondary);">
-                        ¿No tienes una cuenta aún? <a href="{{ url_for('register') }}" style="color: var(--primary);">Registra tu tienda</a>
+                    <div style="text-align: center; margin-top: 16px; color: var(--text-secondary); font-size: 0.88rem;">
+                        ¿No tienes una cuenta aún? <a href="{{ url_for('register') }}" style="color: var(--primary); font-weight: 600;">Registra tu tienda</a>
                     </div>
                 </form>
             </div>
