@@ -173,15 +173,15 @@
  </div>
 
  <script>
- const expected = parseInt('{{ expected_cash }}', 10);
+ const expected = Number.parseInt('{{ expected_cash }}', 10);
  const actualInput = document.getElementById('actual_cash');
  const diffText = document.getElementById('diffText');
  const submitBtn = document.getElementById('submitBtn');
  const montoError = document.getElementById('montoError');
 
  function validateAmount() {
- let actual = parseInt(actualInput.value, 10);
- if (isNaN(actual) || actual < 0) {
+ let actual = Number.parseInt(actualInput.value, 10);
+ if (Number.isNaN(actual) || actual < 0) {
  actualInput.value = '';
  actual = 0;
  }
@@ -197,7 +197,7 @@
  submitBtn.disabled = false;
  }
 
- if (isNaN(actual) || actualInput.value === '') {
+ if (Number.isNaN(actual) || actualInput.value === '') {
  diffText.innerText = '';
  return;
  }
@@ -219,8 +219,8 @@
 
  document.querySelectorAll('.money-btn').forEach(btn => {
  btn.addEventListener('click', () => {
- let current = parseInt(actualInput.value, 10) || 0;
- let add = parseInt(btn.getAttribute('data-val'), 10);
+ let current = Number.parseInt(actualInput.value, 10) || 0;
+ let add = Number.parseInt(btn.getAttribute('data-val'), 10);
  actualInput.value = current + add;
  validateAmount();
  });

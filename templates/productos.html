@@ -205,7 +205,7 @@
                 <button class="btn btn-outline btn-sm" onclick="clearBulkSelection()" style="font-size: 0.8rem;">Deseleccionar</button>
             </div>
             <div style="display: flex; align-items: center; gap: 12px;">
-                <label style="font-weight: 600; font-size: 0.95rem; white-space: nowrap;">Nuevo precio (COP):</label>
+                <label for="bulkNewPrice" style="font-weight: 600; font-size: 0.95rem; white-space: nowrap;">Nuevo precio (COP):</label>
                 <input aria-label="Nuevo precio" type="text" id="bulkNewPrice" class="form-control" placeholder="Ej: 4000" 
                        style="width: 150px; font-size: 1.1rem; font-weight: 700; text-align: center;"
                        oninput="this.value = this.value.replace(/\D/g, ''); updateBulkPricePreview();">
@@ -232,19 +232,19 @@
             <h3 style="margin-top: 0; color: var(--primary);">Exportar Inventario</h3>
             <p style="color: var(--text-muted); margin-bottom: 20px;">¿Qué productos deseas descargar a Excel (CSV)?</p>
             
-            <label style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px; cursor: pointer;">
-                <input id="input_exportMode" aria-label="Exportmode" type="radio" name="exportMode" value="all" checked onchange="document.getElementById('exportCategorySelect').style.display='none'" style="accent-color: var(--primary); width: 18px; height: 18px;">
+            <label for="input_exportMode_all" style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px; cursor: pointer;">
+                <input id="input_exportMode_all" aria-label="Todo el inventario" type="radio" name="exportMode" value="all" checked onchange="document.getElementById('exportCategorySelect').style.display='none'" style="accent-color: var(--primary); width: 18px; height: 18px;">
                 <span style="font-weight: 600;">Todo el inventario</span>
             </label>
             
-            <label style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px; cursor: pointer;">
-                <input id="input_exportMode" aria-label="Exportmode" type="radio" name="exportMode" value="category" onchange="document.getElementById('exportCategorySelect').style.display='block'" style="accent-color: var(--primary); width: 18px; height: 18px;">
+            <label for="input_exportMode_category" style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px; cursor: pointer;">
+                <input id="input_exportMode_category" aria-label="Por categorías específicas" type="radio" name="exportMode" value="category" onchange="document.getElementById('exportCategorySelect').style.display='block'" style="accent-color: var(--primary); width: 18px; height: 18px;">
                 <span style="font-weight: 600;">Por categorías específicas</span>
             </label>
             
             <div id="exportCategorySelect" style="display: none; margin-left: 26px; width: calc(100% - 26px); margin-bottom: 20px; max-height: 150px; overflow-y: auto; background: var(--bg-input); padding: 10px; border-radius: 8px;">
                 {% for cat in categories %}
-                <label style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px; cursor: pointer; font-size: 0.9rem;">
+                <label for="field_248" style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px; cursor: pointer; font-size: 0.9rem;">
                     <input id="field_248" aria-label="Campo" type="checkbox" class="export-category-chk" value="{{ cat.id }}" style="accent-color: var(--primary);">
                     <span>{{ cat.name }}</span>
                 </label>

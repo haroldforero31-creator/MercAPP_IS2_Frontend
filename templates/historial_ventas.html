@@ -34,9 +34,9 @@
 
     <!-- Filters -->
     <form class="filter-bar" method="GET" action="{{ url_for('sales_history') }}">
-        <label class="form-label" style="margin: 0; white-space: nowrap;">Desde:</label>
+        <label for="input_date_from" class="form-label" style="margin: 0; white-space: nowrap;">Desde:</label>
         <input id="input_date_from" aria-label="Desde:" type="date" name="date_from" class="form-control" value="{{ date_from }}" style="max-width: 180px;">
-        <label class="form-label" style="margin: 0; white-space: nowrap;">Hasta:</label>
+        <label for="input_date_to" class="form-label" style="margin: 0; white-space: nowrap;">Hasta:</label>
         <input id="input_date_to" aria-label="Desde:" type="date" name="date_to" class="form-control" value="{{ date_to }}" style="max-width: 180px;">
         <select id="input_method" aria-label="Desde:" name="method" class="form-control" style="max-width: 180px;">
             <option value="">Todos los métodos</option>

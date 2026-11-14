@@ -22,7 +22,7 @@
         <label class="form-label">Categoría *</label>
         <div class="category-grid" style="margin-bottom: 8px;">
           {% for cat in categories %}
-          <label class="category-btn" style="cursor: pointer; position: relative;" id="catBtn{{ cat.id }}"
+          <label for="input_category_id" class="category-btn" style="cursor: pointer; position: relative;" id="catBtn{{ cat.id }}"
             onclick="selectCategory({{ cat.id }})">
             <input id="input_category_id" aria-label="Category id" type="radio" name="category_id" value="{{ cat.id }}" style="position: absolute; opacity: 0;" {% if
               editing and product.category_id==cat.id %}checked{% endif %} required>
@@ -34,7 +34,7 @@
 
       <!-- Subcategory -->
       <div class="form-group" id="subcategoryGroup" style="display: none;">
-        <label class="form-label">Subcategoría</label>
+        <label for="subcategorySelect" class="form-label">Subcategoría</label>
         <select aria-label="Subcategoría" name="subcategory_id" id="subcategorySelect" class="form-control">
           <option value="">-- Sin subcategoría --</option>
         </select>
@@ -105,7 +105,7 @@
       <div class="form-group">
         <label class="form-label">¿Se vende por peso?</label>
         <div style="display: flex; align-items: center; gap: 16px;">
-          <label class="weight-toggle"
+          <label for="sellByWeight" class="weight-toggle"
             style="display: flex; align-items: center; gap: 10px; cursor: pointer; padding: 12px 20px; background: var(--bg-input); border: 2px solid var(--border); border-radius: var(--radius-sm); transition: var(--transition);">
             <input aria-label="¿Se vende por peso?" type="checkbox" name="sell_by_weight" id="sellByWeight" {% if editing and product.sell_by_weight
               %}checked{% endif %} onchange="toggleWeightMode(this.checked)"
@@ -199,7 +199,7 @@
     <div class="modal-body" style="padding: 18px 24px; overflow-y: auto; flex: 1;">
       <!-- Code Input and Generate Button -->
       <div class="form-group" style="margin-bottom: 16px;">
-        <label class="form-label" style="font-weight: 600; font-size: 0.9rem;">Código de Barras para este
+        <label for="modalBarcodeInput" class="form-label" style="font-weight: 600; font-size: 0.9rem;">Código de Barras para este
           producto</label>
         <div style="display: flex; gap: 8px;">
           <input aria-label="Código de Barras para este" type="text" id="modalBarcodeInput" class="form-control" placeholder="Ej: 200100000001" maxlength="50"
@@ -246,7 +246,7 @@
       <!-- Print Options -->
       <div
         style="background: var(--bg-surface); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; margin-bottom: 12px;">
-        <label
+        <label for="modalChkAutoPrint"
           style="display: flex; align-items: center; gap: 10px; cursor: pointer; font-size: 0.92rem; font-weight: 600;">
           <input aria-label="Modalchkautoprint" type="checkbox" id="modalChkAutoPrint" checked
             style="width: 19px; height: 19px; accent-color: var(--primary);">
