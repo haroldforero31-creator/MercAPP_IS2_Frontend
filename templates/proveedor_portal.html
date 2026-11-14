@@ -115,7 +115,7 @@
                     </span>
                   </td>
                   <td style="padding: 14px; text-align: right;">
-                    <select onchange="updateOrderStatus({{ order.id }}, this.value)" style="background: #181D2B; color: #fff; border: 1px solid var(--border); padding: 6px 12px; border-radius: 8px; font-size: 0.85rem; cursor: pointer;">
+                    <select id="field_118" aria-label="Campo" onchange="updateOrderStatus({{ order.id }}, this.value)" style="background: #181D2B; color: #fff; border: 1px solid var(--border); padding: 6px 12px; border-radius: 8px; font-size: 0.85rem; cursor: pointer;">
                       <option value="">Cambiar Estado...</option>
                       <option value="CONFIRMADA" {% if order.status == 'CONFIRMADA' %}selected{% endif %}>Confirmar Pedido</option>
                       <option value="EN_CAMINO" {% if order.status == 'EN_CAMINO' %}selected{% endif %}>En Camino / Despachado</option>

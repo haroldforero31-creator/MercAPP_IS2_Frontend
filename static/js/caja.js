@@ -340,7 +340,7 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('manualWeightInput').addEventListener('input', function() {
             this.value = this.value.replace(/\D/g, '');
             if (currentWeightProduct) {
-                calculateWeightSubtotal(parseInt(this.value) || 0);
+                calculateWeightSubtotal(Number.parseInt(this.value) || 0);
             }
         });
     }
@@ -384,7 +384,7 @@ function runSmartSearch(query, commitMode) {
     // Check for PLU barcode (starts with 2, length 13)
     if (commitMode && query.length === 13 && query.startsWith('2')) {
         const pluCode = query.substring(1, 6); // 5 digits PLU
-        const priceOrWeight = parseInt(query.substring(7, 12), 10); // 5 digits Price
+        const priceOrWeight = Number.parseInt(query.substring(7, 12), 10); // 5 digits Price
         
         fetch(`/api/product/plu?code=${pluCode}`)
             .then(res => res.json())
@@ -1071,7 +1071,7 @@ function confirmWeight() {
     if (!currentWeightProduct) return;
     
     const gramsStr = document.getElementById('manualWeightInput').value;
-    const grams = parseInt(gramsStr) || 0;
+    const grams = Number.parseInt(gramsStr) || 0;
     
     if (grams < 10) {
         showToast('', 'El peso debe ser al menos 10g', 'error');
@@ -1083,7 +1083,7 @@ function confirmWeight() {
         return;
     }
     
-    const subtotal = parseInt(document.getElementById('manualWeightInput').dataset.subtotal) || 0;
+    const subtotal = Number.parseInt(document.getElementById('manualWeightInput').dataset.subtotal) || 0;
     
     const existingIndex = cart.findIndex(item => item.product_id === currentWeightProduct.id);
     
@@ -1202,7 +1202,7 @@ function switchPaymentTab(tab) {
 // ============================================================
 function addDenomination(amount) {
     const input = document.getElementById('amountReceived');
-    const current = parseInt(input.value) || 0;
+    const current = Number.parseInt(input.value) || 0;
     input.value = current + amount;
     calculateChange();
 }
@@ -1220,7 +1220,7 @@ function clearAmount() {
 
 function calculateChange() {
     const amountStr = document.getElementById('amountReceived').value;
-    const amount = parseInt(amountStr) || 0;
+    const amount = Number.parseInt(amountStr) || 0;
     const changeDiv = document.getElementById('changeDisplay');
     const changeValue = document.getElementById('changeValue');
     const btnPay = document.getElementById('btnPayEfectivo');
@@ -1249,8 +1249,8 @@ function calculateChange() {
 // MIXTO (SPLIT) PAYMENT HELPERS
 // ============================================================
 function calculateMixto() {
-    const transVal = parseInt(document.getElementById('mixtoTransferencia').value) || 0;
-    const cashReceived = parseInt(document.getElementById('mixtoEfectivoRecibido').value) || 0;
+    const transVal = Number.parseInt(document.getElementById('mixtoTransferencia').value) || 0;
+    const cashReceived = Number.parseInt(document.getElementById('mixtoEfectivoRecibido').value) || 0;
 
     // Cash needed is whatever transfer doesn't cover
     const cashNeeded = Math.max(0, currentTotal - transVal);
@@ -1304,12 +1304,12 @@ function calculateMixto() {
 
 function fillMixtoField(field) {
     if (field === 'efectivo') {
-        const transVal = parseInt(document.getElementById('mixtoTransferencia').value) || 0;
+        const transVal = Number.parseInt(document.getElementById('mixtoTransferencia').value) || 0;
         const needed = Math.max(0, currentTotal - transVal);
         const input = document.getElementById('mixtoEfectivoRecibido');
         if (input) input.value = needed;
     } else if (field === 'transferencia') {
-        const cashReceived = parseInt(document.getElementById('mixtoEfectivoRecibido').value) || 0;
+        const cashReceived = Number.parseInt(document.getElementById('mixtoEfectivoRecibido').value) || 0;
         const needed = Math.max(0, currentTotal - cashReceived);
         const input = document.getElementById('mixtoTransferencia');
         if (input) input.value = needed;
@@ -1360,7 +1360,7 @@ function processSale(method) {
     // Validate and add payment data
     if (method === 'efectivo') {
         const amount = document.getElementById('amountReceived').value;
-        if (!amount || parseInt(amount) < currentTotal) {
+        if (!amount || Number.parseInt(amount) < currentTotal) {
             showToast('', 'El monto recibido es insuficiente', 'error');
             return;
         }
@@ -1375,8 +1375,8 @@ function processSale(method) {
         payload.payment.transfer_ref = '';
         payload.payment.transfer_name = '';
     } else if (method === 'mixto') {
-        const transVal = parseInt(document.getElementById('mixtoTransferencia').value) || 0;
-        const cashReceived = parseInt(document.getElementById('mixtoEfectivoRecibido').value) || 0;
+        const transVal = Number.parseInt(document.getElementById('mixtoTransferencia').value) || 0;
+        const cashReceived = Number.parseInt(document.getElementById('mixtoEfectivoRecibido').value) || 0;
         const bank = document.getElementById('mixtoTransferBank').value;
 
         const valTransfer = Math.min(transVal, currentTotal);
@@ -1452,7 +1452,7 @@ function processSale(method) {
                             method: 'POST',
                             headers: {'Content-Type': 'application/json', 'X-CSRFToken': document.querySelector('meta[name="csrf-token"]').getAttribute('content')},
                             body: JSON.stringify({printer_name: hwPrinter, sale_id: lastSaleId})
-                        });
+                        }).catch(err => console.warn('Hardware print error:', err));
                     } else {
                         // Browser html print
                         window.open(`/sales/${lastSaleId}/receipt`, '_blank');
@@ -1557,7 +1557,7 @@ function printReceipt() {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json', 'X-CSRFToken': CSRF_TOKEN},
                 body: JSON.stringify({printer_name: hwPrinter, sale_id: lastSaleId})
-            });
+            }).catch(err => console.warn('Hardware print error:', err));
         } else {
             window.open(`/sales/${lastSaleId}/receipt`, '_blank');
         }
@@ -1684,7 +1684,7 @@ function testDrawer() {
     }).then(r=>r.json()).then(res => {
         if(res.success) alert('Señal enviada al cajón.');
         else alert('Error: ' + res.message);
-    });
+    }).catch(err => console.warn('Drawer error:', err));
 }
 
 function testScale() {
@@ -1901,7 +1901,7 @@ function confirmCustomProduct() {
     const priceInput = document.getElementById('customProductPrice');
     
     const name = nameInput.value.trim() || 'Varios';
-    const price = parseInt(priceInput.value);
+    const price = Number.parseInt(priceInput.value);
     
     if (!price || price <= 0) {
         showToast('', 'Ingresa un precio válido', 'error');

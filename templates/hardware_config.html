@@ -28,7 +28,7 @@
  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px;">
   <!-- Manual Mode Card -->
   <label class="card" style="cursor: pointer; padding: 24px; text-align: center; border: 2px solid {{ 'var(--primary)' if settings.scale_mode == 'manual' else 'var(--border)' }}; transition: all 0.2s;">
-   <input type="radio" name="scale_mode" value="manual" {{ 'checked' if settings.scale_mode == 'manual' }} style="display: none;" onchange="this.form.submit()">
+   <input id="input_scale_mode" aria-label="Scale mode" type="radio" name="scale_mode" value="manual" {{ 'checked' if settings.scale_mode == 'manual' }} style="display: none;" onchange="this.form.submit()">
    <div style="margin-bottom: 12px; color: var(--accent);">
     <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 11V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v0"/><path d="M14 10V4a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v0"/><path d="M10 10.5V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v0"/><path d="M18 8a2 2 0 1 1 4 0v6a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.86-5.99-2.34l-3.6-3.6a2 2 0 0 1 2.83-2.82L7 15"/></svg>
    </div>
@@ -44,7 +44,7 @@
 
   <!-- Auto Mode Card -->
   <label class="card" style="cursor: pointer; padding: 24px; text-align: center; border: 2px solid {{ 'var(--primary)' if settings.scale_mode == 'auto' else 'var(--border)' }}; transition: all 0.2s;">
-   <input type="radio" name="scale_mode" value="auto" {{ 'checked' if settings.scale_mode == 'auto' }} style="display: none;" onchange="this.form.submit()">
+   <input id="input_scale_mode" aria-label="Scale mode" type="radio" name="scale_mode" value="auto" {{ 'checked' if settings.scale_mode == 'auto' }} style="display: none;" onchange="this.form.submit()">
    <div style="margin-bottom: 12px; color: #FFA726;">
     <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
    </div>
@@ -72,7 +72,7 @@
   <div class="form-group" style="margin-bottom: 20px;">
    <label class="form-label">Impresora Térmica (SAT)</label>
    <div style="display: flex; gap: 10px;">
-    <select id="hwPrinterSelect" class="form-control" style="font-size: 0.95rem; flex: 1;" onchange="saveHardwareConfig()">
+    <select aria-label="Impresora Térmica" id="hwPrinterSelect" class="form-control" style="font-size: 0.95rem; flex: 1;" onchange="saveHardwareConfig()">
      <option value="">Cargando impresoras...</option>
     </select>
     <button type="button" class="btn btn-outline btn-sm" onclick="testDrawer()">Abrir Cajón</button>
@@ -82,7 +82,7 @@
   <div class="form-group">
    <label class="form-label">Balanza Digital (Puerto COM)</label>
    <div style="display: flex; gap: 10px; margin-bottom: 10px;">
-    <select id="hwScaleSelect" class="form-control" style="font-size: 0.95rem; flex: 1;" onchange="saveHardwareConfig()">
+    <select aria-label="Balanza Digital" id="hwScaleSelect" class="form-control" style="font-size: 0.95rem; flex: 1;" onchange="saveHardwareConfig()">
      <option value="">Cargando puertos...</option>
     </select>
     <button type="button" class="btn btn-outline btn-sm" onclick="autoDetectScale()">Auto-detectar</button>

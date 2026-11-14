@@ -1244,7 +1244,6 @@ tbody tr:hover {
 
     /* —— Tables —— */
     .table-container {
-        border-radius: var(--radius-sm);
         margin: 0 -12px;
         width: calc(100% + 24px);
         border-left: none;

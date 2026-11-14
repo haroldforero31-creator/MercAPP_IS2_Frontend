@@ -24,7 +24,7 @@
           {% for cat in categories %}
           <label class="category-btn" style="cursor: pointer; position: relative;" id="catBtn{{ cat.id }}"
             onclick="selectCategory({{ cat.id }})">
-            <input type="radio" name="category_id" value="{{ cat.id }}" style="position: absolute; opacity: 0;" {% if
+            <input id="input_category_id" aria-label="Category id" type="radio" name="category_id" value="{{ cat.id }}" style="position: absolute; opacity: 0;" {% if
               editing and product.category_id==cat.id %}checked{% endif %} required>
             <span class="cat-name">{{ cat.name }}</span>
           </label>
@@ -35,7 +35,7 @@
       <!-- Subcategory -->
       <div class="form-group" id="subcategoryGroup" style="display: none;">
         <label class="form-label">Subcategoría</label>
-        <select name="subcategory_id" id="subcategorySelect" class="form-control">
+        <select aria-label="Subcategoría" name="subcategory_id" id="subcategorySelect" class="form-control">
           <option value="">-- Sin subcategoría --</option>
         </select>
       </div>
@@ -43,7 +43,7 @@
       <!-- Product Name -->
       <div class="form-group">
         <label class="form-label" for="productName">Nombre del Producto *</label>
-        <input type="text" id="productName" name="name" class="form-control" placeholder="Ej: Coca-Cola 600ml"
+        <input aria-label="Nombre del Producto *" type="text" id="productName" name="name" class="form-control" placeholder="Ej: Coca-Cola 600ml"
           value="{{ product.name if editing else '' }}" required minlength="2" maxlength="150"
           oninput="onProductNameOrPriceChange()">
       </div>
@@ -75,7 +75,7 @@
         </div>
 
         <div style="position: relative;">
-          <input type="text" id="productBarcode" name="barcode" class="form-control"
+          <input aria-label="Barcode" type="text" id="productBarcode" name="barcode" class="form-control"
             placeholder="Escanea o escribe el código (opcional, máx 50 caracteres)" maxlength="50"
             value="{{ product.barcode if editing and product.barcode else '' }}"
             style="font-family: monospace; font-size: 1.05rem; letter-spacing: 0.5px;">
@@ -94,7 +94,7 @@
       <!-- PLU Code (for label-printing scales) -->
       <div class="form-group">
         <label class="form-label" for="productPlu">Código PLU (Básculas Etiquetadoras)</label>
-        <input type="text" id="productPlu" name="plu_code" class="form-control"
+        <input aria-label="Código PLU" type="text" id="productPlu" name="plu_code" class="form-control"
           placeholder="Ej: 00015 (opcional, máx 50 caracteres)" maxlength="50"
           value="{{ product.plu_code if editing and product.plu_code else '' }}">
         <div class="form-hint">Si usas una báscula que imprime códigos de barras con precio o código de producto (hasta
@@ -107,13 +107,13 @@
         <div style="display: flex; align-items: center; gap: 16px;">
           <label class="weight-toggle"
             style="display: flex; align-items: center; gap: 10px; cursor: pointer; padding: 12px 20px; background: var(--bg-input); border: 2px solid var(--border); border-radius: var(--radius-sm); transition: var(--transition);">
-            <input type="checkbox" name="sell_by_weight" id="sellByWeight" {% if editing and product.sell_by_weight
+            <input aria-label="¿Se vende por peso?" type="checkbox" name="sell_by_weight" id="sellByWeight" {% if editing and product.sell_by_weight
               %}checked{% endif %} onchange="toggleWeightMode(this.checked)"
               style="width: 20px; height: 20px; accent-color: var(--primary);">
             <span style="font-weight: 600;"> Venta por peso</span>
           </label>
           <div id="weightUnitGroup" style="display: none;">
-            <select name="weight_unit" id="weightUnit" class="form-control" style="max-width: 180px;"
+            <select aria-label="Weight unit" name="weight_unit" id="weightUnit" class="form-control" style="max-width: 180px;"
               onchange="updatePriceLabel()">
               <option value="kg" {% if editing and product.weight_unit=='kg' %}selected{% endif %}>Kilogramo (kg)
               </option>
@@ -128,7 +128,7 @@
       <!-- Price -->
       <div class="form-group">
         <label class="form-label" for="productPrice" id="priceLabel">Precio (Pesos Colombianos) *</label>
-        <input type="text" id="productPrice" name="price" class="form-control"
+        <input aria-label="Precio" type="text" id="productPrice" name="price" class="form-control"
           placeholder="Ej: 3500 (sin puntos ni comas)" maxlength="9" value="{{ product.price if editing else '' }}"
           required style="font-size: 1.2rem; font-weight: 700;" oninput="onProductNameOrPriceChange()">
         <div class="form-hint" id="priceHint">Solo números enteros. Ejemplo: 3500 = $3.500 COP. Mínimo $100, Máximo
@@ -151,14 +151,14 @@
           <p class="form-hint">Imagen actual. Sube una nueva para reemplazarla.</p>
         </div>
         {% endif %}
-        <input type="file" id="productImage" name="image" class="form-control" accept=".jpg,.jpeg,.png,.webp">
+        <input aria-label="Image" type="file" id="productImage" name="image" class="form-control" accept=".jpg,.jpeg,.png,.webp">
         <div class="form-hint">Formatos: JPG, PNG, WEBP. Máximo 5MB. La imagen se optimizará automáticamente.</div>
       </div>
 
       <!-- Stock (hidden when sell_by_weight) -->
       <div class="form-group" id="stockGroup">
         <label class="form-label" for="productStock">Stock Actual (Opcional)</label>
-        <input type="number" id="productStock" name="stock" class="form-control"
+        <input aria-label="Stock Actual" type="number" id="productStock" name="stock" class="form-control"
           value="{{ product.stock if editing and product.stock is not none else '' }}" min="0" max="999999"
           style="max-width: 200px;">
         <div class="form-hint">Deja este campo vacío para productos con stock infinito. Si pones 0, el producto no se
@@ -202,7 +202,7 @@
         <label class="form-label" style="font-weight: 600; font-size: 0.9rem;">Código de Barras para este
           producto</label>
         <div style="display: flex; gap: 8px;">
-          <input type="text" id="modalBarcodeInput" class="form-control" placeholder="Ej: 200100000001" maxlength="50"
+          <input aria-label="Código de Barras para este" type="text" id="modalBarcodeInput" class="form-control" placeholder="Ej: 200100000001" maxlength="50"
             style="flex: 1; font-family: monospace; font-size: 1.15rem; font-weight: 700; letter-spacing: 1px;">
           <button type="button" class="btn btn-outline" onclick="generateNewBarcodeCode()" id="btnGenerateNewCode"
             title="Generar otro código único"
@@ -248,7 +248,7 @@
         style="background: var(--bg-surface); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; margin-bottom: 12px;">
         <label
           style="display: flex; align-items: center; gap: 10px; cursor: pointer; font-size: 0.92rem; font-weight: 600;">
-          <input type="checkbox" id="modalChkAutoPrint" checked
+          <input aria-label="Modalchkautoprint" type="checkbox" id="modalChkAutoPrint" checked
             style="width: 19px; height: 19px; accent-color: var(--primary);">
           <span>Imprimir etiqueta automáticamente al guardar cambios / agregar producto</span>
         </label>

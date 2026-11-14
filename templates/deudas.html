@@ -43,8 +43,8 @@
  <!-- Filters -->
  <div class="card" style="margin-bottom: 20px; padding: 16px;">
  <form method="GET" class="debt-filters">
- <input type="text" name="search" class="form-control" placeholder=" Buscar por nombre o teléfono..." value="{{ search }}" style="max-width: 350px;">
- <select name="status" class="form-control" style="max-width: 200px;" onchange="this.form.submit()">
+ <input id="input_search" aria-label="Buscar por nombre o teléfono..." type="text" name="search" class="form-control" placeholder=" Buscar por nombre o teléfono..." value="{{ search }}" style="max-width: 350px;">
+ <select id="input_status" aria-label="Status" name="status" class="form-control" style="max-width: 200px;" onchange="this.form.submit()">
  <option value="">Todos los estados</option>
  <option value="pendiente" {% if status_filter == 'pendiente' %}selected{% endif %}> Pendientes</option>
  <option value="pagado" {% if status_filter == 'pagado' %}selected{% endif %}> Pagados</option>
@@ -144,12 +144,12 @@
       <div class="modal-body">
         <div class="form-group">
           <label class="form-label" for="clientName">Nombre del Cliente *</label>
-          <input type="text" id="clientName" name="name" class="form-control" 
+          <input aria-label="Nombre del Cliente *" type="text" id="clientName" name="name" class="form-control" 
                  placeholder="Nombre completo del cliente" required minlength="2" autofocus>
         </div>
         <div class="form-group">
           <label class="form-label" for="clientEmail">Correo Electrónico * <span style="color: var(--accent); font-weight: normal; font-size: 0.8rem;">(para facturas automáticas)</span></label>
-          <input type="email" id="clientEmail" name="email" class="form-control" 
+          <input aria-label="Correo Electrónico *" type="email" id="clientEmail" name="email" class="form-control" 
                  placeholder="cliente@ejemplo.com" required>
           <small style="color: var(--text-muted); font-size: 0.78rem; display: block; margin-top: 4px;">
             Se enviará automáticamente la factura de lo fiado y los recibos de abono a este correo.
@@ -157,7 +157,7 @@
         </div>
         <div class="form-group">
           <label class="form-label" for="clientPhone">Teléfono (opcional)</label>
-          <input type="text" id="clientPhone" name="phone" class="form-control" 
+          <input aria-label="Teléfono" type="text" id="clientPhone" name="phone" class="form-control" 
                  placeholder="Ej: 3001234567">
         </div>
       </div>
@@ -181,18 +181,18 @@
       <div class="modal-body">
         <div class="form-group">
           <label class="form-label" for="editClientName">Nombre del Cliente *</label>
-          <input type="text" id="editClientName" name="name" class="form-control" required minlength="2">
+          <input aria-label="Nombre del Cliente *" type="text" id="editClientName" name="name" class="form-control" required minlength="2">
         </div>
         <div class="form-group">
           <label class="form-label" for="editClientEmail">Correo Electrónico *</label>
-          <input type="email" id="editClientEmail" name="email" class="form-control" placeholder="cliente@ejemplo.com" required>
+          <input aria-label="Correo Electrónico *" type="email" id="editClientEmail" name="email" class="form-control" placeholder="cliente@ejemplo.com" required>
           <small style="color: var(--text-muted); font-size: 0.78rem; display: block; margin-top: 4px;">
             Las facturas de ventas fiadas y los comprobantes de abono se enviarán a este correo.
           </small>
         </div>
         <div class="form-group">
           <label class="form-label" for="editClientPhone">Teléfono</label>
-          <input type="text" id="editClientPhone" name="phone" class="form-control" placeholder="Ej: 3001234567">
+          <input aria-label="Teléfono" type="text" id="editClientPhone" name="phone" class="form-control" placeholder="Ej: 3001234567">
         </div>
       </div>
       <div class="modal-footer">

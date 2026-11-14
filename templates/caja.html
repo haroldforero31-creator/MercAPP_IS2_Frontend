@@ -21,7 +21,7 @@
   <div class="scanner-input-wrapper" style="margin: 16px 20px;">
     <span id="searchModeIndicator" class="scanner-icon search-mode-indicator mode-idle"
     title="Escribe un código de barras o nombre de producto"></span>
-    <input type="text" id="barcodeInput" class="scanner-input"
+    <input aria-label="Barcodeinput" type="text" id="barcodeInput" class="scanner-input"
     placeholder="Código de barras o nombre del producto..." autocomplete="off" autofocus>
     <!-- Autocomplete Dropdown -->
     <div class="smart-dropdown" id="smartDropdown"></div>
@@ -55,7 +55,7 @@
      <div class="cart-items-count" id="cartItemsCount">0 artículos en el carrito</div>
      <div style="display: flex; align-items: center; gap: 10px;">
       <label class="voice-toggle" title="Anunciar total por voz al cobrar">
-       <input type="checkbox" id="chkVoiceAnnounce" onchange="setVoiceEnabled(this.checked)">
+       <input aria-label="Chkvoiceannounce" type="checkbox" id="chkVoiceAnnounce" onchange="setVoiceEnabled(this.checked)">
        <span class="voice-toggle-label">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/><path d="M15.54 8.46a5 5 0 0 1 0 7.08"/></svg>
        </span>
@@ -106,7 +106,7 @@
  </button>
  </div>
  <div class="panel-search">
- <input type="text" id="panelSearchInput" placeholder="Buscar producto por nombre..."
+ <input aria-label="Buscar producto por nombre..." type="text" id="panelSearchInput" placeholder="Buscar producto por nombre..."
  oninput="searchProducts(this.value)">
  </div>
  <div class="panel-content" id="panelContent">
@@ -173,7 +173,7 @@
 
  <div class="form-group">
  <label class="form-label">Monto Recibido (COP)</label>
- <input type="text" id="amountReceived" class="form-control" placeholder="Ej: 20000"
+ <input aria-label="Monto Recibido" type="text" id="amountReceived" class="form-control" placeholder="Ej: 20000"
  oninput="calculateChange()" style="font-size: 1.3rem; font-weight: 700; text-align: center;">
  </div>
 
@@ -197,7 +197,7 @@
 
  <!-- Print toggle -->
  <label class="print-toggle" id="printToggleEfectivo">
- <input type="checkbox" id="chkPrintReceipt">
+ <input aria-label="Chkprintreceipt" type="checkbox" id="chkPrintReceipt">
  <span class="print-toggle-label">Imprimir recibo</span>
  </label>
 
@@ -219,7 +219,7 @@
  
 
  <label class="print-toggle">
- <input type="checkbox" class="chk-print-mirror">
+ <input id="field_222" aria-label="Campo" type="checkbox" class="chk-print-mirror">
  <span class="print-toggle-label">Imprimir recibo</span>
  </label>
 
@@ -245,7 +245,7 @@
 
  <div class="form-group">
  <label class="form-label">Plataforma / Banco</label>
- <select id="transferBank" class="form-control">
+ <select aria-label="Plataforma / Banco" id="transferBank" class="form-control">
  <option value="">-- Seleccionar --</option>
  <option value="Nequi">Nequi</option>
  <option value="Daviplata">Daviplata</option>
@@ -263,7 +263,7 @@
  
 
  <label class="print-toggle">
- <input type="checkbox" class="chk-print-mirror">
+ <input id="field_266" aria-label="Campo" type="checkbox" class="chk-print-mirror">
  <span class="print-toggle-label">Imprimir recibo</span>
  </label>
 
@@ -285,7 +285,7 @@
    <span>Efectivo Recibido (Cliente)</span>
    <button type="button" class="btn btn-outline btn-sm" style="padding: 2px 6px; font-size: 0.75rem; color: var(--accent-light); border-color: var(--accent-light);" onclick="fillMixtoField('efectivo')">Restante</button>
  </label>
- <input type="number" id="mixtoEfectivoRecibido" class="form-control mixto-input" placeholder="0" oninput="calculateMixto()" style="font-size: 1.2rem; font-weight: 700; text-align: right;">
+ <input aria-label="0" type="number" id="mixtoEfectivoRecibido" class="form-control mixto-input" placeholder="0" oninput="calculateMixto()" style="font-size: 1.2rem; font-weight: 700; text-align: right;">
  </div>
 
  <div class="form-group" style="margin-bottom: 12px;">
@@ -294,7 +294,7 @@
    <button type="button" class="btn btn-outline btn-sm" style="padding: 2px 6px; font-size: 0.75rem; color: var(--accent-light); border-color: var(--accent-light);" onclick="fillMixtoField('transferencia')">Restante</button>
  </label>
  <div style="display: flex; gap: 8px; align-items: center;">
-   <select id="mixtoTransferBank" class="form-control" style="width: 140px;">
+   <select aria-label="Mixtotransferbank" id="mixtoTransferBank" class="form-control" style="width: 140px;">
      <option value="Nequi">Nequi</option>
      <option value="Daviplata">Daviplata</option>
      <option value="Bancolombia">Bancolombia</option>
@@ -302,7 +302,7 @@
      <option value="BBVA">BBVA</option>
      <option value="Otro">Otro</option>
    </select>
-   <input type="number" id="mixtoTransferencia" class="form-control mixto-input" placeholder="0" oninput="calculateMixto()" style="flex: 1; font-size: 1.2rem; font-weight: 700; text-align: right;">
+   <input aria-label="0" type="number" id="mixtoTransferencia" class="form-control mixto-input" placeholder="0" oninput="calculateMixto()" style="flex: 1; font-size: 1.2rem; font-weight: 700; text-align: right;">
  </div>
  </div>
 
@@ -322,7 +322,7 @@
  </div>
 
  <label class="print-toggle" style="margin-top: 12px; display: block;">
- <input type="checkbox" class="chk-print-mirror">
+ <input id="field_325" aria-label="Campo" type="checkbox" class="chk-print-mirror">
  <span class="print-toggle-label">Imprimir recibo</span>
  </label>
 
@@ -367,7 +367,7 @@
  <div class="form-group" style="margin-top: 12px;">
  <label class="form-label" style="margin-bottom: 4px;">Ingresar gramos manualmente</label>
  <div style="display: flex; gap: 12px; align-items: stretch;">
- <input type="text" id="manualWeightInput" class="form-control" style="font-size: 1.2rem; padding: 8px; font-weight: 700; text-align: center;" placeholder="Gramos (ej: 1400)">
+ <input aria-label="Ingresar gramos manualmente" type="text" id="manualWeightInput" class="form-control" style="font-size: 1.2rem; padding: 8px; font-weight: 700; text-align: center;" placeholder="Gramos (ej: 1400)">
  <div style="display: flex; align-items: center; padding: 0 16px; background: var(--bg-card); border: 2px solid var(--border); border-radius: var(--radius-sm); font-weight: 700;">
  g
  </div>
@@ -399,11 +399,11 @@
   <div class="modal-body" style="padding-top: 20px;">
    <div class="form-group">
     <label class="form-label">Nombre o descripción breve</label>
-    <input type="text" id="customProductName" class="form-control" placeholder="Ej: Bolsa, Recargo..." value="Varios">
+    <input aria-label="Nombre o descripción breve" type="text" id="customProductName" class="form-control" placeholder="Ej: Bolsa, Recargo..." value="Varios">
    </div>
    <div class="form-group">
     <label class="form-label">Precio ($)</label>
-    <input type="number" id="customProductPrice" class="form-control" placeholder="Monto" style="font-size: 1.5rem; font-weight: bold; text-align: center;">
+    <input aria-label="Precio" type="number" id="customProductPrice" class="form-control" placeholder="Monto" style="font-size: 1.5rem; font-weight: bold; text-align: center;">
    </div>
   </div>
   <div class="modal-footer">
@@ -495,39 +495,39 @@
    
    <div class="form-group" style="margin-bottom: 16px;">
     <label class="form-label">Nombre del Cliente *</label>
-    <input type="text" id="orderCustomerName" class="form-control" placeholder="Ej: Juan Pérez" required>
+    <input aria-label="Nombre del Cliente *" type="text" id="orderCustomerName" class="form-control" placeholder="Ej: Juan Pérez" required>
    </div>
    
    <div class="form-group" style="margin-bottom: 16px;">
     <label class="form-label">Celular (WhatsApp) *</label>
     <div style="display: flex; gap: 8px;">
-     <input type="text" class="form-control" value="+57" style="width: 60px; text-align: center;" disabled>
-     <input type="tel" id="orderCustomerPhone" class="form-control" placeholder="3001234567" style="flex: 1;" required>
+     <input id="field_504" aria-label="Celular" type="text" class="form-control" value="+57" style="width: 60px; text-align: center;" disabled>
+     <input aria-label="Celular" type="tel" id="orderCustomerPhone" class="form-control" placeholder="3001234567" style="flex: 1;" required>
     </div>
    </div>
    
    <div style="display: flex; gap: 16px; margin-bottom: 16px;">
     <div class="form-group" style="flex: 1;">
      <label class="form-label">Tipo de Pedido</label>
-     <select id="orderType" class="form-control" onchange="toggleOrderAddress()">
+     <select aria-label="Tipo de Pedido" id="orderType" class="form-control" onchange="toggleOrderAddress()">
       <option value="domicilio">Domicilio</option>
       <option value="recoger">Recoger en Tienda</option>
      </select>
     </div>
     <div class="form-group" style="flex: 1;">
      <label class="form-label">Costo de Envío</label>
-     <input type="number" id="orderDeliveryCost" class="form-control" value="0" min="0" step="50">
+     <input aria-label="Costo de Envío" type="number" id="orderDeliveryCost" class="form-control" value="0" min="0" step="50">
     </div>
    </div>
 
    <div class="form-group" id="orderAddressGroup" style="margin-bottom: 16px;">
     <label class="form-label">Dirección de Entrega</label>
-    <input type="text" id="orderCustomerAddress" class="form-control" placeholder="Ej: Calle 10 #20-30">
+    <input aria-label="Dirección de Entrega" type="text" id="orderCustomerAddress" class="form-control" placeholder="Ej: Calle 10 #20-30">
    </div>
    
    <div class="form-group" style="margin-bottom: 16px;">
     <label class="form-label">Método de Pago Provisional</label>
-    <select id="orderPaymentMethod" class="form-control">
+    <select aria-label="Método de Pago Provisional" id="orderPaymentMethod" class="form-control">
      <option value="efectivo">Efectivo</option>
      <option value="nequi">Nequi</option>
      <option value="daviplata">Daviplata</option>
@@ -537,7 +537,7 @@
    
    <div class="form-group">
     <label class="form-label">Notas / Observaciones</label>
-    <textarea id="orderNotes" class="form-control" rows="2" placeholder="Opcional"></textarea>
+    <textarea aria-label="Notas / Observaciones" id="orderNotes" class="form-control" rows="2" placeholder="Opcional"></textarea>
    </div>
 
   </div>
@@ -596,7 +596,7 @@ document.addEventListener('DOMContentLoaded', () => {
         speechSynthesis.getVoices();
     }
     // Set scale mode from server config
-    scaleMode = '{{ scale_mode }}';
+    window.scaleMode = '{{ scale_mode }}';
 });
 
 function toggleOrderAddress() {

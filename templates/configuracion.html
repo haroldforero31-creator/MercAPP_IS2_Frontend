@@ -20,12 +20,12 @@
  
  <div class="form-group">
  <label class="form-label">Nombre del Supermercado</label>
- <input type="text" name="store_name" class="form-control" value="{{ store.store_name }}">
+ <input id="input_store_name" aria-label="Nombre del Supermercado" type="text" name="store_name" class="form-control" value="{{ store.store_name }}">
  </div>
  
  <div class="form-group">
  <label class="form-label">Tu Nombre (Administrador)</label>
- <input type="text" name="user_name" class="form-control" value="{{ current_user.name }}" placeholder="Ej: Eraldo Barbosa">
+ <input id="input_user_name" aria-label="Tu Nombre" type="text" name="user_name" class="form-control" value="{{ current_user.name }}" placeholder="Ej: Eraldo Barbosa">
  <div class="form-hint">Este es el nombre que aparece en la barra de navegación.</div>
  </div>
  
@@ -37,7 +37,7 @@
  alt="Logo" style="max-width: 120px; border-radius: 8px; border: 2px solid var(--border);">
  </div>
  {% endif %}
- <input type="file" name="logo" class="form-control" accept=".jpg,.jpeg,.png,.webp">
+ <input id="input_logo" aria-label="Logo" type="file" name="logo" class="form-control" accept=".jpg,.jpeg,.png,.webp">
  <div class="form-hint">Formatos: JPG, PNG, WEBP. Se optimizará automáticamente.</div>
  </div>
 
@@ -49,23 +49,23 @@
  alt="QR Transferencia" style="max-width: 120px; border-radius: 8px; border: 2px solid var(--border);">
  </div>
  {% endif %}
- <input type="file" name="qr_transferencia" class="form-control" accept=".jpg,.jpeg,.png,.webp">
+ <input id="input_qr_transferencia" aria-label="Qr transferencia" type="file" name="qr_transferencia" class="form-control" accept=".jpg,.jpeg,.png,.webp">
  <div class="form-hint">Añade aquí tu QR de Nequi, Daviplata o Bancolombia. Se mostrará en el POS al cobrar.</div>
  </div>
 
  <div class="form-group">
  <label class="form-label">Dirección</label>
- <input type="text" name="direccion" class="form-control" value="{{ store.direccion }}" placeholder="Ej: Calle 10 #15-30">
+ <input id="input_direccion" aria-label="Dirección" type="text" name="direccion" class="form-control" value="{{ store.direccion }}" placeholder="Ej: Calle 10 #15-30">
  </div>
  
  <div class="form-group">
  <label class="form-label">Teléfono</label>
- <input type="text" name="telefono" class="form-control" value="{{ store.telefono }}" placeholder="Ej: 310 555 1234">
+ <input id="input_telefono" aria-label="Teléfono" type="text" name="telefono" class="form-control" value="{{ store.telefono }}" placeholder="Ej: 310 555 1234">
  </div>
  
  <div class="form-group">
  <label class="form-label">Ciudad / Departamento</label>
- <input type="text" name="ciudad" class="form-control" value="{{ store.ciudad }}" placeholder="Ej: Bogotá, Cundinamarca">
+ <input id="input_ciudad" aria-label="Ciudad / Departamento" type="text" name="ciudad" class="form-control" value="{{ store.ciudad }}" placeholder="Ej: Bogotá, Cundinamarca">
  </div>
  </div>
 
@@ -75,22 +75,22 @@
  
  <div class="form-group">
  <label class="form-label">Razón Social</label>
- <input type="text" name="razon_social" class="form-control" value="{{ store.razon_social }}" placeholder="Ej: MercAPP S.A.S">
+ <input id="input_razon_social" aria-label="Razón Social" type="text" name="razon_social" class="form-control" value="{{ store.razon_social }}" placeholder="Ej: MercAPP S.A.S">
  </div>
  
  <div class="form-group">
  <label class="form-label">NIT</label>
- <input type="text" name="nit" class="form-control" value="{{ store.nit }}" placeholder="Ej: 900.123.456-7">
+ <input id="input_nit" aria-label="NIT" type="text" name="nit" class="form-control" value="{{ store.nit }}" placeholder="Ej: 900.123.456-7">
  </div>
  
  <div class="form-group">
  <label class="form-label">RUT</label>
- <input type="text" name="rut" class="form-control" value="{{ store.rut }}" placeholder="Número de RUT">
+ <input id="input_rut" aria-label="RUT" type="text" name="rut" class="form-control" value="{{ store.rut }}" placeholder="Número de RUT">
  </div>
  
  <div class="form-group">
  <label class="form-label">Régimen Tributario</label>
- <select name="regimen_tributario" class="form-control">
+ <select id="input_regimen_tributario" aria-label="Régimen Tributario" name="regimen_tributario" class="form-control">
  <option value="No responsable de IVA" {% if store.regimen_tributario == 'No responsable de IVA' %}selected{% endif %}>No responsable de IVA</option>
  <option value="Responsable de IVA" {% if store.regimen_tributario == 'Responsable de IVA' %}selected{% endif %}>Responsable de IVA</option>
  <option value="Régimen Simple" {% if store.regimen_tributario == 'Régimen Simple' %}selected{% endif %}>Régimen Simple de Tributación</option>
@@ -99,12 +99,12 @@
  
  <div class="form-group">
  <label class="form-label">Gran Contribuyente (si aplica)</label>
- <input type="text" name="gran_contribuyente" class="form-control" value="{{ store.gran_contribuyente }}" placeholder="Ej: GRAN CONTRIBUYENTE Res. 267/14">
+ <input id="input_gran_contribuyente" aria-label="Gran Contribuyente" type="text" name="gran_contribuyente" class="form-control" value="{{ store.gran_contribuyente }}" placeholder="Ej: GRAN CONTRIBUYENTE Res. 267/14">
  </div>
  
  <div class="form-group">
  <label class="form-label">Agente de Retención (si aplica)</label>
- <input type="text" name="agente_retencion" class="form-control" value="{{ store.agente_retencion }}" placeholder="Ej: Agente de Retención de IVA">
+ <input id="input_agente_retencion" aria-label="Agente de Retención" type="text" name="agente_retencion" class="form-control" value="{{ store.agente_retencion }}" placeholder="Ej: Agente de Retención de IVA">
  </div>
  </div>
 
@@ -114,22 +114,22 @@
  
  <div class="form-group">
  <label class="form-label">Número de Resolución</label>
- <input type="text" name="resolucion_dian" class="form-control" value="{{ store.resolucion_dian }}" placeholder="Ej: 18764000001234">
+ <input id="input_resolucion_dian" aria-label="Número de Resolución" type="text" name="resolucion_dian" class="form-control" value="{{ store.resolucion_dian }}" placeholder="Ej: 18764000001234">
  </div>
  
  <div class="form-group">
  <label class="form-label">Vigencia de Resolución</label>
- <input type="text" name="resolucion_fecha" class="form-control" value="{{ store.resolucion_fecha }}" placeholder="Ej: Del 01/01/2026 al 31/12/2026">
+ <input id="input_resolucion_fecha" aria-label="Vigencia de Resolución" type="text" name="resolucion_fecha" class="form-control" value="{{ store.resolucion_fecha }}" placeholder="Ej: Del 01/01/2026 al 31/12/2026">
  </div>
  
  <div class="form-group">
  <label class="form-label">Rango Autorizado Desde</label>
- <input type="text" name="rango_desde" class="form-control" value="{{ store.rango_desde }}" placeholder="Ej: MRC-0001">
+ <input id="input_rango_desde" aria-label="Rango Autorizado Desde" type="text" name="rango_desde" class="form-control" value="{{ store.rango_desde }}" placeholder="Ej: MRC-0001">
  </div>
  
  <div class="form-group">
  <label class="form-label">Rango Autorizado Hasta</label>
- <input type="text" name="rango_hasta" class="form-control" value="{{ store.rango_hasta }}" placeholder="Ej: MRC-9999">
+ <input id="input_rango_hasta" aria-label="Rango Autorizado Hasta" type="text" name="rango_hasta" class="form-control" value="{{ store.rango_hasta }}" placeholder="Ej: MRC-9999">
  </div>
  </div>
 
@@ -157,8 +157,8 @@
  <button type="button" class="btn-reset" onclick="resetColor('primary', '#1B5E20')" style="background: none; border: none; color: var(--accent); font-size: 0.75rem; cursor: pointer; padding: 0; outline: none;">Original</button>
  </label>
  <div style="display: flex; gap: 10px; align-items: center;">
- <input type="color" id="theme_color_primary_picker" class="form-control" style="width: 50px; height: 38px; padding: 2px; cursor: pointer;" value="{% if store.theme_color_primary and store.theme_color_primary != 'default' %}{{ store.theme_color_primary }}{% else %}#1b5e20{% endif %}">
- <input type="text" id="theme_color_primary_text" class="form-control" style="font-family: monospace; font-size: 0.9rem;" placeholder="#1b5e20" value="{% if store.theme_color_primary and store.theme_color_primary != 'default' %}{{ store.theme_color_primary }}{% else %}#1b5e20{% endif %}">
+ <input aria-label="Theme color primary picker" type="color" id="theme_color_primary_picker" class="form-control" style="width: 50px; height: 38px; padding: 2px; cursor: pointer;" value="{% if store.theme_color_primary and store.theme_color_primary != 'default' %}{{ store.theme_color_primary }}{% else %}#1b5e20{% endif %}">
+ <input aria-label="#1b5e20" type="text" id="theme_color_primary_text" class="form-control" style="font-family: monospace; font-size: 0.9rem;" placeholder="#1b5e20" value="{% if store.theme_color_primary and store.theme_color_primary != 'default' %}{{ store.theme_color_primary }}{% else %}#1b5e20{% endif %}">
  </div>
  <div style="margin-top: 8px;">
      <div style="font-size: 0.78rem; color: var(--text-muted); margin-bottom: 6px;">Paleta recomendada con alto contraste:</div>
@@ -182,8 +182,8 @@
  <button type="button" class="btn-reset" onclick="resetColor('accent', '#FF8F00')" style="background: none; border: none; color: var(--accent); font-size: 0.75rem; cursor: pointer; padding: 0; outline: none;">Original</button>
  </label>
  <div style="display: flex; gap: 10px; align-items: center;">
- <input type="color" id="theme_color_accent_picker" class="form-control" style="width: 50px; height: 38px; padding: 2px; cursor: pointer;" value="{% if store.theme_color_accent and store.theme_color_accent != 'default' %}{{ store.theme_color_accent }}{% else %}#ff8f00{% endif %}">
- <input type="text" id="theme_color_accent_text" class="form-control" style="font-family: monospace; font-size: 0.9rem;" placeholder="#ff8f00" value="{% if store.theme_color_accent and store.theme_color_accent != 'default' %}{{ store.theme_color_accent }}{% else %}#ff8f00{% endif %}">
+ <input aria-label="Theme color accent picker" type="color" id="theme_color_accent_picker" class="form-control" style="width: 50px; height: 38px; padding: 2px; cursor: pointer;" value="{% if store.theme_color_accent and store.theme_color_accent != 'default' %}{{ store.theme_color_accent }}{% else %}#ff8f00{% endif %}">
+ <input aria-label="#ff8f00" type="text" id="theme_color_accent_text" class="form-control" style="font-family: monospace; font-size: 0.9rem;" placeholder="#ff8f00" value="{% if store.theme_color_accent and store.theme_color_accent != 'default' %}{{ store.theme_color_accent }}{% else %}#ff8f00{% endif %}">
  </div>
  <div id="accent_warning" style="display: none; font-size: 0.8rem; color: #FFA726; margin-top: 6px; padding: 4px 8px; background: rgba(255, 167, 38, 0.1); border-radius: 4px;"></div>
  </div>
@@ -195,8 +195,8 @@
  <button type="button" class="btn-reset" onclick="resetColor('btn_clear', '#E53935')" style="background: none; border: none; color: var(--accent); font-size: 0.75rem; cursor: pointer; padding: 0; outline: none;">Original</button>
  </label>
  <div style="display: flex; gap: 10px; align-items: center;">
- <input type="color" id="theme_btn_clear_picker" class="form-control" style="width: 50px; height: 38px; padding: 2px; cursor: pointer;" value="{% if store.theme_btn_clear_color and store.theme_btn_clear_color != 'default' %}{{ store.theme_btn_clear_color }}{% else %}#e53935{% endif %}">
- <input type="text" id="theme_btn_clear_text" class="form-control" style="font-family: monospace; font-size: 0.9rem;" placeholder="#e53935" value="{% if store.theme_btn_clear_color and store.theme_btn_clear_color != 'default' %}{{ store.theme_btn_clear_color }}{% else %}#e53935{% endif %}">
+ <input aria-label="Theme btn clear picker" type="color" id="theme_btn_clear_picker" class="form-control" style="width: 50px; height: 38px; padding: 2px; cursor: pointer;" value="{% if store.theme_btn_clear_color and store.theme_btn_clear_color != 'default' %}{{ store.theme_btn_clear_color }}{% else %}#e53935{% endif %}">
+ <input aria-label="#e53935" type="text" id="theme_btn_clear_text" class="form-control" style="font-family: monospace; font-size: 0.9rem;" placeholder="#e53935" value="{% if store.theme_btn_clear_color and store.theme_btn_clear_color != 'default' %}{{ store.theme_btn_clear_color }}{% else %}#e53935{% endif %}">
  </div>
  <div style="margin-top: 8px;">
      <div style="display: flex; gap: 8px; flex-wrap: wrap;">
@@ -215,8 +215,8 @@
  <button type="button" class="btn-reset" onclick="resetColor('btn_charge', '#FF8F00')" style="background: none; border: none; color: var(--accent); font-size: 0.75rem; cursor: pointer; padding: 0; outline: none;">Original</button>
  </label>
  <div style="display: flex; gap: 10px; align-items: center;">
- <input type="color" id="theme_btn_charge_picker" class="form-control" style="width: 50px; height: 38px; padding: 2px; cursor: pointer;" value="{% if store.theme_btn_charge_color and store.theme_btn_charge_color != 'default' %}{{ store.theme_btn_charge_color }}{% else %}#ff8f00{% endif %}">
- <input type="text" id="theme_btn_charge_text" class="form-control" style="font-family: monospace; font-size: 0.9rem;" placeholder="#ff8f00" value="{% if store.theme_btn_charge_color and store.theme_btn_charge_color != 'default' %}{{ store.theme_btn_charge_color }}{% else %}#ff8f00{% endif %}">
+ <input aria-label="Theme btn charge picker" type="color" id="theme_btn_charge_picker" class="form-control" style="width: 50px; height: 38px; padding: 2px; cursor: pointer;" value="{% if store.theme_btn_charge_color and store.theme_btn_charge_color != 'default' %}{{ store.theme_btn_charge_color }}{% else %}#ff8f00{% endif %}">
+ <input aria-label="#ff8f00" type="text" id="theme_btn_charge_text" class="form-control" style="font-family: monospace; font-size: 0.9rem;" placeholder="#ff8f00" value="{% if store.theme_btn_charge_color and store.theme_btn_charge_color != 'default' %}{{ store.theme_btn_charge_color }}{% else %}#ff8f00{% endif %}">
  </div>
  <div style="margin-top: 8px;">
      <div style="font-size: 0.78rem; color: var(--text-muted); margin-bottom: 6px;">Paleta recomendada con alto contraste:</div>
@@ -234,7 +234,7 @@
  <!-- 5. Background Color -->
  <div class="form-group" style="margin-bottom: 20px;">
  <label class="form-label">Color de Fondo (Nivel de Oscuridad)</label>
- <select id="theme_color_background_select" class="form-control">
+ <select aria-label="Color de Fondo" id="theme_color_background_select" class="form-control">
  <option value="default" {% if not store.theme_color_background or store.theme_color_background == 'default' %}selected{% endif %}>Oscuro Obsidiana (Original)</option>
  <option value="#090d16" {% if store.theme_color_background == '#090d16' %}selected{% endif %}>Medianoche Profundo</option>
  <option value="#111827" {% if store.theme_color_background == '#111827' %}selected{% endif %}>Pizarra Oscuro</option>
@@ -248,7 +248,7 @@
  <!-- 6. Font Family -->
  <div class="form-group" style="margin-bottom: 20px;">
  <label class="form-label">Tipografía (Letra)</label>
- <select id="theme_font_family_select" class="form-control">
+ <select aria-label="Tipografía" id="theme_font_family_select" class="form-control">
  <option value="default" {% if not store.theme_font_family or store.theme_font_family == 'default' %}selected{% endif %}>Outfit (Predeterminada)</option>
  <option value="Inter" {% if store.theme_font_family == 'Inter' %}selected{% endif %}>Inter (Limpia y técnica)</option>
  <option value="Roboto" {% if store.theme_font_family == 'Roboto' %}selected{% endif %}>Roboto (Estándar legible)</option>
@@ -266,7 +266,7 @@
  <!-- 7. Font Size -->
  <div class="form-group" style="margin-bottom: 20px;">
  <label class="form-label">Tamaño de la Letra</label>
- <select id="theme_font_size_select" class="form-control">
+ <select aria-label="Tamaño de la Letra" id="theme_font_size_select" class="form-control">
  <option value="default" {% if not store.theme_font_size or store.theme_font_size == 'default' %}selected{% endif %}>Mediano (Predeterminado - 16px)</option>
  <option value="small" {% if store.theme_font_size == 'small' %}selected{% endif %}>Pequeño (14px - Compacto)</option>
  <option value="large" {% if store.theme_font_size == 'large' %}selected{% endif %}>Grande (18px - Legible)</option>
@@ -290,7 +290,7 @@
  
  <div class="form-group">
  <label class="form-label">Mensaje de Despedida</label>
- <input type="text" name="mensaje_ticket" class="form-control" value="{{ store.mensaje_ticket }}" placeholder="¡Gracias por su compra!">
+ <input id="input_mensaje_ticket" aria-label="Mensaje de Despedida" type="text" name="mensaje_ticket" class="form-control" value="{{ store.mensaje_ticket }}" placeholder="¡Gracias por su compra!">
  <div class="form-hint">Este mensaje aparece al final de cada factura.</div>
  </div>
  
