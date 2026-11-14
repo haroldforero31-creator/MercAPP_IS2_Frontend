@@ -71,7 +71,7 @@
 
         <a href="{{ url_for('proveedor_registrar_entrega', store_id=store.id) }}" class="btn"
            style="display: block; text-align: center; text-decoration: none; padding: 12px; font-weight: 700; font-size: 0.92rem; border-radius: 10px; background: linear-gradient(135deg, #FFA726, #F57C00); color: #000; box-shadow: 0 4px 15px rgba(255, 167, 38, 0.25);">
-          Registrar Entrega & Cobro ➔
+          Hacer Pedido / Despacho ➔
         </a>
       </div>
     {% endfor %}
@@ -82,6 +82,66 @@
     <h3 style="color: #fff; font-size: 1.1rem; margin: 0 0 6px;">No se encontraron tiendas</h3>
     <p style="font-size: 0.9rem; margin: 0;">Prueba buscando con otro término.</p>
   </div>
+
+  <!-- Mis Pedidos Recientes -->
+  {% if recent_orders %}
+  <div style="margin-top: 48px;">
+    <h2 style="font-size: 1.3rem; font-weight: 800; color: #FFFFFF; margin: 0 0 16px;">
+      Tus Solicitudes de Pedido Recientes
+    </h2>
+    <div style="background: rgba(22, 27, 41, 0.85); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.3);">
+      <table style="width: 100%; border-collapse: collapse; text-align: left;">
+        <thead>
+          <tr style="background: rgba(255,255,255,0.03); color: var(--text-secondary); font-size: 0.85rem; text-transform: uppercase;">
+            <th style="padding: 14px 18px;">ID / Fecha</th>
+            <th style="padding: 14px 18px;">Tienda</th>
+            <th style="padding: 14px 18px;">Costo Solicitado</th>
+            <th style="padding: 14px 18px;">Método de Pago</th>
+            <th style="padding: 14px 18px;">Estado</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for ord in recent_orders %}
+          <tr style="border-top: 1px solid rgba(255,255,255,0.05); color: #fff; font-size: 0.9rem;">
+            <td style="padding: 14px 18px;">
+              <strong>ORD-{{ "%04d"|format(ord.id) }}</strong><br>
+              <span style="font-size: 0.78rem; color: #94A3B8;">{{ ord.created_at.strftime('%d/%m/%Y %I:%M %p') }}</span>
+            </td>
+            <td style="padding: 14px 18px; font-weight: 600;">{{ ord.store.name if ord.store else 'Tienda' }}</td>
+            <td style="padding: 14px 18px; font-weight: 700; color: #FFA726;">${{ "{:,.0f}".format(ord.total) }}</td>
+            <td style="padding: 14px 18px;">
+              {% if ord.payment_method == 'efectivo' %}
+                💵 Efectivo de Caja
+              {% elif ord.payment_method == 'transferencia' %}
+                📲 Transferencia
+              {% elif ord.payment_method == 'mixto' %}
+                🔄 Mixto
+              {% else %}
+                ⏳ Pendiente
+              {% endif %}
+            </td>
+            <td style="padding: 14px 18px;">
+              {% if ord.status == 'completado' %}
+                <span style="background: rgba(34,197,94,0.15); color: #4ADE80; font-size: 0.75rem; font-weight: 700; padding: 4px 10px; border-radius: 999px;">
+                  ✓ Confirmado & Pagado
+                </span>
+              {% elif ord.status == 'cancelado' %}
+                <span style="background: rgba(239,68,68,0.15); color: #F87171; font-size: 0.75rem; font-weight: 700; padding: 4px 10px; border-radius: 999px;">
+                  ✕ Cancelado
+                </span>
+              {% else %}
+                <span style="background: rgba(251,191,36,0.15); color: #FBBF24; font-size: 0.75rem; font-weight: 700; padding: 4px 10px; border-radius: 999px;">
+                  ⏳ En espera de Tienda
+                </span>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+  {% endif %}
 </div>
 
 <script>

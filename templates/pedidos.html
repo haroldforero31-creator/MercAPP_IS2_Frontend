@@ -207,6 +207,68 @@
     <h2 style="font-size: 1.5rem; font-weight: 800; color: var(--text-primary); margin-bottom: 20px;">Pedidos Activos</h2>
     <div class="orders-container">
         {% for order in active_orders %}
+        {% if order.order_type == 'proveedor' %}
+        <!-- Tarjeta de Pedido Solicitado por Proveedor -->
+        <div class="order-card" style="border: 1px solid rgba(255, 167, 38, 0.45); background: rgba(255, 167, 38, 0.03);">
+            <div class="order-header" style="border-bottom: 1px solid rgba(255, 167, 38, 0.2);">
+                <div class="order-title">
+                    <span style="color: #FFA726;">ORD-{{ "%04d"|format(order.id) }}</span>
+                    <span class="badge" style="background: rgba(255, 167, 38, 0.2); color: #FFA726; border: 1px solid rgba(255, 167, 38, 0.4);">
+                        🚚 PEDIDO PROVEEDOR
+                    </span>
+                    <span class="badge badge-{{ order.status }}">{{ order.status }}</span>
+                </div>
+                <div style="color: var(--text-secondary); font-size: 0.9rem;">
+                    {{ order.created_at.strftime('%d/%m/%Y %I:%M %p') }}
+                </div>
+            </div>
+            
+            <div class="order-body">
+                <div class="client-info">
+                    <div class="info-row">
+                        <strong>Empresa Proveedora:</strong> <span style="color: #FFA726; font-weight: 800;">{{ order.customer_name }}</span>
+                    </div>
+                    <div class="info-row">
+                        <strong>Encargado / Repartidor:</strong> <span>{{ order.customer_address }}</span>
+                    </div>
+                    <div class="info-row">
+                        <strong>Teléfono:</strong> <span>{{ order.customer_phone }}</span>
+                    </div>
+                    <div class="info-row">
+                        <strong>Tipo:</strong> <span>Despacho de Mercancía a Supermercado</span>
+                    </div>
+                </div>
+                
+                <div>
+                    <strong style="display:block; margin-bottom:8px; font-size:0.95rem; color:#FFA726;">📝 Anotaciones de Errores / Novedades:</strong>
+                    <div class="items-list" style="padding: 12px 14px; color: #CBD5E1; font-size: 0.9rem; border-left: 3px solid #FFA726;">
+                        {{ order.notes if order.notes else 'Ningún error o novedad reportada por el proveedor.' }}
+                    </div>
+                </div>
+            </div>
+            
+            <div class="order-footer">
+                <div class="total-amount" style="color: #FFA726;">
+                    Total a Pagar: ${{ "{:,.0f}".format(order.total) }}
+                </div>
+                <div class="actions-group">
+                    {% if order.status == 'pendiente' %}
+                    <button type="button" class="btn" style="background: linear-gradient(135deg, #FFA726, #F57C00); color: #000; font-weight: 800; border: none; padding: 10px 18px; border-radius: 8px; cursor: pointer;" onclick="openSupplierPaymentModal({{ order.id }}, '{{ order.customer_name }}', {{ order.total }})">
+                        Confirmar y Pagar al Proveedor ➔
+                    </button>
+                    <button type="button" class="btn btn-secondary" style="background: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3);" onclick="openCancelModal({{ order.id }})">
+                        Rechazar
+                    </button>
+                    {% elif order.status == 'confirmado' or order.status == 'completado' %}
+                    <span style="color: #10B981; font-weight: 700; font-size: 0.95rem;">
+                        ✓ Confirmado & Pagado ({{ order.payment_method|capitalize }})
+                    </span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <!-- Tarjeta de Pedido de Cliente B2C -->
         <div class="order-card">
             <div class="order-header">
                 <div class="order-title">
@@ -269,6 +331,7 @@
                 </div>
             </div>
         </div>
+        {% endif %}
         {% else %}
         <div style="text-align: center; padding: 60px; color: var(--text-secondary); background: var(--card-bg, #1e1e2e); border-radius: 16px; border: 1px solid var(--border, #2a2a3e);">
             No tienes pedidos activos.
@@ -349,8 +412,69 @@
     </div>
 </div>
 
+<!-- Confirm Supplier Payment Modal -->
+<div class="modal" id="supplierPaymentModal">
+    <div class="modal-content" style="max-width: 480px;">
+        <div class="modal-header" style="color: #FFA726; display: flex; align-items: center; gap: 10px;">
+            <span>🚚</span> Confirmar Pago a Proveedor
+        </div>
+        <p style="color: var(--text-secondary); margin-bottom: 16px; font-size: 0.9rem;">
+            Proveedor: <strong id="supplierNameDisplay" style="color: #FFFFFF;"></strong>
+        </p>
+
+        <div style="margin-bottom: 16px;">
+            <label for="supplierPaymentTotal" style="display: block; font-size: 0.85rem; font-weight: 700; color: #CBD5E1; margin-bottom: 6px;">
+                Costo a Pagar al Proveedor ($ COP) *
+            </label>
+            <input aria-label="Costo a Pagar al proveedor" type="number" id="supplierPaymentTotal" class="form-control" oninput="updatePaymentSplit()" required
+                   style="font-size: 1.15rem; font-weight: 800; color: #FFA726;">
+        </div>
+
+        <div style="margin-bottom: 16px;">
+            <label for="supplierPaymentMethod" style="display: block; font-size: 0.85rem; font-weight: 700; color: #CBD5E1; margin-bottom: 6px;">
+                Método de Pago Seleccionado *
+            </label>
+            <select aria-label="Método de Pago Seleccionado" id="supplierPaymentMethod" class="form-control" onchange="toggleSupplierSplitInputs()" style="padding: 10px 12px;">
+                <option value="efectivo">💵 Efectivo (Descontar de la Caja Registradora)</option>
+                <option value="transferencia">📲 Transferencia Bancaria (Nequi / Banco)</option>
+                <option value="mixto">🔄 Parte y Parte (Mixto: Efectivo + Transferencia)</option>
+            </select>
+        </div>
+
+        <!-- Campos de división para método mixto -->
+        <div id="supplierSplitBox" style="display: none; background: rgba(0,0,0,0.25); border: 1px solid var(--border); border-radius: 10px; padding: 14px; margin-bottom: 16px;">
+            <div style="margin-bottom: 10px;">
+                <label for="splitCashAmount" style="display: block; font-size: 0.8rem; font-weight: 600; color: #EF4444; margin-bottom: 4px;">
+                    💵 Efectivo a sacar de la Caja ($ COP):
+                </label>
+                <input aria-label="Monto en efectivo sacado de caja" type="number" id="splitCashAmount" class="form-control" value="0" min="0" step="50" oninput="validateSplitSum()">
+            </div>
+            <div>
+                <label for="splitTransferAmount" style="display: block; font-size: 0.8rem; font-weight: 600; color: #60A5FA; margin-bottom: 4px;">
+                    📲 Monto por Transferencia ($ COP):
+                </label>
+                <input aria-label="Monto por transferencia bancaria" type="number" id="splitTransferAmount" class="form-control" value="0" min="0" step="50" oninput="validateSplitSum()">
+            </div>
+            <div id="splitFeedback" style="font-size: 0.78rem; margin-top: 6px; color: #FBBF24;"></div>
+        </div>
+
+        <!-- Advertencia de cuadre de caja -->
+        <div style="background: rgba(239, 68, 68, 0.08); border: 1px solid rgba(239, 68, 68, 0.25); border-radius: 10px; padding: 12px; margin-bottom: 20px; font-size: 0.82rem; color: #FCA5A5; line-height: 1.45;">
+            ⚠️ <strong>Control de Cuadre de Caja:</strong> El monto pagado en efectivo se descontará automáticamente del arqueo de la caja abierta de hoy y de las ventas/ganancias del día para que el dinero físico en el cajón sea exacto.
+        </div>
+
+        <div class="modal-footer">
+            <button class="btn btn-secondary" onclick="closeModals()">Cancelar</button>
+            <button class="btn" id="btnSubmitSupplierPayment" onclick="submitSupplierPayment()" style="background: linear-gradient(135deg, #FFA726, #F57C00); color: #000; font-weight: 800; border: none; padding: 10px 18px; border-radius: 8px; cursor: pointer;">
+                Confirmar Pago y Descontar
+            </button>
+        </div>
+    </div>
+</div>
+
 <script>
     let activeOrderId = null;
+    let activeSupplierOrderId = null;
 
     function openConfirmModal(orderId) {
         activeOrderId = orderId;
@@ -364,10 +488,114 @@
         document.getElementById('cancelModal').classList.add('active');
     }
 
+    function openSupplierPaymentModal(orderId, supplierName, total) {
+        activeSupplierOrderId = orderId;
+        document.getElementById('supplierNameDisplay').textContent = supplierName;
+        document.getElementById('supplierPaymentTotal').value = total;
+        document.getElementById('supplierPaymentMethod').value = 'efectivo';
+        document.getElementById('splitCashAmount').value = total;
+        document.getElementById('splitTransferAmount').value = 0;
+        toggleSupplierSplitInputs();
+        document.getElementById('supplierPaymentModal').classList.add('active');
+    }
+
+    function toggleSupplierSplitInputs() {
+        const method = document.getElementById('supplierPaymentMethod').value;
+        const splitBox = document.getElementById('supplierSplitBox');
+        const total = Number.parseInt(document.getElementById('supplierPaymentTotal').value) || 0;
+        if (method === 'mixto') {
+            splitBox.style.display = 'block';
+            validateSplitSum();
+        } else {
+            splitBox.style.display = 'none';
+            if (method === 'efectivo') {
+                document.getElementById('splitCashAmount').value = total;
+                document.getElementById('splitTransferAmount').value = 0;
+            } else {
+                document.getElementById('splitCashAmount').value = 0;
+                document.getElementById('splitTransferAmount').value = total;
+            }
+            document.getElementById('btnSubmitSupplierPayment').disabled = false;
+        }
+    }
+
+    function updatePaymentSplit() {
+        toggleSupplierSplitInputs();
+    }
+
+    function validateSplitSum() {
+        const total = Number.parseInt(document.getElementById('supplierPaymentTotal').value) || 0;
+        const cash = Number.parseInt(document.getElementById('splitCashAmount').value) || 0;
+        const transfer = Number.parseInt(document.getElementById('splitTransferAmount').value) || 0;
+        const feedback = document.getElementById('splitFeedback');
+        const sum = cash + transfer;
+        if (sum === total) {
+            feedback.style.color = '#4ADE80';
+            feedback.textContent = `✓ Suma exacta: $${sum.toLocaleString()}`;
+            document.getElementById('btnSubmitSupplierPayment').disabled = false;
+        } else {
+            feedback.style.color = '#F87171';
+            feedback.textContent = `⚠️ Suma: $${sum.toLocaleString()} (Faltan: $${(total - sum).toLocaleString()})`;
+            document.getElementById('btnSubmitSupplierPayment').disabled = true;
+        }
+    }
+
     function closeModals() {
         document.getElementById('confirmModal').classList.remove('active');
         document.getElementById('cancelModal').classList.remove('active');
+        const supModal = document.getElementById('supplierPaymentModal');
+        if (supModal) supModal.classList.remove('active');
         activeOrderId = null;
+        activeSupplierOrderId = null;
+    }
+
+    async function submitSupplierPayment() {
+        if (!activeSupplierOrderId) return;
+        const method = document.getElementById('supplierPaymentMethod').value;
+        const total = Number.parseInt(document.getElementById('supplierPaymentTotal').value) || 0;
+        let cash = 0;
+        let transfer = 0;
+        if (method === 'efectivo') {
+            cash = total;
+        } else if (method === 'transferencia') {
+            transfer = total;
+        } else {
+            cash = Number.parseInt(document.getElementById('splitCashAmount').value) || 0;
+            transfer = Number.parseInt(document.getElementById('splitTransferAmount').value) || 0;
+            if (cash + transfer !== total) {
+                alert('La suma de efectivo y transferencia debe coincidir con el total a pagar.');
+                return;
+            }
+        }
+
+        const btn = document.getElementById('btnSubmitSupplierPayment');
+        btn.disabled = true;
+
+        try {
+            const response = await fetch(`/api/order/${activeSupplierOrderId}/confirm_supplier_payment`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token() }}'
+                },
+                body: JSON.stringify({
+                    payment_method: method,
+                    total_paid: total,
+                    amount_cash: cash,
+                    amount_transfer: transfer
+                })
+            });
+            const data = await response.json();
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('Error: ' + data.message);
+                btn.disabled = false;
+            }
+        } catch (e) {
+            alert('Error de conexión al procesar el pago.');
+            btn.disabled = false;
+        }
     }
 
     async function submitConfirm() {
