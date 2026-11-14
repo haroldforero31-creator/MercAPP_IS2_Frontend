@@ -328,7 +328,7 @@
     <div class="modal-content">
         <div class="modal-header">Confirmar Pedido</div>
         <p style="color: var(--text-secondary); margin-bottom: 15px;">Puedes escribir un pequeño mensaje interno para el cliente (aparecerá en sus notificaciones):</p>
-        <textarea id="confirmMessage" class="form-control" rows="3" placeholder="Ej: Tu pedido ya está confirmado y en preparación."></textarea>
+        <textarea aria-label="Ej: Tu pedido ya está confirmado y en preparación." id="confirmMessage" class="form-control" rows="3" placeholder="Ej: Tu pedido ya está confirmado y en preparación."></textarea>
         <div class="modal-footer">
             <button class="btn btn-secondary" onclick="closeModals()">Volver</button>
             <button class="btn btn-primary" id="btnSubmitConfirm" onclick="submitConfirm()">Confirmar</button>
@@ -341,7 +341,7 @@
     <div class="modal-content">
         <div class="modal-header" style="color: #ef4444;">Cancelar Pedido</div>
         <p style="color: var(--text-secondary); margin-bottom: 15px;">Escribe un motivo de cancelación que el cliente pueda ver:</p>
-        <textarea id="cancelMessage" class="form-control" rows="3" placeholder="Ej: No contamos con stock disponible de algunos productos."></textarea>
+        <textarea aria-label="Ej: No contamos con stock disponible de algunos productos." id="cancelMessage" class="form-control" rows="3" placeholder="Ej: No contamos con stock disponible de algunos productos."></textarea>
         <div class="modal-footer">
             <button class="btn btn-secondary" onclick="closeModals()">Volver</button>
             <button class="btn btn-primary" style="background-color: #ef4444;" id="btnSubmitCancel" onclick="submitCancel()">Cancelar Pedido</button>

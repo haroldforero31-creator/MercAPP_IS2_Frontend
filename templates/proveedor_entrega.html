@@ -62,7 +62,7 @@
           <label style="display: block; font-size: 0.85rem; font-weight: 600; color: #CBD5E1; margin-bottom: 6px;">
             No. de Pedido / Factura / Remisión *
           </label>
-          <input type="text" name="order_number" placeholder="Ej. REM-49201 o FAC-1024" required
+          <input id="input_order_number" aria-label="Ej. REM-49201 o FAC-1024" type="text" name="order_number" placeholder="Ej. REM-49201 o FAC-1024" required
                  style="width: 100%; padding: 12px 14px; border-radius: 10px; background: #131722; border: 1px solid var(--border); color: #fff; font-size: 0.92rem; box-sizing: border-box;">
         </div>
 
@@ -70,7 +70,7 @@
           <label style="display: block; font-size: 0.85rem; font-weight: 600; color: #CBD5E1; margin-bottom: 6px;">
             Fecha del Pedido / Despacho *
           </label>
-          <input type="date" name="delivery_date" value="{{ today_str }}" required
+          <input id="input_delivery_date" aria-label="Delivery date" type="date" name="delivery_date" value="{{ today_str }}" required
                  style="width: 100%; padding: 12px 14px; border-radius: 10px; background: #131722; border: 1px solid var(--border); color: #fff; font-size: 0.92rem; box-sizing: border-box;">
         </div>
       </div>
@@ -81,7 +81,7 @@
           <label style="display: block; font-size: 0.85rem; font-weight: 600; color: #CBD5E1; margin-bottom: 6px;">
             Valor Total de la Entrega ($ COP) *
           </label>
-          <input type="number" name="total_amount" id="total_amount" placeholder="0" min="0" step="50" oninput="handleTotalChange()" required
+          <input aria-label="0" type="number" name="total_amount" id="total_amount" placeholder="0" min="0" step="50" oninput="handleTotalChange()" required
                  style="width: 100%; padding: 12px 14px; border-radius: 10px; background: #131722; border: 1px solid var(--border); color: #FFA726; font-size: 1.1rem; font-weight: 700; box-sizing: border-box;">
         </div>
 
@@ -89,7 +89,7 @@
           <label style="display: block; font-size: 0.85rem; font-weight: 600; color: #CBD5E1; margin-bottom: 6px;">
             Forma de Cobro / Pago *
           </label>
-          <select name="payment_method" id="payment_method" onchange="togglePaymentInputs()" required
+          <select aria-label="Payment method" name="payment_method" id="payment_method" onchange="togglePaymentInputs()" required
                   style="width: 100%; padding: 12px 14px; border-radius: 10px; background: #131722; border: 1px solid var(--border); color: #fff; font-size: 0.92rem; box-sizing: border-box;">
             <option value="efectivo_caja">Efectivo tomado de la Caja Registradora</option>
             <option value="transferencia">Transferencia Bancaria (Nequi / Daviplata / Banco)</option>
@@ -110,7 +110,7 @@
             <label style="display: block; font-size: 0.82rem; font-weight: 600; color: #EF4444; margin-bottom: 5px;">
               💵 Efectivo Sacado de la Caja ($ COP):
             </label>
-            <input type="number" name="amount_cash" id="amount_cash" min="0" step="50" value="0"
+            <input aria-label="Amount cash" type="number" name="amount_cash" id="amount_cash" min="0" step="50" value="0"
                    style="width: 100%; padding: 10px 12px; border-radius: 8px; background: #181D2B; border: 1px solid rgba(239,68,68,0.4); color: #fff; font-weight: 700; box-sizing: border-box;">
             <small style="color: #F87171; font-size: 0.75rem; display: block; margin-top: 4px;">
               ⚠️ Este valor se descontará automáticamente del arqueo de caja de hoy.
@@ -121,7 +121,7 @@
             <label style="display: block; font-size: 0.82rem; font-weight: 600; color: #60A5FA; margin-bottom: 5px;">
               📲 Monto por Transferencia ($ COP):
             </label>
-            <input type="number" name="amount_transfer" id="amount_transfer" min="0" step="50" value="0"
+            <input aria-label="Amount transfer" type="number" name="amount_transfer" id="amount_transfer" min="0" step="50" value="0"
                    style="width: 100%; padding: 10px 12px; border-radius: 8px; background: #181D2B; border: 1px solid rgba(59,130,246,0.4); color: #fff; font-weight: 700; box-sizing: border-box;">
             <small style="color: #94A3B8; font-size: 0.75rem; display: block; margin-top: 4px;">
               Pagado desde cuenta bancaria del negocio.
@@ -135,7 +135,7 @@
         <label style="display: block; font-size: 0.85rem; font-weight: 600; color: #CBD5E1; margin-bottom: 6px;">
           Observaciones / Novedades de la Entrega (Opcional)
         </label>
-        <textarea name="notes" rows="3" placeholder="Ej. Faltaron 2 paquetes de aceite por agotado en bodega, se repondrán en el próximo despacho..."
+        <textarea id="input_notes" aria-label="Ej. Faltaron 2 paquetes de aceite por agotado en bodega, se repondrán en el próximo despacho..." name="notes" rows="3" placeholder="Ej. Faltaron 2 paquetes de aceite por agotado en bodega, se repondrán en el próximo despacho..."
                   style="width: 100%; padding: 12px 14px; border-radius: 10px; background: #131722; border: 1px solid var(--border); color: #fff; font-size: 0.9rem; box-sizing: border-box; resize: vertical;"></textarea>
       </div>
 
@@ -145,7 +145,7 @@
           📷 Foto de la Factura o Comprobante Físico
         </label>
         <div style="border: 2px dashed rgba(255,255,255,0.15); border-radius: 12px; padding: 18px; text-align: center; background: rgba(0,0,0,0.2);">
-          <input type="file" name="invoice_photo" id="invoice_photo" accept="image/*" onchange="previewInvoicePhoto(this)" style="display: none;">
+          <input aria-label="Invoice photo" type="file" name="invoice_photo" id="invoice_photo" accept="image/*" onchange="previewInvoicePhoto(this)" style="display: none;">
           <label for="invoice_photo" style="cursor: pointer; display: block;">
             <div style="font-size: 2rem; margin-bottom: 6px;">📸</div>
             <div style="font-size: 0.9rem; font-weight: 600; color: #FFA726;">Tomar foto o subir imagen de la factura</div>
@@ -163,7 +163,7 @@
       <!-- Mandatory Provider Confirmation Checkbox -->
       <div style="background: rgba(255, 167, 38, 0.08); border: 1px solid rgba(255, 167, 38, 0.3); border-radius: 12px; padding: 16px; margin-bottom: 24px;">
         <label style="display: flex; align-items: flex-start; gap: 12px; cursor: pointer;">
-          <input type="checkbox" id="confirm_check" name="is_confirmed" onchange="toggleSubmitBtn()" style="width: 20px; height: 20px; margin-top: 2px; accent-color: #FFA726; cursor: pointer;" required>
+          <input aria-label="Is confirmed" type="checkbox" id="confirm_check" name="is_confirmed" onchange="toggleSubmitBtn()" style="width: 20px; height: 20px; margin-top: 2px; accent-color: #FFA726; cursor: pointer;" required>
           <span style="font-size: 0.88rem; color: #FFFFFF; line-height: 1.45;">
             <strong>Confirmación de Entrega:</strong> Confirmo solemnemente que los productos fueron entregados al establecimiento, revisados físicamente y que los montos de cobro y dinero extraído de la caja registradora son verídicos y exactos.
           </span>

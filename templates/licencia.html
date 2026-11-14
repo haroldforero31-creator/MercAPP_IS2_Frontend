@@ -107,7 +107,7 @@
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <div class="form-group">
                 <label class="form-label" for="password">Contraseña de Desbloqueo</label>
-                <input type="password" id="password" name="password" class="form-control" placeholder="Ingrese la contraseña maestra..." required autofocus>
+                <input aria-label="Contraseña de Desbloqueo" type="password" id="password" name="password" class="form-control" placeholder="Ingrese la contraseña maestra..." required autofocus>
             </div>
             <button type="submit" class="btn-unlock">Desbloquear Sistema</button>
         </form>

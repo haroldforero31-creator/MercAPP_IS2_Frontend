@@ -21,7 +21,7 @@
 
             <form id="importForm" action="{{ url_for('products_import') }}" method="POST" enctype="multipart/form-data" style="display: none;">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                <input type="file" id="importFile" name="file" accept=".csv" onchange="document.getElementById('importForm').submit()">
+                <input aria-label="File" type="file" id="importFile" name="file" accept=".csv" onchange="document.getElementById('importForm').submit()">
             </form>
 
             <a href="{{ url_for('product_add') }}" class="btn btn-primary">
@@ -82,9 +82,9 @@
 
     <!-- Filters -->
     <form class="filter-bar" method="GET" action="{{ url_for('products') }}">
-        <input type="text" name="search" id="productSearchInput" class="form-control" placeholder="Buscar por nombre o código..." 
+        <input aria-label="Buscar por nombre o código..." type="text" name="search" id="productSearchInput" class="form-control" placeholder="Buscar por nombre o código..." 
                value="{{ search }}" style="flex: 1; min-width: 200px;" autofocus>
-        <select name="category" class="form-control" style="max-width: 200px;">
+        <select id="input_category" aria-label="Category" name="category" class="form-control" style="max-width: 200px;">
             <option value="">Todas las categorías</option>
             {% for cat in categories %}
             <option value="{{ cat.id }}" {% if category_filter == cat.id|string %}selected{% endif %}>{{ cat.name }}</option>
@@ -103,7 +103,7 @@
             <thead>
                 <tr>
                     <th style="width: 40px; text-align: center;">
-                        <input type="checkbox" id="selectAllCheckbox" onchange="toggleSelectAll(this.checked)" 
+                        <input aria-label="Selectallcheckbox" type="checkbox" id="selectAllCheckbox" onchange="toggleSelectAll(this.checked)" 
                                title="Seleccionar / Deseleccionar todos"
                                style="width: 18px; height: 18px; accent-color: var(--primary); cursor: pointer;">
                     </th>
@@ -121,7 +121,7 @@
                 {% for product in products %}
                 <tr class="{{ 'product-inactive' if not product.is_active }}" id="productRow{{ product.id }}">
                     <td style="text-align: center;">
-                        <input type="checkbox" class="product-select-chk" value="{{ product.id }}" 
+                        <input id="field_124" aria-label="Campo" type="checkbox" class="product-select-chk" value="{{ product.id }}" 
                                onchange="updateBulkSelection()"
                                style="width: 18px; height: 18px; accent-color: var(--primary); cursor: pointer;">
                     </td>
@@ -206,7 +206,7 @@
             </div>
             <div style="display: flex; align-items: center; gap: 12px;">
                 <label style="font-weight: 600; font-size: 0.95rem; white-space: nowrap;">Nuevo precio (COP):</label>
-                <input type="text" id="bulkNewPrice" class="form-control" placeholder="Ej: 4000" 
+                <input aria-label="Nuevo precio" type="text" id="bulkNewPrice" class="form-control" placeholder="Ej: 4000" 
                        style="width: 150px; font-size: 1.1rem; font-weight: 700; text-align: center;"
                        oninput="this.value = this.value.replace(/\D/g, ''); updateBulkPricePreview();">
                 <span id="bulkPricePreview" style="font-weight: 700; color: var(--success); min-width: 90px;"></span>
@@ -233,19 +233,19 @@
             <p style="color: var(--text-muted); margin-bottom: 20px;">¿Qué productos deseas descargar a Excel (CSV)?</p>
             
             <label style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px; cursor: pointer;">
-                <input type="radio" name="exportMode" value="all" checked onchange="document.getElementById('exportCategorySelect').style.display='none'" style="accent-color: var(--primary); width: 18px; height: 18px;">
+                <input id="input_exportMode" aria-label="Exportmode" type="radio" name="exportMode" value="all" checked onchange="document.getElementById('exportCategorySelect').style.display='none'" style="accent-color: var(--primary); width: 18px; height: 18px;">
                 <span style="font-weight: 600;">Todo el inventario</span>
             </label>
             
             <label style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px; cursor: pointer;">
-                <input type="radio" name="exportMode" value="category" onchange="document.getElementById('exportCategorySelect').style.display='block'" style="accent-color: var(--primary); width: 18px; height: 18px;">
+                <input id="input_exportMode" aria-label="Exportmode" type="radio" name="exportMode" value="category" onchange="document.getElementById('exportCategorySelect').style.display='block'" style="accent-color: var(--primary); width: 18px; height: 18px;">
                 <span style="font-weight: 600;">Por categorías específicas</span>
             </label>
             
             <div id="exportCategorySelect" style="display: none; margin-left: 26px; width: calc(100% - 26px); margin-bottom: 20px; max-height: 150px; overflow-y: auto; background: var(--bg-input); padding: 10px; border-radius: 8px;">
                 {% for cat in categories %}
                 <label style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px; cursor: pointer; font-size: 0.9rem;">
-                    <input type="checkbox" class="export-category-chk" value="{{ cat.id }}" style="accent-color: var(--primary);">
+                    <input id="field_248" aria-label="Campo" type="checkbox" class="export-category-chk" value="{{ cat.id }}" style="accent-color: var(--primary);">
                     <span>{{ cat.name }}</span>
                 </label>
                 {% endfor %}

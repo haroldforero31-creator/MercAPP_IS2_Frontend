@@ -41,7 +41,7 @@
                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 
       <div style="margin-bottom: 24px;">
-        <input type="text" name="code" maxlength="6" pattern="[0-9]{6}" placeholder="000000" autofocus required
+        <input id="input_code" aria-label="000000" type="text" name="code" maxlength="6" pattern="[0-9]{6}" placeholder="000000" autofocus required
                style="width: 100%; text-align: center; font-size: 2.2rem; font-weight: 800; letter-spacing: 12px; padding: 12px 0; border-radius: 12px; background: #0E121B; border: 2px solid rgba(255,167,38,0.4); color: #FFA726; box-sizing: border-box; font-family: monospace;">
         <p style="color: #94A3B8; font-size: 0.8rem; margin: 8px 0 0;">Ingresa el código numérico recibido.</p>
       </div>

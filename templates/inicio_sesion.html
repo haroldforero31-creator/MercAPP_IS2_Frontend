@@ -187,13 +187,13 @@
                     
                     <div class="form-group">
                         <label class="form-label" for="email">Correo Electrónico (Administrador)</label>
-                        <input type="email" id="email" name="email" class="form-control" 
+                        <input aria-label="Correo Electrónico" type="email" id="email" name="email" class="form-control" 
                         placeholder="correo@ejemplo.com" required autocomplete="username" autofocus>
                     </div>
 
                     <div class="form-group">
                         <label class="form-label" for="password">Contraseña</label>
-                        <input type="password" id="password" name="password" class="form-control" 
+                        <input aria-label="Contraseña" type="password" id="password" name="password" class="form-control" 
                         placeholder="••••••••" required autocomplete="current-password">
                         <div style="text-align: right; margin-top: 8px;">
                             <a href="{{ url_for('forgot_password') }}" style="font-size: 0.85rem; color: var(--text-secondary); text-decoration: none;">¿Olvidaste tu contraseña?</a>

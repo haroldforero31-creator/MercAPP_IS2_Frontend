@@ -343,7 +343,7 @@
     <div class="container">
         <!-- Main Content (Products) -->
         <div class="main-content">
-            <input type="text" id="searchInput" class="search-bar" placeholder="Buscar producto por nombre...">
+            <input aria-label="Buscar producto por nombre..." type="text" id="searchInput" class="search-bar" placeholder="Buscar producto por nombre...">
             
             <div class="category-tabs" id="categoryTabs">
                 <div class="category-tab active" onclick="filterCategory('all')">Todos</div>
@@ -365,7 +365,7 @@
                         <button class="add-btn" onclick="addToCart({{ prod.id }}, '{{ prod.name }}', {{ prod.price }}, 'unidad')">Agregar</button>
                     {% else %}
                         <div style="display:flex; gap:10px; margin-top:auto;">
-                            <input type="number" id="qty-{{ prod.id }}" placeholder="Cant." class="form-control" style="margin:0; width:70px;" min="1" value="1">
+                            <input aria-label="Cant." type="number" id="qty-{{ prod.id }}" placeholder="Cant." class="form-control" style="margin:0; width:70px;" min="1" value="1">
                             <button class="add-btn" style="margin:0;" onclick="addGranelToCart({{ prod.id }}, '{{ prod.name }}', {{ prod.price }}, '{{ prod.weight_unit }}')">Agregar</button>
                         </div>
                     {% endif %}
@@ -386,13 +386,13 @@
             <hr style="border:0; border-top:1px solid #e5e7eb; margin:15px 0;">
             
             <label style="display:block; font-weight:500; margin-bottom:5px;">Tipo de Entrega</label>
-            <select id="orderType" class="form-control">
+            <select aria-label="Tipo de Entrega" id="orderType" class="form-control">
                 <option value="domicilio">A Domicilio</option>
                 <option value="recoger">Pasar a Recoger</option>
             </select>
             
             <label style="display:block; font-weight:500; margin-bottom:5px;">Método de Pago</label>
-            <select id="paymentMethod" class="form-control">
+            <select aria-label="Método de Pago" id="paymentMethod" class="form-control">
                 <option value="efectivo">Efectivo (Pago Contraentrega)</option>
                 <option value="transferencia">Transferencia (Pago Contraentrega)</option>
             </select>

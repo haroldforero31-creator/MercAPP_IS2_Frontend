@@ -105,11 +105,11 @@
 
         <form method="POST">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-            <input type="text" name="name" class="form-control" placeholder="Nombre completo" required>
-            <input type="email" name="email" class="form-control" placeholder="Correo Electrónico" required>
-            <input type="text" name="phone" class="form-control" placeholder="Número de Teléfono" required>
-            <input type="text" name="address" class="form-control" placeholder="Dirección (Opcional)">
-            <input type="password" name="password" class="form-control" placeholder="Contraseña" required>
+            <input id="input_name" aria-label="Nombre completo" type="text" name="name" class="form-control" placeholder="Nombre completo" required>
+            <input id="input_email" aria-label="Correo Electrónico" type="email" name="email" class="form-control" placeholder="Correo Electrónico" required>
+            <input id="input_phone" aria-label="Número de Teléfono" type="text" name="phone" class="form-control" placeholder="Número de Teléfono" required>
+            <input id="input_address" aria-label="Dirección (Opcional)" type="text" name="address" class="form-control" placeholder="Dirección (Opcional)">
+            <input id="input_password" aria-label="Contraseña" type="password" name="password" class="form-control" placeholder="Contraseña" required>
             <button type="submit" class="btn">Registrarse</button>
         </form>
         
