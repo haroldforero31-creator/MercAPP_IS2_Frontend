@@ -59,7 +59,7 @@
       <!-- Row 1: Order Number & Date -->
       <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-bottom: 18px;">
         <div>
-          <label style="display: block; font-size: 0.85rem; font-weight: 600; color: #CBD5E1; margin-bottom: 6px;">
+          <label for="input_order_number" style="display: block; font-size: 0.85rem; font-weight: 600; color: #CBD5E1; margin-bottom: 6px;">
             No. de Pedido / Factura / Remisión *
           </label>
           <input id="input_order_number" aria-label="Ej. REM-49201 o FAC-1024" type="text" name="order_number" placeholder="Ej. REM-49201 o FAC-1024" required
@@ -67,7 +67,7 @@
         </div>
 
         <div>
-          <label style="display: block; font-size: 0.85rem; font-weight: 600; color: #CBD5E1; margin-bottom: 6px;">
+          <label for="input_delivery_date" style="display: block; font-size: 0.85rem; font-weight: 600; color: #CBD5E1; margin-bottom: 6px;">
             Fecha del Pedido / Despacho *
           </label>
           <input id="input_delivery_date" aria-label="Delivery date" type="date" name="delivery_date" value="{{ today_str }}" required
@@ -78,7 +78,7 @@
       <!-- Row 2: Total Amount & Payment Method -->
       <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-bottom: 18px;">
         <div>
-          <label style="display: block; font-size: 0.85rem; font-weight: 600; color: #CBD5E1; margin-bottom: 6px;">
+          <label for="total_amount" style="display: block; font-size: 0.85rem; font-weight: 600; color: #CBD5E1; margin-bottom: 6px;">
             Valor Total de la Entrega ($ COP) *
           </label>
           <input aria-label="0" type="number" name="total_amount" id="total_amount" placeholder="0" min="0" step="50" oninput="handleTotalChange()" required
@@ -86,7 +86,7 @@
         </div>
 
         <div>
-          <label style="display: block; font-size: 0.85rem; font-weight: 600; color: #CBD5E1; margin-bottom: 6px;">
+          <label for="payment_method" style="display: block; font-size: 0.85rem; font-weight: 600; color: #CBD5E1; margin-bottom: 6px;">
             Forma de Cobro / Pago *
           </label>
           <select aria-label="Payment method" name="payment_method" id="payment_method" onchange="togglePaymentInputs()" required
@@ -107,7 +107,7 @@
 
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
           <div id="cash-input-group">
-            <label style="display: block; font-size: 0.82rem; font-weight: 600; color: #EF4444; margin-bottom: 5px;">
+            <label for="amount_cash" style="display: block; font-size: 0.82rem; font-weight: 600; color: #EF4444; margin-bottom: 5px;">
               💵 Efectivo Sacado de la Caja ($ COP):
             </label>
             <input aria-label="Amount cash" type="number" name="amount_cash" id="amount_cash" min="0" step="50" value="0"
@@ -118,7 +118,7 @@
           </div>
 
           <div id="transfer-input-group">
-            <label style="display: block; font-size: 0.82rem; font-weight: 600; color: #60A5FA; margin-bottom: 5px;">
+            <label for="amount_transfer" style="display: block; font-size: 0.82rem; font-weight: 600; color: #60A5FA; margin-bottom: 5px;">
               📲 Monto por Transferencia ($ COP):
             </label>
             <input aria-label="Amount transfer" type="number" name="amount_transfer" id="amount_transfer" min="0" step="50" value="0"
@@ -132,7 +132,7 @@
 
       <!-- Notes / Missing items -->
       <div style="margin-bottom: 20px;">
-        <label style="display: block; font-size: 0.85rem; font-weight: 600; color: #CBD5E1; margin-bottom: 6px;">
+        <label for="input_notes" style="display: block; font-size: 0.85rem; font-weight: 600; color: #CBD5E1; margin-bottom: 6px;">
           Observaciones / Novedades de la Entrega (Opcional)
         </label>
         <textarea id="input_notes" aria-label="Ej. Faltaron 2 paquetes de aceite por agotado en bodega, se repondrán en el próximo despacho..." name="notes" rows="3" placeholder="Ej. Faltaron 2 paquetes de aceite por agotado en bodega, se repondrán en el próximo despacho..."
@@ -162,7 +162,7 @@
 
       <!-- Mandatory Provider Confirmation Checkbox -->
       <div style="background: rgba(255, 167, 38, 0.08); border: 1px solid rgba(255, 167, 38, 0.3); border-radius: 12px; padding: 16px; margin-bottom: 24px;">
-        <label style="display: flex; align-items: flex-start; gap: 12px; cursor: pointer;">
+        <label for="confirm_check" style="display: flex; align-items: flex-start; gap: 12px; cursor: pointer;">
           <input aria-label="Is confirmed" type="checkbox" id="confirm_check" name="is_confirmed" onchange="toggleSubmitBtn()" style="width: 20px; height: 20px; margin-top: 2px; accent-color: #FFA726; cursor: pointer;" required>
           <span style="font-size: 0.88rem; color: #FFFFFF; line-height: 1.45;">
             <strong>Confirmación de Entrega:</strong> Confirmo solemnemente que los productos fueron entregados al establecimiento, revisados físicamente y que los montos de cobro y dinero extraído de la caja registradora son verídicos y exactos.

@@ -22,7 +22,7 @@
 
  <!-- Date Selector -->
  <div style="background: var(--card-bg, #1e1e2e); border-radius: 14px; padding: 16px 20px; margin-bottom: 24px; border: 1px solid var(--border, #2a2a3e); display: flex; align-items: center; gap: 16px; flex-wrap: wrap;">
-  <label style="font-weight: 600; color: var(--text-primary); font-size: 0.95rem;">📅 Fecha:</label>
+  <label for="input_date" style="font-weight: 600; color: var(--text-primary); font-size: 0.95rem;">📅 Fecha:</label>
   <form method="GET" style="display: flex; align-items: center; gap: 10px; flex: 1;">
    <input id="input_date" aria-label="📅 Fecha:" type="date" name="date" value="{{ view_date.strftime('%Y-%m-%d') }}" 
     class="form-control" style="max-width: 200px; padding: 10px 14px; border-radius: 10px; font-size: 0.95rem;"

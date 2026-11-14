@@ -21,8 +21,8 @@
   <div class="scanner-input-wrapper" style="margin: 16px 20px;">
     <span id="searchModeIndicator" class="scanner-icon search-mode-indicator mode-idle"
     title="Escribe un código de barras o nombre de producto"></span>
-    <input aria-label="Barcodeinput" type="text" id="barcodeInput" class="scanner-input"
-    placeholder="Código de barras o nombre del producto..." autocomplete="off" autofocus>
+    <input aria-label="Código de barras o nombre del producto" type="text" id="barcodeInput" class="scanner-input"
+    placeholder="Código de barras o nombre del producto..." autocomplete="off">
     <!-- Autocomplete Dropdown -->
     <div class="smart-dropdown" id="smartDropdown"></div>
   </div>
@@ -54,7 +54,7 @@
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
      <div class="cart-items-count" id="cartItemsCount">0 artículos en el carrito</div>
      <div style="display: flex; align-items: center; gap: 10px;">
-      <label class="voice-toggle" title="Anunciar total por voz al cobrar">
+      <label for="chkVoiceAnnounce" class="voice-toggle" title="Anunciar total por voz al cobrar">
        <input aria-label="Chkvoiceannounce" type="checkbox" id="chkVoiceAnnounce" onchange="setVoiceEnabled(this.checked)">
        <span class="voice-toggle-label">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/><path d="M15.54 8.46a5 5 0 0 1 0 7.08"/></svg>
@@ -172,7 +172,7 @@
  </div>
 
  <div class="form-group">
- <label class="form-label">Monto Recibido (COP)</label>
+ <label for="amountReceived" class="form-label">Monto Recibido (COP)</label>
  <input aria-label="Monto Recibido" type="text" id="amountReceived" class="form-control" placeholder="Ej: 20000"
  oninput="calculateChange()" style="font-size: 1.3rem; font-weight: 700; text-align: center;">
  </div>
@@ -196,7 +196,7 @@
  </div>
 
  <!-- Print toggle -->
- <label class="print-toggle" id="printToggleEfectivo">
+ <label for="chkPrintReceipt" class="print-toggle" id="printToggleEfectivo">
  <input aria-label="Chkprintreceipt" type="checkbox" id="chkPrintReceipt">
  <span class="print-toggle-label">Imprimir recibo</span>
  </label>
@@ -218,7 +218,7 @@
 
  
 
- <label class="print-toggle">
+ <label for="field_222" class="print-toggle">
  <input id="field_222" aria-label="Campo" type="checkbox" class="chk-print-mirror">
  <span class="print-toggle-label">Imprimir recibo</span>
  </label>
@@ -244,7 +244,7 @@
  {% endif %}
 
  <div class="form-group">
- <label class="form-label">Plataforma / Banco</label>
+ <label for="transferBank" class="form-label">Plataforma / Banco</label>
  <select aria-label="Plataforma / Banco" id="transferBank" class="form-control">
  <option value="">-- Seleccionar --</option>
  <option value="Nequi">Nequi</option>
@@ -262,7 +262,7 @@
 
  
 
- <label class="print-toggle">
+ <label for="field_266" class="print-toggle">
  <input id="field_266" aria-label="Campo" type="checkbox" class="chk-print-mirror">
  <span class="print-toggle-label">Imprimir recibo</span>
  </label>
@@ -321,7 +321,7 @@
  </div>
  </div>
 
- <label class="print-toggle" style="margin-top: 12px; display: block;">
+ <label for="field_325" class="print-toggle" style="margin-top: 12px; display: block;">
  <input id="field_325" aria-label="Campo" type="checkbox" class="chk-print-mirror">
  <span class="print-toggle-label">Imprimir recibo</span>
  </label>
@@ -365,7 +365,7 @@
  </div>
  
  <div class="form-group" style="margin-top: 12px;">
- <label class="form-label" style="margin-bottom: 4px;">Ingresar gramos manualmente</label>
+ <label for="manualWeightInput" class="form-label" style="margin-bottom: 4px;">Ingresar gramos manualmente</label>
  <div style="display: flex; gap: 12px; align-items: stretch;">
  <input aria-label="Ingresar gramos manualmente" type="text" id="manualWeightInput" class="form-control" style="font-size: 1.2rem; padding: 8px; font-weight: 700; text-align: center;" placeholder="Gramos (ej: 1400)">
  <div style="display: flex; align-items: center; padding: 0 16px; background: var(--bg-card); border: 2px solid var(--border); border-radius: var(--radius-sm); font-weight: 700;">
@@ -398,11 +398,11 @@
   </div>
   <div class="modal-body" style="padding-top: 20px;">
    <div class="form-group">
-    <label class="form-label">Nombre o descripción breve</label>
+    <label for="customProductName" class="form-label">Nombre o descripción breve</label>
     <input aria-label="Nombre o descripción breve" type="text" id="customProductName" class="form-control" placeholder="Ej: Bolsa, Recargo..." value="Varios">
    </div>
    <div class="form-group">
-    <label class="form-label">Precio ($)</label>
+    <label for="customProductPrice" class="form-label">Precio ($)</label>
     <input aria-label="Precio" type="number" id="customProductPrice" class="form-control" placeholder="Monto" style="font-size: 1.5rem; font-weight: bold; text-align: center;">
    </div>
   </div>
@@ -494,12 +494,12 @@
   <div class="modal-body" style="padding: 24px;">
    
    <div class="form-group" style="margin-bottom: 16px;">
-    <label class="form-label">Nombre del Cliente *</label>
+    <label for="orderCustomerName" class="form-label">Nombre del Cliente *</label>
     <input aria-label="Nombre del Cliente *" type="text" id="orderCustomerName" class="form-control" placeholder="Ej: Juan Pérez" required>
    </div>
    
    <div class="form-group" style="margin-bottom: 16px;">
-    <label class="form-label">Celular (WhatsApp) *</label>
+    <label for="field_504" class="form-label">Celular (WhatsApp) *</label>
     <div style="display: flex; gap: 8px;">
      <input id="field_504" aria-label="Celular" type="text" class="form-control" value="+57" style="width: 60px; text-align: center;" disabled>
      <input aria-label="Celular" type="tel" id="orderCustomerPhone" class="form-control" placeholder="3001234567" style="flex: 1;" required>
@@ -508,25 +508,25 @@
    
    <div style="display: flex; gap: 16px; margin-bottom: 16px;">
     <div class="form-group" style="flex: 1;">
-     <label class="form-label">Tipo de Pedido</label>
+     <label for="orderType" class="form-label">Tipo de Pedido</label>
      <select aria-label="Tipo de Pedido" id="orderType" class="form-control" onchange="toggleOrderAddress()">
       <option value="domicilio">Domicilio</option>
       <option value="recoger">Recoger en Tienda</option>
      </select>
     </div>
     <div class="form-group" style="flex: 1;">
-     <label class="form-label">Costo de Envío</label>
+     <label for="orderDeliveryCost" class="form-label">Costo de Envío</label>
      <input aria-label="Costo de Envío" type="number" id="orderDeliveryCost" class="form-control" value="0" min="0" step="50">
     </div>
    </div>
 
    <div class="form-group" id="orderAddressGroup" style="margin-bottom: 16px;">
-    <label class="form-label">Dirección de Entrega</label>
+    <label for="orderCustomerAddress" class="form-label">Dirección de Entrega</label>
     <input aria-label="Dirección de Entrega" type="text" id="orderCustomerAddress" class="form-control" placeholder="Ej: Calle 10 #20-30">
    </div>
    
    <div class="form-group" style="margin-bottom: 16px;">
-    <label class="form-label">Método de Pago Provisional</label>
+    <label for="orderPaymentMethod" class="form-label">Método de Pago Provisional</label>
     <select aria-label="Método de Pago Provisional" id="orderPaymentMethod" class="form-control">
      <option value="efectivo">Efectivo</option>
      <option value="nequi">Nequi</option>
@@ -536,7 +536,7 @@
    </div>
    
    <div class="form-group">
-    <label class="form-label">Notas / Observaciones</label>
+    <label for="orderNotes" class="form-label">Notas / Observaciones</label>
     <textarea aria-label="Notas / Observaciones" id="orderNotes" class="form-control" rows="2" placeholder="Opcional"></textarea>
    </div>
 
@@ -630,7 +630,7 @@ function submitOrder() {
     }
     
     const orderType = document.getElementById('orderType').value;
-    const deliveryCost = parseInt(document.getElementById('orderDeliveryCost').value) || 0;
+    const deliveryCost = Number.parseInt(document.getElementById('orderDeliveryCost').value, 10) || 0;
     const customerAddress = document.getElementById('orderCustomerAddress').value.trim();
     const paymentMethod = document.getElementById('orderPaymentMethod').value;
     const notes = document.getElementById('orderNotes').value.trim();
