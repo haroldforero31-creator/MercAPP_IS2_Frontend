@@ -57,16 +57,27 @@
 
     <!-- Demo Fast Login Helper -->
     <div style="margin-top: 24px; padding: 14px; border-radius: 10px; background: rgba(255, 255, 255, 0.03); border: 1px dashed rgba(255, 167, 38, 0.3); text-align: center;">
+      <a href="{{ url_for('proveedor_demo_login') }}" style="display: block; width: 100%; box-sizing: border-box; text-decoration: none; padding: 10px 14px; font-weight: 700; font-size: 0.92rem; border-radius: 8px; background: #2e7d32; color: #fff; margin-bottom: 10px;">
+        ⚡ Acceso Rápido Demo (Entrar sin Login)
+      </a>
       <div style="font-size: 0.82rem; color: #94A3B8; margin-bottom: 8px;">Credenciales de Demostración:</div>
-      <button type="button" onclick="autoFillDemoSupplier()" style="background: rgba(255,167,38,0.15); border: 1px solid rgba(255,167,38,0.4); color: #FFA726; padding: 6px 14px; border-radius: 6px; font-size: 0.82rem; font-weight: 600; cursor: pointer;">
-        Rellenar: proveedor.demo@mercapp.com
+      <button type="button" onclick="autoFillDemoSupplier()" style="background: rgba(255,167,38,0.15); border: 1px solid rgba(255,167,38,0.4); color: #FFA726; padding: 8px 16px; border-radius: 8px; font-size: 0.85rem; font-weight: 700; cursor: pointer;">
+        Rellenar Datos de Prueba (proveedor@mercapp.com)
       </button>
     </div>
 
+    <!-- Register link -->
+    <div style="text-align: center; margin-top: 18px; padding-top: 16px; border-top: 1px solid rgba(255,255,255,0.06);">
+      <span style="color: var(--text-secondary); font-size: 0.88rem;">¿Eres un nuevo proveedor?</span>
+      <a href="{{ url_for('proveedor_register') }}" style="color: #FFA726; font-weight: 700; text-decoration: none; margin-left: 6px; font-size: 0.88rem;">
+        Regístrate aquí
+      </a>
+    </div>
+
     <!-- Back link -->
-    <div style="text-align: center; margin-top: 22px;">
-      <a href="{{ url_for('index') }}" style="color: var(--text-secondary); text-decoration: none; font-size: 0.88rem;">
-        ← Volver al inicio de MercAPP
+    <div style="text-align: center; margin-top: 16px;">
+      <a href="{{ url_for('login') }}" style="color: var(--text-secondary); text-decoration: none; font-size: 0.85rem;">
+        ← Volver al inicio de sesión principal
       </a>
     </div>
   </div>
@@ -74,8 +85,8 @@
 
 <script>
 function autoFillDemoSupplier() {
-  document.getElementById('supplier-email').value = 'proveedor.demo@mercapp.com';
-  document.getElementById('supplier-pass').value = 'Proveedor123.';
+  document.getElementById('supplier-email').value = 'proveedor@mercapp.com';
+  document.getElementById('supplier-pass').value = 'Proveedor123!';
 }
 </script>
 {% endblock %}
