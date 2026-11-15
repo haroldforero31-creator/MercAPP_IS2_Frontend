@@ -1,104 +1,301 @@
-{% extends "base.html" %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MercAPP — Registrar Pedido a {{ store.name }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2343A047' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><circle cx='9' cy='21' r='1'/><circle cx='20' cy='21' r='1'/><path d='M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6'/></svg>">
+    <style>
+        body {
+            background-color: var(--bg);
+            margin: 0;
+            font-family: var(--font);
+            color: var(--text);
+        }
+        .header {
+            background-color: var(--bg-card);
+            border-bottom: 1px solid var(--border);
+            padding: 1rem 2rem;
+            color: var(--text);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .container {
+            max-width: 680px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem 3rem;
+        }
+        .form-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 32px 28px;
+            box-shadow: var(--shadow-lg);
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-group label {
+            display: block;
+            font-size: 0.88rem;
+            font-weight: 700;
+            color: var(--text);
+            margin-bottom: 6px;
+        }
+        .form-control {
+            width: 100%;
+            padding: 12px 14px;
+            background-color: var(--bg-input);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            color: var(--text);
+            font-size: 0.95rem;
+            box-sizing: border-box;
+            outline: none;
+            transition: var(--transition);
+        }
+        .form-control:focus {
+            border-color: var(--primary);
+            box-shadow: var(--shadow-glow);
+        }
+        .amount-control {
+            font-size: 1.25rem;
+            font-weight: 800;
+            color: var(--primary);
+        }
+        .info-box {
+            background: rgba(27, 94, 32, 0.08);
+            border: 1px solid rgba(27, 94, 32, 0.2);
+            border-radius: var(--radius-sm);
+            padding: 14px 16px;
+            margin-bottom: 24px;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            line-height: 1.45;
+        }
+        .btn-submit {
+            width: 100%;
+            padding: 15px;
+            font-weight: 800;
+            font-size: 1.05rem;
+            border-radius: var(--radius-sm);
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            cursor: pointer;
+            box-shadow: var(--shadow-glow);
+            transition: var(--transition);
+        }
+        .btn-submit:hover {
+            background-color: var(--primary-light);
+            transform: translateY(-2px);
+        }
+        .nav-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-weight: 500;
+            transition: var(--transition);
+        }
+        .nav-links a:hover {
+            color: var(--text);
+        }
+        .back-link {
+            color: var(--primary);
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 700;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            margin-bottom: 18px;
+        }
+        .back-link:hover {
+            text-decoration: underline;
+        }
+        .flash-messages {
+            margin-bottom: 20px;
+        }
+        .flash-alert {
+            padding: 12px 16px;
+            border-radius: var(--radius-sm);
+            font-size: 0.9rem;
+            margin-bottom: 10px;
+        }
+        .flash-alert.success {
+            background: rgba(34, 197, 94, 0.12);
+            border: 1px solid rgba(34, 197, 94, 0.25);
+            color: #4ade80;
+        }
+        .flash-alert.error {
+            background: rgba(239, 68, 68, 0.12);
+            border: 1px solid rgba(239, 68, 68, 0.25);
+            color: #f87171;
+        }
 
-{% block title %}MercAPP — Registrar Pedido a {{ store.name }}{% endblock %}
-
-{% block content %}
-<div class="page-container" style="max-width: 680px; margin: 30px auto 60px;">
-  
-  <!-- Back Button & Breadcrumb -->
-  <div style="margin-bottom: 20px;">
-    <a href="{{ url_for('proveedor_tiendas') }}" style="color: #FFA726; text-decoration: none; font-size: 0.9rem; font-weight: 700; display: inline-flex; align-items: center; gap: 6px;">
-      ← Volver al listado de tiendas
-    </a>
-  </div>
-
-  <div class="card" style="padding: 34px 28px; border-radius: 18px; border: 1px solid rgba(255,167,38,0.25); box-shadow: 0 20px 50px rgba(0,0,0,0.6); background: rgba(18, 22, 34, 0.95); backdrop-filter: blur(15px);">
-    
-    <!-- Header -->
-    <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 24px; padding-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.08);">
-      <div style="width: 54px; height: 54px; border-radius: 14px; background: rgba(255, 167, 38, 0.15); border: 1px solid rgba(255, 167, 38, 0.4); display: flex; align-items: center; justify-content: center; font-size: 1.8rem; color: #FFA726;">
-        📦
-      </div>
-      <div>
-        <h1 style="font-size: 1.45rem; font-weight: 800; margin: 0 0 4px; color: #FFFFFF;">
-          Solicitud de Pedido / Despacho
-        </h1>
-        <p style="color: var(--text-secondary); font-size: 0.88rem; margin: 0;">
-          Destino: <strong style="color: #FFFFFF;">{{ store.name }}</strong> 
-          • Proveedor: <strong style="color: #FFA726;">{{ current_user.company_name }}</strong>
-        </p>
-      </div>
+        @media (max-width: 768px) {
+            .header {
+                padding: 0.8rem 1rem;
+                flex-wrap: wrap;
+                gap: 10px;
+            }
+            .container {
+                padding: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div style="font-size: 1.4rem; font-weight: bold; display: flex; align-items: center; gap: 10px;">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#43A047" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+            MercAPP
+        </div>
+        <div class="nav-links" style="display: flex; align-items: center; gap: 18px;">
+            <a href="{{ url_for('proveedor_tiendas') }}" style="color: var(--primary); text-decoration: none; font-weight: 600;">🏪 Tiendas</a>
+            <span style="color: var(--text-secondary); font-size: 0.92rem;">
+                Proveedor: <strong style="color: var(--text);">{{ current_user.company_name }}</strong>
+            </span>
+            <a href="#" onclick="confirmAppLogout(event, '{{ url_for('proveedor_logout') }}')" style="color: var(--error); text-decoration: none; font-weight: 500; display: inline-flex; align-items: center; gap: 4px; padding: 6px 12px; border-radius: var(--radius-sm); background: rgba(239, 68, 68, 0.1); transition: var(--transition);">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                Salir
+            </a>
+        </div>
     </div>
 
-    <!-- Flash Messages -->
-    {% with messages = get_flashed_messages(with_categories=true) %}
-      {% if messages %}
-        <div style="margin-bottom: 20px;">
-          {% for category, message in messages %}
-            <div style="padding: 12px 16px; border-radius: 10px; font-size: 0.88rem; margin-bottom: 8px; {% if category == 'error' %}background: rgba(239,68,68,0.15); border: 1px solid rgba(239,68,68,0.3); color: #FCA5A5;{% else %}background: rgba(34,197,94,0.15); border: 1px solid rgba(34,197,94,0.3); color: #86EFAC;{% endif %}">
-              {{ message }}
+    <div class="container">
+        <a href="{{ url_for('proveedor_tiendas') }}" class="back-link">
+            ← Volver al listado de tiendas
+        </a>
+
+        <div class="form-card">
+            <!-- Header -->
+            <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 24px; padding-bottom: 18px; border-bottom: 1px solid var(--border);">
+                <div style="width: 52px; height: 52px; border-radius: 50%; background: rgba(27, 94, 32, 0.08); border: 1px solid rgba(27, 94, 32, 0.15); display: flex; align-items: center; justify-content: center; font-size: 1.6rem; color: var(--primary);">
+                    📦
+                </div>
+                <div>
+                    <h1 style="font-size: 1.35rem; font-weight: 800; margin: 0 0 4px; color: var(--text);">
+                        Solicitud de Pedido / Despacho
+                    </h1>
+                    <p style="color: var(--text-secondary); font-size: 0.88rem; margin: 0;">
+                        Destino: <strong style="color: var(--text);">{{ store.name }}</strong> 
+                        • Proveedor: <strong style="color: var(--primary);">{{ current_user.company_name }}</strong>
+                    </p>
+                </div>
             </div>
-          {% endfor %}
+
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    <div class="flash-messages">
+                        {% for category, message in messages %}
+                            <div class="flash-alert {{ category }}">{{ message }}</div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            {% endwith %}
+
+            <form method="POST" id="deliveryForm">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+                <!-- Campo 1: Fecha de Pedido -->
+                <div class="form-group">
+                    <label for="delivery_date">📅 Fecha de Pedido *</label>
+                    <input id="delivery_date" aria-label="Fecha de Pedido" type="date" name="delivery_date" value="{{ today_str }}" required class="form-control">
+                    <small style="color: var(--text-secondary); font-size: 0.78rem; display: block; margin-top: 4px;">
+                        Día en que se realiza o despacha la orden de mercancía a la tienda.
+                    </small>
+                </div>
+
+                <!-- Campo 2: Costo del Pedido -->
+                <div class="form-group">
+                    <label for="total_amount">💰 Costo del Pedido ($ COP) *</label>
+                    <input id="total_amount" aria-label="Costo del Pedido en pesos colombianos" type="number" name="total_amount" placeholder="Ej. 250000" min="1" step="50" required class="form-control amount-control">
+                    <small style="color: var(--text-secondary); font-size: 0.78rem; display: block; margin-top: 4px;">
+                        Monto total que el supermercado deberá pagar por este pedido.
+                    </small>
+                </div>
+
+                <!-- Campo 3: Anotaciones de Errores / Novedades -->
+                <div class="form-group">
+                    <label for="notes">📝 Anotaciones de Errores / Novedades de Mercancía</label>
+                    <textarea id="notes" aria-label="Anotaciones de errores o novedades" name="notes" rows="4" 
+                              placeholder="Ej. Se entregaron 10 cajas de leche, 2 llegaron con empaque averiado y se descontarán. Faltaron 3 paquetes de arroz por agotado en bodega..."
+                              class="form-control" style="resize: vertical;"></textarea>
+                    <small style="color: var(--text-secondary); font-size: 0.78rem; display: block; margin-top: 4px;">
+                        Registra detalles sobre novedades, devoluciones o notas para el administrador.
+                    </small>
+                </div>
+
+                <div class="info-box">
+                    ℹ️ Al confirmar, tu solicitud se enviará directamente al panel de pedidos de <strong>{{ store.name }}</strong>. El administrador confirmará el pedido y seleccionará el método de pago (efectivo de caja, transferencia o mixto).
+                </div>
+
+                <!-- Campo 4: Confirmar Pedido y Pago -->
+                <button type="submit" id="submit-delivery-btn" class="btn-submit">
+                    Confirmar Pedido y Pago ➔
+                </button>
+            </form>
         </div>
-      {% endif %}
-    {% endwith %}
+    </div>
 
-    <form method="POST" id="deliveryForm">
-      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-
-      <!-- Campo 1: Fecha de Pedido -->
-      <div style="margin-bottom: 18px;">
-        <label for="input_delivery_date" style="display: block; font-size: 0.88rem; font-weight: 700; color: #CBD5E1; margin-bottom: 6px;">
-          📅 Fecha de Pedido *
-        </label>
-        <input id="input_delivery_date" aria-label="Fecha de Pedido" type="date" name="delivery_date" value="{{ today_str }}" required
-               style="width: 100%; padding: 12px 14px; border-radius: 10px; background: #131722; border: 1px solid var(--border); color: #fff; font-size: 0.95rem; box-sizing: border-box;">
-        <small style="color: #94A3B8; font-size: 0.78rem; display: block; margin-top: 4px;">
-          Día en que se realiza o despacha la orden de mercancía a la tienda.
-        </small>
-      </div>
-
-      <!-- Campo 2: Costo del Pedido -->
-      <div style="margin-bottom: 18px;">
-        <label for="total_amount" style="display: block; font-size: 0.88rem; font-weight: 700; color: #CBD5E1; margin-bottom: 6px;">
-          💰 Costo del Pedido ($ COP) *
-        </label>
-        <input aria-label="Costo del Pedido en pesos colombianos" type="number" name="total_amount" id="total_amount" placeholder="Ej. 250000" min="1" step="50" required
-               style="width: 100%; padding: 14px 16px; border-radius: 10px; background: #131722; border: 1px solid rgba(255, 167, 38, 0.4); color: #FFA726; font-size: 1.25rem; font-weight: 800; box-sizing: border-box;">
-        <small style="color: #94A3B8; font-size: 0.78rem; display: block; margin-top: 4px;">
-          Monto total que el supermercado deberá pagar por esta entrega.
-        </small>
-      </div>
-
-      <!-- Campo 3: Anotaciones de Errores / Novedades -->
-      <div style="margin-bottom: 24px;">
-        <label for="input_notes" style="display: block; font-size: 0.88rem; font-weight: 700; color: #CBD5E1; margin-bottom: 6px;">
-          📝 Anotaciones de Errores / Novedades de Mercancía
-        </label>
-        <textarea id="input_notes" aria-label="Anotaciones de errores o novedades" name="notes" rows="4" 
-                  placeholder="Ej. Se entregaron 10 cajas de leche, 2 llegaron con empaque averiado y se descontarán. Faltaron 3 paquetes de arroz por agotado en bodega..."
-                  style="width: 100%; padding: 12px 14px; border-radius: 10px; background: #131722; border: 1px solid var(--border); color: #fff; font-size: 0.92rem; box-sizing: border-box; resize: vertical;"></textarea>
-        <small style="color: #94A3B8; font-size: 0.78rem; display: block; margin-top: 4px;">
-          Registra cualquier detalle sobre productos faltantes, averías, devoluciones o notas para el administrador.
-        </small>
-      </div>
-
-      <!-- Information Card -->
-      <div style="background: rgba(255, 167, 38, 0.08); border: 1px solid rgba(255, 167, 38, 0.25); border-radius: 12px; padding: 16px; margin-bottom: 24px;">
-        <div style="display: flex; gap: 12px; align-items: flex-start;">
-          <span style="font-size: 1.3rem;">ℹ️</span>
-          <div style="font-size: 0.85rem; color: #CBD5E1; line-height: 1.45;">
-            Al confirmar, tu solicitud se enviará directamente al panel de pedidos de <strong>{{ store.name }}</strong>. El administrador confirmará el pedido y seleccionará el método de pago (efectivo de caja, transferencia o mixto).
-          </div>
+    <!-- Modal de confirmación para cerrar sesión -->
+    <div class="modal-overlay" id="logoutConfirmModal">
+        <div class="modal" style="max-width: 380px;">
+            <div class="modal-header">
+                <span class="modal-title" style="display: flex; align-items: center; gap: 8px;">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                    Cerrar Sesión
+                </span>
+                <button class="modal-close" onclick="closeLogoutModal()">✕</button>
+            </div>
+            <div class="modal-body" style="padding: 24px; text-align: center;">
+                <div style="width: 52px; height: 52px; border-radius: 50%; background: rgba(239, 68, 68, 0.12); display: flex; align-items: center; justify-content: center; margin: 0 auto 16px auto;">
+                    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2.2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                </div>
+                <h3 style="margin: 0 0 8px 0; font-size: 1.15rem; color: var(--text); font-weight: 600;">¿Cerrar sesión de proveedor?</h3>
+                <p style="margin: 0 0 24px 0; color: var(--text-secondary); font-size: 0.9rem; line-height: 1.4;">Tendrás que volver a ingresar tus credenciales para registrar nuevos pedidos.</p>
+                <div style="display: flex; gap: 12px;">
+                    <button type="button" class="btn btn-outline" style="flex: 1;" onclick="closeLogoutModal()">Cancelar</button>
+                    <a id="confirmLogoutBtn" href="{{ url_for('proveedor_logout') }}" class="btn" style="flex: 1; text-align: center; text-decoration: none; display: flex; align-items: center; justify-content: center; background-color: var(--error); color: white; border: none; border-radius: var(--radius-sm); font-weight: 600; padding: 10px 16px;">Cerrar Sesión</a>
+                </div>
+            </div>
         </div>
-      </div>
+    </div>
 
-      <!-- Campo 4: Confirmar Pedido y Pago -->
-      <button type="submit" id="submit-delivery-btn"
-              style="width: 100%; padding: 15px; font-weight: 800; font-size: 1.05rem; border-radius: 12px; background: linear-gradient(135deg, #FFA726, #F57C00); color: #000; border: none; cursor: pointer; box-shadow: 0 4px 20px rgba(255, 167, 38, 0.35); transition: transform 0.15s;">
-        Confirmar Pedido y Pago ➔
-      </button>
-    </form>
-  </div>
-</div>
-{% endblock %}
+    <script>
+        let pendingLogoutUrl = '';
+        function confirmAppLogout(event, url) {
+            if (event) {
+                event.preventDefault();
+                event.stopPropagation();
+            }
+            pendingLogoutUrl = url || "{{ url_for('proveedor_logout') }}";
+            const modal = document.getElementById('logoutConfirmModal');
+            const confirmBtn = document.getElementById('confirmLogoutBtn');
+            if (confirmBtn && pendingLogoutUrl) {
+                confirmBtn.href = pendingLogoutUrl;
+            }
+            if (modal) {
+                modal.classList.add('active');
+            }
+        }
+
+        function closeLogoutModal() {
+            const modal = document.getElementById('logoutConfirmModal');
+            if (modal) {
+                modal.classList.remove('active');
+            }
+        }
+
+        document.getElementById('logoutConfirmModal')?.addEventListener('click', function(e) {
+            if (e.target === this) closeLogoutModal();
+        });
+
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') closeLogoutModal();
+        });
+    </script>
+</body>
+</html>
