@@ -211,9 +211,10 @@
                 <!-- Campo 2: Costo del Pedido -->
                 <div class="form-group">
                     <label for="total_amount">💰 Costo del Pedido ($ COP) *</label>
-                    <input id="total_amount" aria-label="Costo del Pedido en pesos colombianos" type="number" name="total_amount" placeholder="Ej. 250000" min="1" step="50" required class="form-control amount-control">
+                    <input id="total_amount" aria-label="Costo del Pedido en pesos colombianos" type="number" name="total_amount" placeholder="Ej. 2000000" min="50" step="50" required class="form-control amount-control">
+                    <div id="amount-preview" style="font-size: 0.95rem; font-weight: 700; color: var(--primary); margin-top: 6px;"></div>
                     <small style="color: var(--text-secondary); font-size: 0.78rem; display: block; margin-top: 4px;">
-                        Monto total que el supermercado deberá pagar por este pedido.
+                        Monto exacto en pesos colombianos (múltiplos de $50 COP, ej. $1.000, $1.200, $1.500, $2.000.000).
                     </small>
                 </div>
 
@@ -296,6 +297,22 @@
         document.addEventListener('keydown', function(e) {
             if (e.key === 'Escape') closeLogoutModal();
         });
+
+        // Formateador en tiempo real de pesos colombianos
+        const amountInput = document.getElementById('total_amount');
+        const amountPreview = document.getElementById('amount-preview');
+        if (amountInput && amountPreview) {
+            function updatePreview() {
+                const val = parseInt(amountInput.value, 10);
+                if (!isNaN(val) && val > 0) {
+                    amountPreview.textContent = '💵 Total a cobrar: $' + val.toLocaleString('es-CO') + ' COP';
+                } else {
+                    amountPreview.textContent = '';
+                }
+            }
+            amountInput.addEventListener('input', updatePreview);
+            updatePreview();
+        }
     </script>
 </body>
 </html>
