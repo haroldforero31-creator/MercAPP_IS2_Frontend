@@ -133,10 +133,13 @@
             </div>
 
             {% if demo_code %}
-            <div style="background: rgba(255, 143, 0, 0.12); border: 1px dashed #FFA726; border-radius: 8px; padding: 10px 14px; margin: 12px 0 16px; text-align: center;">
-                <div style="font-size: 0.78rem; color: #FFA726; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 700;">⚡ Modo Evaluación / Acceso Rápido</div>
-                <div style="font-size: 0.85rem; color: #E8EAED; margin-top: 3px;">
-                    Código generado: <strong style="font-size: 1.25rem; color: #FFB74D; letter-spacing: 3px; font-family: monospace;">{{ demo_code }}</strong>
+            <div style="background: rgba(46, 125, 50, 0.12); border: 1px dashed var(--primary); border-radius: 8px; padding: 12px 14px; margin: 12px 0 16px; text-align: center;">
+                <div style="font-size: 0.78rem; color: #81C784; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 700;">🛡️ Verificación en Línea (Render Cloud)</div>
+                <div style="font-size: 0.88rem; color: #E8EAED; margin-top: 4px;">
+                    Código generado: <strong style="font-size: 1.35rem; color: #A5D6A7; letter-spacing: 4px; font-family: monospace;">{{ demo_code }}</strong>
+                </div>
+                <div style="font-size: 0.74rem; color: #9AA0A6; margin-top: 4px;">
+                    (En Render Free Tier los puertos SMTP están bloqueados. Ingresa este código para activar tu cuenta)
                 </div>
             </div>
             {% endif %}
