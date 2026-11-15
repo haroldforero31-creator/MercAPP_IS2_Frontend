@@ -1,92 +1,199 @@
-{% extends "base.html" %}
-
-{% block title %}MercAPP — Portal de Proveedores{% endblock %}
-
-{% block content %}
-<div class="page-container" style="max-width: 460px; margin: 40px auto 60px;">
-  <div class="card" style="padding: 36px 30px; border-radius: 18px; border: 1px solid rgba(255,167,38,0.25); box-shadow: 0 20px 50px rgba(0,0,0,0.6); background: rgba(18, 22, 34, 0.95); backdrop-filter: blur(15px);">
-    
-    <!-- Header -->
-    <div style="text-align: center; margin-bottom: 28px;">
-      <div style="width: 58px; height: 58px; border-radius: 14px; background: rgba(255, 167, 38, 0.12); border: 1px solid rgba(255, 167, 38, 0.35); display: flex; align-items: center; justify-content: center; margin: 0 auto 14px; color: #FFA726; font-size: 1.8rem;">
-        🚚
-      </div>
-      <h1 style="font-size: 1.7rem; font-weight: 800; margin: 0 0 6px; color: #FFFFFF;">Portal Proveedores</h1>
-      <p style="color: var(--text-secondary); font-size: 0.92rem; margin: 0;">
-        Accede para gestionar órdenes de reabastecimiento, remisiones y cuentas por cobrar de tu tienda asociada.
-      </p>
-    </div>
-
-    <!-- Flash Messages -->
-    {% with messages = get_flashed_messages(with_categories=true) %}
-      {% if messages %}
-        <div style="margin-bottom: 20px;">
-          {% for category, message in messages %}
-            <div style="padding: 12px 16px; border-radius: 10px; font-size: 0.9rem; margin-bottom: 10px; {% if category == 'error' %}background: rgba(239,68,68,0.15); border: 1px solid rgba(239,68,68,0.3); color: #FCA5A5;{% else %}background: rgba(34,197,94,0.15); border: 1px solid rgba(34,197,94,0.3); color: #86EFAC;{% endif %}">
-              {{ message }}
-            </div>
-          {% endfor %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MercAPP — Portal de Proveedores</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2343A047' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><circle cx='9' cy='21' r='1'/><circle cx='20' cy='21' r='1'/><path d='M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6'/></svg>">
+    <style>
+        body {
+            background-color: var(--bg);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 24px 16px;
+            box-sizing: border-box;
+            margin: 0;
+            font-family: var(--font);
+            color: var(--text);
+        }
+        .login-card {
+            background: var(--bg-card);
+            padding: 40px 32px;
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow-lg);
+            width: 100%;
+            max-width: 420px;
+            text-align: center;
+            box-sizing: border-box;
+        }
+        .supplier-icon-wrap {
+            background: rgba(27, 94, 32, 0.08);
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 18px;
+            border: 1px solid rgba(27, 94, 32, 0.15);
+            color: var(--primary);
+        }
+        .login-card h2 {
+            margin: 0 0 8px 0;
+            color: var(--text);
+            font-size: 24px;
+            font-weight: 700;
+        }
+        .login-card p {
+            color: var(--text-secondary);
+            margin: 0 0 24px 0;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+        .form-group {
+            text-align: left;
+            margin-bottom: 16px;
+        }
+        .form-group label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text);
+            margin-bottom: 6px;
+        }
+        .form-control {
+            width: 100%;
+            padding: 12px 14px;
+            background-color: var(--bg-input);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            color: var(--text);
+            box-sizing: border-box;
+            outline: none;
+            font-size: 15px;
+            transition: var(--transition);
+        }
+        .form-control:focus {
+            border-color: var(--primary);
+            box-shadow: var(--shadow-glow);
+        }
+        .btn-submit {
+            width: 100%;
+            padding: 13px;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 700;
+            transition: var(--transition);
+            margin-top: 8px;
+        }
+        .btn-submit:hover {
+            background-color: var(--primary-light);
+        }
+        .flash-messages {
+            margin-bottom: 18px;
+            text-align: left;
+        }
+        .flash-alert {
+            padding: 10px 14px;
+            border-radius: var(--radius-sm);
+            font-size: 0.88rem;
+            margin-bottom: 8px;
+        }
+        .flash-alert.error {
+            background: rgba(239, 68, 68, 0.12);
+            border: 1px solid rgba(239, 68, 68, 0.25);
+            color: #f87171;
+        }
+        .flash-alert.success {
+            background: rgba(34, 197, 94, 0.12);
+            border: 1px solid rgba(34, 197, 94, 0.25);
+            color: #4ade80;
+        }
+        .flash-alert.info {
+            background: rgba(59, 130, 246, 0.12);
+            border: 1px solid rgba(59, 130, 246, 0.25);
+            color: #60a5fa;
+        }
+        .link {
+            display: block;
+            margin-top: 16px;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.92rem;
+            transition: var(--transition);
+        }
+        .link:hover {
+            color: var(--primary-light);
+            text-decoration: underline;
+        }
+        .back-link {
+            display: inline-block;
+            margin-top: 14px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.85rem;
+            transition: var(--transition);
+        }
+        .back-link:hover {
+            color: var(--text);
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-card">
+        <div class="supplier-icon-wrap">
+            <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="1" y="3" width="15" height="13"></rect>
+                <polygon points="16 8 20 8 23 11 23 16 16 16 8"></polygon>
+                <circle cx="5.5" cy="18.5" r="2.5"></circle>
+                <circle cx="18.5" cy="18.5" r="2.5"></circle>
+            </svg>
         </div>
-      {% endif %}
-    {% endwith %}
+        <h2>Portal de Proveedores</h2>
+        <p>Inicia sesión para gestionar tus despachos a tiendas</p>
+        
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="flash-messages">
+                    {% for category, message in messages %}
+                        <div class="flash-alert {{ category }}">{{ message }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
 
-    <!-- Login Form -->
-    <form method="POST" action="{{ url_for('proveedor_login') }}">
-                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <form method="POST" action="{{ url_for('proveedor_login') }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            
+            <div class="form-group">
+                <label for="supplier-email">Correo del Proveedor / Encargado</label>
+                <input id="supplier-email" aria-label="Correo del Proveedor" type="email" name="email" class="form-control" placeholder="correo@proveedor.com" required autocomplete="username">
+            </div>
 
-      <div style="margin-bottom: 18px;">
-        <label for="supplier-email" style="display: block; font-size: 0.88rem; font-weight: 600; color: #E2E8F0; margin-bottom: 6px;">
-          Correo del Proveedor / Preventista
-        </label>
-        <input aria-label="ejemplo@proveedor.com" type="email" name="email" id="supplier-email" class="form-control" placeholder="ejemplo@proveedor.com" required
-               style="width: 100%; padding: 12px 14px; border-radius: 10px; background: #131722; border: 1px solid var(--border); color: #fff; font-size: 0.95rem; box-sizing: border-box;">
-      </div>
+            <div class="form-group">
+                <label for="supplier-pass">Contraseña</label>
+                <input id="supplier-pass" aria-label="Contraseña" type="password" name="password" class="form-control" placeholder="••••••••" required autocomplete="current-password">
+            </div>
 
-      <div style="margin-bottom: 24px;">
-        <label for="supplier-pass" style="display: block; font-size: 0.88rem; font-weight: 600; color: #E2E8F0; margin-bottom: 6px;">
-          Contraseña
-        </label>
-        <input aria-label="••••••••" type="password" name="password" id="supplier-pass" class="form-control" placeholder="••••••••" required
-               style="width: 100%; padding: 12px 14px; border-radius: 10px; background: #131722; border: 1px solid var(--border); color: #fff; font-size: 0.95rem; box-sizing: border-box;">
-      </div>
-
-      <button type="submit" class="btn" style="width: 100%; padding: 13px; font-weight: 700; font-size: 1rem; border-radius: 10px; background: linear-gradient(135deg, #FFA726, #F57C00); color: #000; border: none; cursor: pointer; box-shadow: 0 4px 15px rgba(255, 167, 38, 0.35);">
-        Ingresar al Portal
-      </button>
-    </form>
-
-    <!-- Demo Fast Login Helper -->
-    <div style="margin-top: 24px; padding: 14px; border-radius: 10px; background: rgba(255, 255, 255, 0.03); border: 1px dashed rgba(255, 167, 38, 0.3); text-align: center;">
-      <a href="{{ url_for('proveedor_demo_login') }}" style="display: block; width: 100%; box-sizing: border-box; text-decoration: none; padding: 10px 14px; font-weight: 700; font-size: 0.92rem; border-radius: 8px; background: #2e7d32; color: #fff; margin-bottom: 10px;">
-        ⚡ Acceso Rápido Demo (Entrar sin Login)
-      </a>
-      <div style="font-size: 0.82rem; color: #94A3B8; margin-bottom: 8px;">Credenciales de Demostración:</div>
-      <button type="button" onclick="autoFillDemoSupplier()" style="background: rgba(255,167,38,0.15); border: 1px solid rgba(255,167,38,0.4); color: #FFA726; padding: 8px 16px; border-radius: 8px; font-size: 0.85rem; font-weight: 700; cursor: pointer;">
-        Rellenar Datos de Prueba (proveedor@mercapp.com)
-      </button>
+            <button type="submit" class="btn-submit">Ingresar al Portal</button>
+        </form>
+        
+        <div style="margin-top: 18px; padding-top: 16px; border-top: 1px solid var(--border);">
+            <span style="color: var(--text-secondary); font-size: 0.88rem;">¿Eres proveedor nuevo?</span>
+            <a href="{{ url_for('proveedor_register') }}" class="link" style="display: inline-block; margin-top: 0; margin-left: 4px;">Regístrate aquí</a>
+        </div>
+        
+        <a href="{{ url_for('login') }}" class="back-link">← Volver al inicio principal</a>
     </div>
-
-    <!-- Register link -->
-    <div style="text-align: center; margin-top: 18px; padding-top: 16px; border-top: 1px solid rgba(255,255,255,0.06);">
-      <span style="color: var(--text-secondary); font-size: 0.88rem;">¿Eres un nuevo proveedor?</span>
-      <a href="{{ url_for('proveedor_register') }}" style="color: #FFA726; font-weight: 700; text-decoration: none; margin-left: 6px; font-size: 0.88rem;">
-        Regístrate aquí
-      </a>
-    </div>
-
-    <!-- Back link -->
-    <div style="text-align: center; margin-top: 16px;">
-      <a href="{{ url_for('login') }}" style="color: var(--text-secondary); text-decoration: none; font-size: 0.85rem;">
-        ← Volver al inicio de sesión principal
-      </a>
-    </div>
-  </div>
-</div>
-
-<script>
-function autoFillDemoSupplier() {
-  document.getElementById('supplier-email').value = 'proveedor@mercapp.com';
-  document.getElementById('supplier-pass').value = 'Proveedor123!';
-}
-</script>
-{% endblock %}
+</body>
+</html>

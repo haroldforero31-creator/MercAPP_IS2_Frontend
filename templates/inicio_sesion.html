@@ -155,9 +155,9 @@
         </div>
 
         <!-- Panel 2: Proveedores (Portal de Proveedores) -->
-        <div class="role-panel-card" style="border-color: rgba(255, 167, 38, 0.35); background: rgba(18, 22, 34, 0.95);">
+        <div class="role-panel-card">
             <div>
-                <div class="customer-icon" style="background: rgba(255, 167, 38, 0.12); border-color: rgba(255, 167, 38, 0.35); color: #FFA726;">
+                <div class="customer-icon">
                     <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <rect x="1" y="3" width="15" height="13"></rect>
                         <polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon>
@@ -165,17 +165,17 @@
                         <circle cx="18.5" cy="18.5" r="2.5"></circle>
                     </svg>
                 </div>
-                <h2 style="color: #FFFFFF;">Portal de Proveedores</h2>
+                <h2>Portal de Proveedores</h2>
                 <p>Ingresa tus despachos, reporta novedades de mercancía y solicita pagos a tiendas aliadas.</p>
             </div>
             
             <div style="width: 100%;">
-                <a href="{{ url_for('proveedor_login') }}" class="btn" style="display: block; text-decoration: none; text-align: center; margin-bottom: 14px; line-height: 24px; background: linear-gradient(135deg, #FFA726, #F57C00); color: #000; font-weight: 800; border-radius: var(--radius); padding: 10px 18px;">
+                <a href="{{ url_for('proveedor_login') }}" class="btn btn-primary" style="display: block; text-decoration: none; text-align: center; margin-bottom: 16px; line-height: 24px; background-color: var(--primary); font-weight: 700;">
                     Iniciar Sesión Proveedor
                 </a>
                 
                 <div style="color: var(--text-secondary); font-size: 0.9rem;">
-                    ¿Eres proveedor nuevo? <a href="{{ url_for('proveedor_register') }}" class="customer-register-link" style="color: #FFA726; text-decoration: none; font-weight: 600;">Regístrate aquí</a>
+                    ¿Eres proveedor nuevo? <a href="{{ url_for('proveedor_register') }}" class="customer-register-link" style="color: var(--primary); text-decoration: none; font-weight: 600;">Regístrate aquí</a>
                 </div>
             </div>
         </div>
