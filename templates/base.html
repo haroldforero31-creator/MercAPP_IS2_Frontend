@@ -75,7 +75,7 @@
     }
     </style>
     
-    {% if current_user and current_user.is_authenticated %}
+    {% if current_user and current_user.is_authenticated and not (current_user.get_id() and (current_user.get_id().startswith('supplier_') or current_user.get_id().startswith('customer_'))) %}
     <link rel="stylesheet" href="{{ url_for('static', filename='css/merki.css') }}?v=4.0">
     {% endif %}
     {% block extra_css %}{% endblock %}
@@ -111,7 +111,7 @@
 </head>
 
 <body>
-    {% if current_user.is_authenticated %}
+    {% if current_user.is_authenticated and not (current_user.get_id() and (current_user.get_id().startswith('supplier_') or current_user.get_id().startswith('customer_'))) %}
     <nav class="navbar">
         <a href="{{ url_for('pos') }}" class="navbar-brand">
             <svg class="brand-svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
@@ -449,7 +449,7 @@
         window.addEventListener('offline', updateNetworkStatus);
         document.addEventListener('DOMContentLoaded', updateNetworkStatus);
     </script>
-    {% if current_user and current_user.is_authenticated %}
+    {% if current_user and current_user.is_authenticated and not (current_user.get_id() and (current_user.get_id().startswith('supplier_') or current_user.get_id().startswith('customer_'))) %}
     <script>
         window.MERKI_STORE_ID = {{ current_user.store_id if current_user and current_user.store_id else 1 }};
     </script>
