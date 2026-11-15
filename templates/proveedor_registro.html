@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MercAPP — Registro de Proveedor</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2343A047' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><circle cx='9' cy='21' r='1'/><circle cx='20' cy='21' r='1'/><path d='M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6'/></svg>">
+    <link rel="icon"
+        href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2343A047' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><circle cx='9' cy='21' r='1'/><circle cx='20' cy='21' r='1'/><path d='M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6'/></svg>">
     <style>
         body {
             background-color: var(--bg);
@@ -19,6 +21,7 @@
             font-family: var(--font);
             color: var(--text);
         }
+
         .register-card {
             background: var(--bg-card);
             padding: 36px 30px;
@@ -30,6 +33,7 @@
             text-align: center;
             box-sizing: border-box;
         }
+
         .supplier-icon-wrap {
             background: rgba(27, 94, 32, 0.08);
             width: 60px;
@@ -42,22 +46,26 @@
             border: 1px solid rgba(27, 94, 32, 0.15);
             color: var(--primary);
         }
+
         .register-card h2 {
             margin: 0 0 8px 0;
             color: var(--text);
             font-size: 22px;
             font-weight: 700;
         }
+
         .register-card p {
             color: var(--text-secondary);
             margin: 0 0 20px 0;
             font-size: 14px;
             line-height: 1.45;
         }
+
         .form-group {
             text-align: left;
             margin-bottom: 14px;
         }
+
         .form-group label {
             display: block;
             font-size: 0.85rem;
@@ -65,6 +73,7 @@
             color: var(--text);
             margin-bottom: 5px;
         }
+
         .form-control {
             width: 100%;
             padding: 11px 13px;
@@ -77,10 +86,12 @@
             font-size: 14px;
             transition: var(--transition);
         }
+
         .form-control:focus {
             border-color: var(--primary);
             box-shadow: var(--shadow-glow);
         }
+
         .btn-submit {
             width: 100%;
             padding: 13px;
@@ -94,29 +105,35 @@
             transition: var(--transition);
             margin-top: 10px;
         }
+
         .btn-submit:hover {
             background-color: var(--primary-light);
         }
+
         .flash-messages {
             margin-bottom: 18px;
             text-align: left;
         }
+
         .flash-alert {
             padding: 10px 14px;
             border-radius: var(--radius-sm);
             font-size: 0.88rem;
             margin-bottom: 8px;
         }
+
         .flash-alert.error {
             background: rgba(239, 68, 68, 0.12);
             border: 1px solid rgba(239, 68, 68, 0.25);
             color: #f87171;
         }
+
         .flash-alert.success {
             background: rgba(34, 197, 94, 0.12);
             border: 1px solid rgba(34, 197, 94, 0.25);
             color: #4ade80;
         }
+
         .link {
             display: block;
             margin-top: 14px;
@@ -126,10 +143,12 @@
             font-size: 0.9rem;
             transition: var(--transition);
         }
+
         .link:hover {
             color: var(--primary-light);
             text-decoration: underline;
         }
+
         .back-link {
             display: inline-block;
             margin-top: 12px;
@@ -138,16 +157,19 @@
             font-size: 0.83rem;
             transition: var(--transition);
         }
+
         .back-link:hover {
             color: var(--text);
             text-decoration: underline;
         }
     </style>
 </head>
+
 <body>
     <div class="register-card">
         <div class="supplier-icon-wrap">
-            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round">
                 <rect x="1" y="3" width="15" height="13"></rect>
                 <polygon points="16 8 20 8 23 11 23 16 16 16 8"></polygon>
                 <circle cx="5.5" cy="18.5" r="2.5"></circle>
@@ -156,57 +178,65 @@
         </div>
         <h2>Registro de Proveedor</h2>
         <p>Crea tu cuenta para gestionar despachos a tiendas asociadas</p>
-        
+
         {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
-                <div class="flash-messages">
-                    {% for category, message in messages %}
-                        <div class="flash-alert {{ category }}">{{ message }}</div>
-                    {% endfor %}
-                </div>
-            {% endif %}
+        {% if messages %}
+        <div class="flash-messages">
+            {% for category, message in messages %}
+            <div class="flash-alert {{ category }}">{{ message }}</div>
+            {% endfor %}
+        </div>
+        {% endif %}
         {% endwith %}
 
         <form method="POST" action="{{ url_for('proveedor_register') }}">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-            
+
             <div class="form-group">
                 <label for="company_name">Nombre de la Empresa o Distribuidora *</label>
-                <input id="company_name" aria-label="Nombre de la Empresa" type="text" name="company_name" class="form-control" placeholder="Ej. Distribuidora Andina S.A.S" required>
+                <input id="company_name" aria-label="Nombre de la Empresa" type="text" name="company_name"
+                    class="form-control" placeholder="Ej. Distribuidora Andina S.A.S" required>
             </div>
 
             <div class="form-group">
                 <label for="contact_name">Nombre del Encargado *</label>
-                <input id="contact_name" aria-label="Nombre del Encargado" type="text" name="contact_name" class="form-control" placeholder="Ej. Carlos Mendoza" required>
+                <input id="contact_name" aria-label="Nombre del Encargado" type="text" name="contact_name"
+                    class="form-control" placeholder="Ej. Carlos Mendoza" required>
             </div>
 
             <div class="form-group">
                 <label for="phone">Número del Encargado *</label>
-                <input id="phone" aria-label="Número del Encargado" type="tel" name="phone" class="form-control" placeholder="Ej. 312 456 7890" required>
+                <input id="phone" aria-label="Número del Encargado" type="tel" name="phone" class="form-control"
+                    placeholder="Ej. 312 456 7890" required>
             </div>
 
             <div class="form-group">
                 <label for="email">Correo Electrónico *</label>
-                <input id="email" aria-label="Correo Electrónico" type="email" name="email" class="form-control" placeholder="proveedor@empresa.com" required autocomplete="email">
-                <small style="color: var(--text-secondary); font-size: 0.78rem; display: block; margin-top: 4px; text-align: left;">
+                <input id="email" aria-label="Correo Electrónico" type="email" name="email" class="form-control"
+                    placeholder="proveedor@empresa.com" required autocomplete="email">
+                <small
+                    style="color: var(--text-secondary); font-size: 0.78rem; display: block; margin-top: 4px; text-align: left;">
                     Te enviaremos un código de seguridad de 6 dígitos para verificar tu cuenta.
                 </small>
             </div>
 
             <div class="form-group">
                 <label for="password">Contraseña *</label>
-                <input id="password" aria-label="Contraseña" type="password" name="password" class="form-control" placeholder="••••••••" required minlength="6" autocomplete="new-password">
+                <input id="password" aria-label="Contraseña" type="password" name="password" class="form-control"
+                    placeholder="••••••••" required minlength="6" autocomplete="new-password">
             </div>
 
             <button type="submit" class="btn-submit">Registrar y Recibir Código</button>
         </form>
-        
+
         <div style="margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--border);">
             <span style="color: var(--text-secondary); font-size: 0.88rem;">¿Ya tienes cuenta?</span>
-            <a href="{{ url_for('proveedor_login') }}" class="link" style="display: inline-block; margin-top: 0; margin-left: 4px;">Inicia sesión aquí</a>
+            <a href="{{ url_for('proveedor_login') }}" class="link"
+                style="display: inline-block; margin-top: 0; margin-left: 4px;">Inicia sesión aquí</a>
         </div>
-        
+
         <a href="{{ url_for('login') }}" class="back-link">← Volver al inicio principal</a>
     </div>
 </body>
+
 </html>
