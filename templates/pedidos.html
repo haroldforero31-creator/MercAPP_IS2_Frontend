@@ -138,8 +138,8 @@
         }
     }
     
-    /* Modal styles */
-    .modal {
+    /* Modal styles - scoped to pedidos modals only to avoid overriding base.html logout modal */
+    #confirmModal, #cancelModal, #supplierPaymentModal {
         display: none;
         position: fixed;
         top: 0;
@@ -151,7 +151,7 @@
         justify-content: center;
         z-index: 1000;
     }
-    .modal.active {
+    #confirmModal.active, #cancelModal.active, #supplierPaymentModal.active {
         display: flex;
     }
     .modal-content {
@@ -426,7 +426,8 @@
             <label for="supplierPaymentTotal" style="display: block; font-size: 0.85rem; font-weight: 700; color: #CBD5E1; margin-bottom: 6px;">
                 Costo a Pagar al Proveedor ($ COP) *
             </label>
-            <input aria-label="Costo a Pagar al proveedor" type="number" id="supplierPaymentTotal" class="form-control" oninput="updatePaymentSplit()" required
+            <input aria-label="Costo a Pagar al proveedor" type="number" id="supplierPaymentTotal" class="form-control" 
+                   min="1" step="50" onkeydown="return preventNegativeKey(event)" oninput="sanitizePositiveInput(this); updatePaymentSplit()" required
                    style="font-size: 1.15rem; font-weight: 800; color: #FFA726;">
         </div>
 
@@ -447,13 +448,15 @@
                 <label for="splitCashAmount" style="display: block; font-size: 0.8rem; font-weight: 600; color: #EF4444; margin-bottom: 4px;">
                     💵 Efectivo a sacar de la Caja ($ COP):
                 </label>
-                <input aria-label="Monto en efectivo sacado de caja" type="number" id="splitCashAmount" class="form-control" value="0" min="0" step="50" oninput="validateSplitSum()">
+                <input aria-label="Monto en efectivo sacado de caja" type="number" id="splitCashAmount" class="form-control" value="0" min="0" step="50"
+                       onkeydown="return preventNegativeKey(event)" oninput="sanitizePositiveInput(this); validateSplitSum()">
             </div>
             <div>
                 <label for="splitTransferAmount" style="display: block; font-size: 0.8rem; font-weight: 600; color: #60A5FA; margin-bottom: 4px;">
                     📲 Monto por Transferencia ($ COP):
                 </label>
-                <input aria-label="Monto por transferencia bancaria" type="number" id="splitTransferAmount" class="form-control" value="0" min="0" step="50" oninput="validateSplitSum()">
+                <input aria-label="Monto por transferencia bancaria" type="number" id="splitTransferAmount" class="form-control" value="0" min="0" step="50"
+                       onkeydown="return preventNegativeKey(event)" oninput="sanitizePositiveInput(this); validateSplitSum()">
             </div>
             <div id="splitFeedback" style="font-size: 0.78rem; margin-top: 6px; color: #FBBF24;"></div>
         </div>
@@ -475,6 +478,25 @@
 <script>
     let activeOrderId = null;
     let activeSupplierOrderId = null;
+
+    function preventNegativeKey(e) {
+        if (e.key === '-' || e.key === 'e' || e.key === 'E' || e.key === '+') {
+            e.preventDefault();
+            return false;
+        }
+        return true;
+    }
+
+    function sanitizePositiveInput(input) {
+        if (!input) return;
+        if (input.value && input.value.includes('-')) {
+            input.value = input.value.replace(/-/g, '');
+        }
+        const val = parseFloat(input.value);
+        if (isNaN(val) || val < 0) {
+            input.value = 0;
+        }
+    }
 
     function openConfirmModal(orderId) {
         activeOrderId = orderId;
@@ -524,18 +546,43 @@
     }
 
     function validateSplitSum() {
-        const total = Number.parseInt(document.getElementById('supplierPaymentTotal').value) || 0;
-        const cash = Number.parseInt(document.getElementById('splitCashAmount').value) || 0;
-        const transfer = Number.parseInt(document.getElementById('splitTransferAmount').value) || 0;
+        const totalEl = document.getElementById('supplierPaymentTotal');
+        const cashEl = document.getElementById('splitCashAmount');
+        const transferEl = document.getElementById('splitTransferAmount');
+
+        sanitizePositiveInput(totalEl);
+        sanitizePositiveInput(cashEl);
+        sanitizePositiveInput(transferEl);
+
+        const total = Math.max(0, Number.parseInt(totalEl.value) || 0);
+        const cash = Math.max(0, Number.parseInt(cashEl.value) || 0);
+        const transfer = Math.max(0, Number.parseInt(transferEl.value) || 0);
         const feedback = document.getElementById('splitFeedback');
         const sum = cash + transfer;
+
+        if (total <= 0) {
+            feedback.style.color = '#F87171';
+            feedback.textContent = '⚠️ El costo a pagar debe ser mayor a 0.';
+            document.getElementById('btnSubmitSupplierPayment').disabled = true;
+            return;
+        }
+
+        if (cash < 0 || transfer < 0) {
+            feedback.style.color = '#F87171';
+            feedback.textContent = '⚠️ Los montos no pueden ser negativos.';
+            document.getElementById('btnSubmitSupplierPayment').disabled = true;
+            return;
+        }
+
         if (sum === total) {
             feedback.style.color = '#4ADE80';
-            feedback.textContent = `✓ Suma exacta: $${sum.toLocaleString()}`;
+            feedback.textContent = `✓ Suma exacta: $${sum.toLocaleString('es-CO')}`;
             document.getElementById('btnSubmitSupplierPayment').disabled = false;
         } else {
             feedback.style.color = '#F87171';
-            feedback.textContent = `⚠️ Suma: $${sum.toLocaleString()} (Faltan: $${(total - sum).toLocaleString()})`;
+            const diff = total - sum;
+            const diffText = diff > 0 ? `Faltan: $${diff.toLocaleString('es-CO')}` : `Excede: $${Math.abs(diff).toLocaleString('es-CO')}`;
+            feedback.textContent = `⚠️ Suma: $${sum.toLocaleString('es-CO')} (${diffText})`;
             document.getElementById('btnSubmitSupplierPayment').disabled = true;
         }
     }
@@ -555,6 +602,12 @@
         const total = Number.parseInt(document.getElementById('supplierPaymentTotal').value) || 0;
         let cash = 0;
         let transfer = 0;
+
+        if (total <= 0) {
+            alert('El monto a pagar al proveedor debe ser mayor a 0.');
+            return;
+        }
+
         if (method === 'efectivo') {
             cash = total;
         } else if (method === 'transferencia') {
@@ -562,8 +615,12 @@
         } else {
             cash = Number.parseInt(document.getElementById('splitCashAmount').value) || 0;
             transfer = Number.parseInt(document.getElementById('splitTransferAmount').value) || 0;
+            if (cash < 0 || transfer < 0) {
+                alert('No se permiten montos negativos.');
+                return;
+            }
             if (cash + transfer !== total) {
-                alert('La suma de efectivo y transferencia debe coincidir con el total a pagar.');
+                alert('La suma de efectivo y transferencia debe coincidir exactamente con el total a pagar.');
                 return;
             }
         }
@@ -587,6 +644,7 @@
             });
             const data = await response.json();
             if (data.success) {
+                alert(data.message);
                 location.reload();
             } else {
                 alert('Error: ' + data.message);
