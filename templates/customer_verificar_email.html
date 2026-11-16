@@ -132,15 +132,6 @@
                 <div class="email-value">{{ email }}</div>
             </div>
 
-            {% if demo_code %}
-            <div style="background: rgba(46, 125, 50, 0.12); border: 1px dashed var(--primary); border-radius: 8px; padding: 12px 14px; margin: 12px 0 16px; text-align: center;">
-                <div style="font-size: 0.78rem; color: #81C784; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 700;">⚡ Verificación Rápida</div>
-                <div style="font-size: 0.88rem; color: #E8EAED; margin-top: 4px;">
-                    Código generado: <strong style="font-size: 1.35rem; color: #A5D6A7; letter-spacing: 4px; font-family: monospace;">{{ demo_code }}</strong>
-                </div>
-            </div>
-            {% endif %}
-
             {% if expired %}
             <div class="timer-bar expired">
                 <span class="timer-value">⏰ Código expirado</span>

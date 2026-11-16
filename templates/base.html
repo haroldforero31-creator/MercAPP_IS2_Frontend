@@ -245,7 +245,7 @@
 
     <!-- Admin PIN Modal for deactivating cashier mode -->
     <div class="modal-overlay" id="adminPinModal">
-        <div class="modal" style="max-width: 320px;">
+        <div class="modal" style="max-width: 320px; display: block !important; position: relative !important;">
             <div class="modal-header">
                 <span class="modal-title">Desactivar Cajero</span>
                 <button class="modal-close" onclick="closeAdminPinModal()">✕</button>
@@ -263,7 +263,7 @@
 
     <!-- Modal de confirmación para cerrar sesión -->
     <div class="modal-overlay" id="logoutConfirmModal">
-        <div class="modal" style="max-width: 380px;">
+        <div class="modal" id="logoutConfirmModalBox" style="max-width: 380px; display: block !important; position: relative !important;">
             <div class="modal-header">
                 <span class="modal-title" style="display: flex; align-items: center; gap: 8px;">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
@@ -448,6 +448,33 @@
         window.addEventListener('online', updateNetworkStatus);
         window.addEventListener('offline', updateNetworkStatus);
         document.addEventListener('DOMContentLoaded', updateNetworkStatus);
+
+        // Prevención global contra números negativos en todos los inputs numéricos y monetarios
+        document.addEventListener('keydown', function(e) {
+            if (e.target && e.target.tagName === 'INPUT') {
+                const type = e.target.type;
+                const minAttr = e.target.getAttribute('min');
+                if (type === 'number' && (minAttr === null || parseFloat(minAttr) >= 0)) {
+                    if (e.key === '-' || e.key === 'e' || e.key === 'E' || e.key === '+') {
+                        e.preventDefault();
+                    }
+                }
+            }
+        }, true);
+
+        document.addEventListener('input', function(e) {
+            if (e.target && e.target.tagName === 'INPUT' && e.target.type === 'number') {
+                const minAttr = e.target.getAttribute('min');
+                if (minAttr === null || parseFloat(minAttr) >= 0) {
+                    if (e.target.value && e.target.value.includes('-')) {
+                        e.target.value = e.target.value.replace(/-/g, '');
+                    }
+                    if (parseFloat(e.target.value) < 0) {
+                        e.target.value = '0';
+                    }
+                }
+            }
+        }, true);
     </script>
     {% if current_user and current_user.is_authenticated and not (current_user.get_id() and (current_user.get_id().startswith('supplier_') or current_user.get_id().startswith('customer_'))) %}
     <script>

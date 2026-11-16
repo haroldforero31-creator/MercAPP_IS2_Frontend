@@ -153,7 +153,8 @@
             MercAPP
         </div>
         <div class="nav-links" style="display: flex; align-items: center; gap: 18px;">
-            <a href="{{ url_for('proveedor_tiendas') }}" style="color: var(--primary); text-decoration: none; font-weight: 600;">🏪 Tiendas</a>
+            <a href="{{ url_for('proveedor_tiendas') }}" style="color: var(--text-secondary); text-decoration: none; font-weight: 600;">🏪 Tiendas</a>
+            <a href="{{ url_for('proveedor_pedidos') }}" style="color: var(--text-secondary); text-decoration: none; font-weight: 600;">📦 Mis Pedidos</a>
             <span style="color: var(--text-secondary); font-size: 0.92rem;">
                 Proveedor: <strong style="color: var(--text);">{{ current_user.company_name }}</strong>
             </span>
@@ -211,7 +212,7 @@
                 <!-- Campo 2: Costo del Pedido -->
                 <div class="form-group">
                     <label for="total_amount">💰 Costo del Pedido ($ COP) *</label>
-                    <input id="total_amount" aria-label="Costo del Pedido en pesos colombianos" type="number" name="total_amount" placeholder="Ej. 2000000" min="50" step="1" required class="form-control amount-control">
+                    <input id="total_amount" aria-label="Costo del Pedido en pesos colombianos" type="number" name="total_amount" placeholder="Ej. 2000000" min="50" step="50" onkeydown="return preventNegativeKey(event)" oninput="sanitizePositiveInput(this); updatePreview();" required class="form-control amount-control">
                     <div id="amount-preview" style="font-size: 0.95rem; font-weight: 700; color: var(--primary); margin-top: 6px;"></div>
                     <small style="color: var(--text-secondary); font-size: 0.78rem; display: block; margin-top: 4px;">
                         Monto exacto en pesos colombianos (múltiplos de $50 COP, ej. $1.000, $1.200, $1.500, $2.000.000).
@@ -297,6 +298,25 @@
         document.addEventListener('keydown', function(e) {
             if (e.key === 'Escape') closeLogoutModal();
         });
+
+        function preventNegativeKey(e) {
+            if (e.key === '-' || e.key === 'e' || e.key === 'E' || e.key === '+') {
+                e.preventDefault();
+                return false;
+            }
+            return true;
+        }
+
+        function sanitizePositiveInput(input) {
+            if (!input) return;
+            if (input.value && input.value.includes('-')) {
+                input.value = input.value.replace(/-/g, '');
+            }
+            const val = parseFloat(input.value);
+            if (isNaN(val) || val < 0) {
+                input.value = 0;
+            }
+        }
 
         // Formateador en tiempo real de pesos colombianos
         const amountInput = document.getElementById('total_amount');
