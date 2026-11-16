@@ -211,7 +211,7 @@
                 <!-- Campo 2: Costo del Pedido -->
                 <div class="form-group">
                     <label for="total_amount">💰 Costo del Pedido ($ COP) *</label>
-                    <input id="total_amount" aria-label="Costo del Pedido en pesos colombianos" type="number" name="total_amount" placeholder="Ej. 2000000" min="50" step="50" required class="form-control amount-control">
+                    <input id="total_amount" aria-label="Costo del Pedido en pesos colombianos" type="number" name="total_amount" placeholder="Ej. 2000000" min="50" step="1" required class="form-control amount-control">
                     <div id="amount-preview" style="font-size: 0.95rem; font-weight: 700; color: var(--primary); margin-top: 6px;"></div>
                     <small style="color: var(--text-secondary); font-size: 0.78rem; display: block; margin-top: 4px;">
                         Monto exacto en pesos colombianos (múltiplos de $50 COP, ej. $1.000, $1.200, $1.500, $2.000.000).
@@ -316,3 +316,4 @@
     </script>
 </body>
 </html>
+
