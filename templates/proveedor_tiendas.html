@@ -154,7 +154,8 @@
             MercAPP
         </div>
         <div class="nav-links" style="display: flex; align-items: center; gap: 18px;">
-            <a href="{{ url_for('proveedor_tiendas') }}" style="color: var(--primary); text-decoration: none; font-weight: 600;">🏪 Tiendas</a>
+            <a href="{{ url_for('proveedor_tiendas') }}" style="color: var(--primary); text-decoration: none; font-weight: 700;">🏪 Tiendas</a>
+            <a href="{{ url_for('proveedor_pedidos') }}" style="color: var(--text-secondary); text-decoration: none; font-weight: 600;">📦 Mis Pedidos</a>
             <span style="color: var(--text-secondary); font-size: 0.92rem;">
                 Proveedor: <strong style="color: var(--text);">{{ current_user.company_name }}</strong>
             </span>
@@ -204,6 +205,65 @@
                 No hay tiendas activas disponibles en este momento.
             </div>
             {% endfor %}
+        </div>
+
+        <!-- Sección de Mis Pedidos Recientes para el Proveedor -->
+        <div style="margin-top: 48px; padding-top: 32px; border-top: 1px solid var(--border);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 12px;">
+                <div>
+                    <h2 style="font-size: 1.4rem; font-weight: 800; color: var(--text); margin: 0 0 4px;">
+                        📦 Mis Pedidos Recientes a Tiendas
+                    </h2>
+                    <p style="color: var(--text-secondary); font-size: 0.9rem; margin: 0;">
+                        Monitorea el estado de aprobación y cobro en tiempo real de tus despachos.
+                    </p>
+                </div>
+                <a href="{{ url_for('proveedor_pedidos') }}" style="color: var(--primary); font-weight: 700; text-decoration: none; font-size: 0.95rem; display: inline-flex; align-items: center; gap: 6px;">
+                    Ver todos mis pedidos ➔
+                </a>
+            </div>
+
+            {% if recent_orders %}
+                <div style="display: flex; flex-direction: column; gap: 12px;">
+                    {% for order in recent_orders %}
+                    <div style="background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 16px 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+                        <div>
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <strong style="color: #FFFFFF; font-size: 1.05rem;">ORD-{{ "%04d"|format(order.id) }}</strong>
+                                <span style="color: var(--text-secondary); font-size: 0.9rem;">• Tienda Destino: <strong style="color: var(--primary);">{{ order.store.name if order.store else 'Tienda' }}</strong></span>
+                            </div>
+                            <div style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 3px;">
+                                📅 {{ order.created_at.strftime('%d/%m/%Y %H:%M') if order.created_at else 'Reciente' }}
+                            </div>
+                        </div>
+                        <div style="text-align: right; display: flex; align-items: center; gap: 16px;">
+                            <div style="font-size: 1.15rem; font-weight: 800; color: var(--primary);">
+                                ${{ "{:,}".format(order.total).replace(',', '.') }} COP
+                            </div>
+                            <div>
+                                {% if order.status == 'pendiente' %}
+                                <span style="background: rgba(255, 167, 38, 0.15); color: #FFA726; border: 1px solid rgba(255, 167, 38, 0.35); padding: 5px 12px; border-radius: 999px; font-size: 0.8rem; font-weight: 700; display: inline-flex; align-items: center; gap: 6px;">
+                                    ⏳ Esperando confirmación del administrador
+                                </span>
+                                {% elif order.status in ('completado', 'confirmado') %}
+                                <span style="background: rgba(34, 197, 94, 0.15); color: #4ADE80; border: 1px solid rgba(34, 197, 94, 0.35); padding: 5px 12px; border-radius: 999px; font-size: 0.8rem; font-weight: 700; display: inline-flex; align-items: center; gap: 6px;">
+                                    ✓ Confirmado & Pagado
+                                </span>
+                                {% else %}
+                                <span style="background: rgba(239, 68, 68, 0.15); color: #F87171; border: 1px solid rgba(239, 68, 68, 0.35); padding: 5px 12px; border-radius: 999px; font-size: 0.8rem; font-weight: 700; display: inline-flex; align-items: center; gap: 6px;">
+                                    ✕ Rechazado
+                                </span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div style="background: var(--bg-card); border: 1px dashed var(--border); border-radius: var(--radius-sm); padding: 24px; text-align: center; color: var(--text-secondary); font-size: 0.95rem;">
+                    Aún no tienes pedidos registrados. Selecciona una tienda de la lista superior para realizar tu primer despacho.
+                </div>
+            {% endif %}
         </div>
     </div>
 

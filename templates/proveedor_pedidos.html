@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MercAPP — Mis Pedidos a Tiendas (Proveedor)</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2343A047' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><circle cx='9' cy='21' r='1'/><circle cx='20' cy='21' r='1'/><path d='M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6'/></svg>">
+    <style>
+        body {
+            background-color: var(--bg);
+            margin: 0;
+            font-family: var(--font);
+            color: var(--text);
+        }
+        .header {
+            background-color: var(--bg-card);
+            border-bottom: 1px solid var(--border);
+            padding: 1rem 2rem;
+            color: var(--text);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        .nav-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-weight: 500;
+            transition: var(--transition);
+        }
+        .nav-links a:hover {
+            color: var(--text);
+        }
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 16px;
+            margin: 24px 0 32px 0;
+        }
+        .kpi-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 20px;
+        }
+        .order-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 22px 26px;
+            margin-bottom: 18px;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+        }
+        .order-card:hover {
+            border-color: rgba(67, 160, 71, 0.4);
+        }
+        .flash-messages {
+            margin-bottom: 20px;
+        }
+        .flash-alert {
+            padding: 12px 16px;
+            border-radius: var(--radius-sm);
+            font-size: 0.9rem;
+            margin-bottom: 10px;
+        }
+        .flash-alert.success {
+            background: rgba(34, 197, 94, 0.12);
+            border: 1px solid rgba(34, 197, 94, 0.25);
+            color: #4ade80;
+        }
+        .flash-alert.error {
+            background: rgba(239, 68, 68, 0.12);
+            border: 1px solid rgba(239, 68, 68, 0.25);
+            color: #f87171;
+        }
+        .badge {
+            padding: 6px 14px;
+            border-radius: 999px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .badge-pendiente {
+            background: rgba(255, 167, 38, 0.15);
+            color: #FFA726;
+            border: 1px solid rgba(255, 167, 38, 0.35);
+        }
+        .badge-completado {
+            background: rgba(34, 197, 94, 0.15);
+            color: #4ADE80;
+            border: 1px solid rgba(34, 197, 94, 0.35);
+        }
+        .badge-cancelado {
+            background: rgba(239, 68, 68, 0.15);
+            color: #F87171;
+            border: 1px solid rgba(239, 68, 68, 0.35);
+        }
+        @media (max-width: 768px) {
+            .header {
+                padding: 0.8rem 1rem;
+                flex-wrap: wrap;
+                gap: 10px;
+            }
+            .container {
+                padding: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div style="font-size: 1.4rem; font-weight: bold; display: flex; align-items: center; gap: 10px;">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#43A047" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+            MercAPP
+        </div>
+        <div class="nav-links" style="display: flex; align-items: center; gap: 18px;">
+            <a href="{{ url_for('proveedor_tiendas') }}" style="color: var(--text-secondary); text-decoration: none; font-weight: 600;">🏪 Tiendas</a>
+            <a href="{{ url_for('proveedor_pedidos') }}" style="color: var(--primary); text-decoration: none; font-weight: 700;">📦 Mis Pedidos</a>
+            <span style="color: var(--text-secondary); font-size: 0.92rem;">
+                Proveedor: <strong style="color: var(--text);">{{ current_user.company_name }}</strong>
+            </span>
+            <a href="#" onclick="confirmAppLogout(event, '{{ url_for('proveedor_logout') }}')" style="color: var(--error); text-decoration: none; font-weight: 500; display: inline-flex; align-items: center; gap: 4px; padding: 6px 12px; border-radius: var(--radius-sm); background: rgba(239, 68, 68, 0.1); transition: var(--transition);">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                Salir
+            </a>
+        </div>
+    </div>
+
+    <div class="container">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="flash-messages">
+                    {% for category, message in messages %}
+                        <div class="flash-alert {{ category }}">{{ message }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
+            <div>
+                <h1 style="font-size: 2.2rem; margin: 0 0 6px; color: var(--text); font-weight: 800;">
+                    Mis Pedidos a Tiendas
+                </h1>
+                <p style="color: var(--text-secondary); font-size: 1rem; margin: 0;">
+                    Estado en tiempo real de tus despachos hacia los administradores de tienda.
+                </p>
+            </div>
+            <a href="{{ url_for('proveedor_tiendas') }}" class="btn" style="background-color: var(--primary); color: white; padding: 12px 20px; border-radius: var(--radius-sm); text-decoration: none; font-weight: 700; display: inline-flex; align-items: center; gap: 8px;">
+                + Cargar Nuevo Pedido a Tienda
+            </a>
+        </div>
+
+        {% set pending_count = orders | selectattr('status', 'equalto', 'pendiente') | list | length %}
+        {% set completed_count = orders | selectattr('status', 'equalto', 'completado') | list | length %}
+
+        <!-- KPIs Resumen -->
+        <div class="kpi-grid">
+            <div class="kpi-card">
+                <div style="font-size: 0.8rem; font-weight: 700; color: #94A3B8; text-transform: uppercase;">Total Despachos</div>
+                <div style="font-size: 2rem; font-weight: 800; color: #FFFFFF; margin-top: 6px;">{{ orders|length }}</div>
+                <div style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 4px;">Pedidos registrados</div>
+            </div>
+            <div class="kpi-card" style="border-color: rgba(255, 167, 38, 0.3);">
+                <div style="font-size: 0.8rem; font-weight: 700; color: #FFA726; text-transform: uppercase;">Esperando Confirmación</div>
+                <div style="font-size: 2rem; font-weight: 800; color: #FFA726; margin-top: 6px;">{{ pending_count }}</div>
+                <div style="font-size: 0.8rem; color: #CBD5E1; margin-top: 4px;">Pendientes por cobrar en caja</div>
+            </div>
+            <div class="kpi-card" style="border-color: rgba(34, 197, 94, 0.3);">
+                <div style="font-size: 0.8rem; font-weight: 700; color: #4ADE80; text-transform: uppercase;">Confirmados & Pagados</div>
+                <div style="font-size: 2rem; font-weight: 800; color: #4ADE80; margin-top: 6px;">{{ completed_count }}</div>
+                <div style="font-size: 0.8rem; color: #CBD5E1; margin-top: 4px;">Con soporte enviado al correo</div>
+            </div>
+        </div>
+
+        <!-- Listado de Pedidos -->
+        {% if orders %}
+            <div style="display: flex; flex-direction: column; gap: 16px;">
+                {% for order in orders %}
+                <div class="order-card">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 14px; margin-bottom: 14px; padding-bottom: 12px; border-bottom: 1px solid var(--border);">
+                        <div>
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <span style="font-size: 1.15rem; font-weight: 800; color: #FFFFFF;">ORD-{{ "%04d"|format(order.id) }}</span>
+                                <span style="color: var(--text-secondary); font-size: 0.95rem;">• Tienda Destino: <strong style="color: var(--primary);">{{ order.store.name if order.store else 'Tienda' }}</strong></span>
+                            </div>
+                            <div style="color: var(--text-secondary); font-size: 0.85rem; margin-top: 4px;">
+                                📅 Fecha de Solicitud: <strong style="color: var(--text);">{{ order.created_at.strftime('%d/%m/%Y %H:%M') if order.created_at else 'Reciente' }}</strong>
+                            </div>
+                        </div>
+                        <div style="text-align: right;">
+                            <div style="font-size: 1.35rem; font-weight: 800; color: var(--primary);">
+                                ${{ "{:,}".format(order.total).replace(',', '.') }} COP
+                            </div>
+                            <div style="margin-top: 6px;">
+                                {% if order.status == 'pendiente' %}
+                                <span class="badge badge-pendiente">
+                                    ⏳ Esperando confirmación del administrador
+                                </span>
+                                {% elif order.status in ('completado', 'confirmado') %}
+                                <span class="badge badge-completado">
+                                    ✓ Confirmado & Pagado ({{ order.payment_method|capitalize }})
+                                </span>
+                                {% else %}
+                                <span class="badge badge-cancelado">
+                                    ✕ Rechazado por Tienda
+                                </span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Detalles / Notas del pedido -->
+                    <div style="background: rgba(0,0,0,0.2); border-radius: 8px; padding: 12px 16px; font-size: 0.88rem; color: #CBD5E1;">
+                        <span style="color: #94A3B8; font-weight: 600;">📝 Novedades / Anotaciones:</span>
+                        {{ order.notes if order.notes else 'Se entregó mercancía completa sin anotaciones de averías.' }}
+                    </div>
+
+                    <!-- Mensaje de Soporte / Correo -->
+                    <div style="margin-top: 12px; display: flex; align-items: center; gap: 8px; font-size: 0.82rem;">
+                        {% if order.status in ('completado', 'confirmado') %}
+                        <span style="color: #4ADE80;">📧 Soporte oficial de liquidación y pago enviado al correo: <strong>{{ current_user.email }}</strong></span>
+                        {% else %}
+                        <span style="color: #94A3B8;">ℹ️ Al ser confirmado por el administrador en caja, se enviará automáticamente el comprobante de pago a <strong>{{ current_user.email }}</strong>.</span>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div style="background: var(--bg-card); border: 1px dashed var(--border); border-radius: var(--radius); padding: 50px 20px; text-align: center;">
+                <div style="font-size: 3rem; margin-bottom: 12px;">🚚</div>
+                <h3 style="margin: 0 0 8px; font-size: 1.3rem; color: var(--text);">Aún no tienes pedidos registrados</h3>
+                <p style="color: var(--text-secondary); margin: 0 0 20px; font-size: 0.95rem;">
+                    Selecciona una tienda para cargar la orden de mercancía y solicitar el pago.
+                </p>
+                <a href="{{ url_for('proveedor_tiendas') }}" class="btn" style="background-color: var(--primary); color: white; padding: 12px 24px; border-radius: var(--radius-sm); text-decoration: none; font-weight: 700;">
+                    Ir a Tiendas Disponibles ➔
+                </a>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Modal de confirmación para cerrar sesión -->
+    <div class="modal-overlay" id="logoutConfirmModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 1000; align-items: center; justify-content: center;">
+        <div style="background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); max-width: 380px; width: 90%; padding: 24px; text-align: center;">
+            <div style="width: 52px; height: 52px; border-radius: 50%; background: rgba(239, 68, 68, 0.12); display: flex; align-items: center; justify-content: center; margin: 0 auto 16px auto;">
+                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2.2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+            </div>
+            <h3 style="margin: 0 0 8px 0; font-size: 1.15rem; color: var(--text); font-weight: 600;">¿Cerrar sesión de proveedor?</h3>
+            <p style="margin: 0 0 24px 0; color: var(--text-secondary); font-size: 0.9rem; line-height: 1.4;">Tendrás que volver a ingresar tus credenciales para registrar nuevos pedidos.</p>
+            <div style="display: flex; gap: 12px;">
+                <button type="button" class="btn btn-outline" style="flex: 1; padding: 10px; background: transparent; border: 1px solid var(--border); color: var(--text); border-radius: var(--radius-sm); cursor: pointer;" onclick="closeLogoutModal()">Cancelar</button>
+                <a id="confirmLogoutBtn" href="{{ url_for('proveedor_logout') }}" style="flex: 1; text-align: center; text-decoration: none; display: flex; align-items: center; justify-content: center; background-color: var(--error); color: white; border: none; border-radius: var(--radius-sm); font-weight: 600; padding: 10px 16px;">Cerrar Sesión</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let pendingLogoutUrl = '';
+        function confirmAppLogout(event, url) {
+            if (event) {
+                event.preventDefault();
+                event.stopPropagation();
+            }
+            pendingLogoutUrl = url || "{{ url_for('proveedor_logout') }}";
+            const modal = document.getElementById('logoutConfirmModal');
+            const confirmBtn = document.getElementById('confirmLogoutBtn');
+            if (confirmBtn && pendingLogoutUrl) {
+                confirmBtn.href = pendingLogoutUrl;
+            }
+            if (modal) {
+                modal.style.display = 'flex';
+            }
+        }
+
+        function closeLogoutModal() {
+            const modal = document.getElementById('logoutConfirmModal');
+            if (modal) {
+                modal.style.display = 'none';
+            }
+        }
+
+        document.getElementById('logoutConfirmModal')?.addEventListener('click', function(e) {
+            if (e.target === this) closeLogoutModal();
+        });
+
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') closeLogoutModal();
+        });
+    </script>
+</body>
+</html>
+
