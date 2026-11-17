@@ -153,8 +153,8 @@
             MercAPP
         </div>
         <div class="nav-links" style="display: flex; align-items: center; gap: 18px;">
-            <a href="{{ url_for('proveedor_tiendas') }}" style="color: var(--text-secondary); text-decoration: none; font-weight: 600;">🏪 Tiendas</a>
-            <a href="{{ url_for('proveedor_pedidos') }}" style="color: var(--text-secondary); text-decoration: none; font-weight: 600;">📦 Mis Pedidos</a>
+            <a href="{{ url_for('proveedor_tiendas') }}" style="color: var(--text-secondary); text-decoration: none; font-weight: 600;">Tiendas</a>
+            <a href="{{ url_for('proveedor_pedidos') }}" style="color: var(--text-secondary); text-decoration: none; font-weight: 600;">Mis Pedidos</a>
             <span style="color: var(--text-secondary); font-size: 0.92rem;">
                 Proveedor: <strong style="color: var(--text);">{{ current_user.company_name }}</strong>
             </span>
@@ -173,8 +173,8 @@
         <div class="form-card">
             <!-- Header -->
             <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 24px; padding-bottom: 18px; border-bottom: 1px solid var(--border);">
-                <div style="width: 52px; height: 52px; border-radius: 50%; background: rgba(27, 94, 32, 0.08); border: 1px solid rgba(27, 94, 32, 0.15); display: flex; align-items: center; justify-content: center; font-size: 1.6rem; color: var(--primary);">
-                    📦
+                <div style="width: 52px; height: 52px; border-radius: 50%; background: rgba(27, 94, 32, 0.08); border: 1px solid rgba(27, 94, 32, 0.15); display: flex; align-items: center; justify-content: center; color: var(--primary);">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
                 </div>
                 <div>
                     <h1 style="font-size: 1.35rem; font-weight: 800; margin: 0 0 4px; color: var(--text);">
@@ -202,7 +202,7 @@
 
                 <!-- Campo 1: Fecha de Pedido -->
                 <div class="form-group">
-                    <label for="delivery_date">📅 Fecha de Pedido *</label>
+                    <label for="delivery_date">Fecha de Pedido *</label>
                     <input id="delivery_date" aria-label="Fecha de Pedido" type="date" name="delivery_date" value="{{ today_str }}" required class="form-control">
                     <small style="color: var(--text-secondary); font-size: 0.78rem; display: block; margin-top: 4px;">
                         Día en que se realiza o despacha la orden de mercancía a la tienda.
@@ -211,7 +211,7 @@
 
                 <!-- Campo 2: Costo del Pedido -->
                 <div class="form-group">
-                    <label for="total_amount">💰 Costo del Pedido ($ COP) *</label>
+                    <label for="total_amount">Costo del Pedido ($ COP) *</label>
                     <input id="total_amount" aria-label="Costo del Pedido en pesos colombianos" type="number" name="total_amount" placeholder="Ej. 2000000" min="50" step="50" onkeydown="return preventNegativeKey(event)" oninput="sanitizePositiveInput(this); updatePreview();" required class="form-control amount-control">
                     <div id="amount-preview" style="font-size: 0.95rem; font-weight: 700; color: var(--primary); margin-top: 6px;"></div>
                     <small style="color: var(--text-secondary); font-size: 0.78rem; display: block; margin-top: 4px;">
@@ -221,7 +221,7 @@
 
                 <!-- Campo 3: Anotaciones de Errores / Novedades -->
                 <div class="form-group">
-                    <label for="notes">📝 Anotaciones de Errores / Novedades de Mercancía</label>
+                    <label for="notes">Anotaciones de Errores / Novedades de Mercancía</label>
                     <textarea id="notes" aria-label="Anotaciones de errores o novedades" name="notes" rows="4" 
                               placeholder="Ej. Se entregaron 10 cajas de leche, 2 llegaron con empaque averiado y se descontarán. Faltaron 3 paquetes de arroz por agotado en bodega..."
                               class="form-control" style="resize: vertical;"></textarea>
@@ -231,7 +231,7 @@
                 </div>
 
                 <div class="info-box">
-                    ℹ️ Al confirmar, tu solicitud se enviará directamente al panel de pedidos de <strong>{{ store.name }}</strong>. El administrador confirmará el pedido y seleccionará el método de pago (efectivo de caja, transferencia o mixto).
+                    Al confirmar, tu solicitud se enviará directamente al panel de pedidos de <strong>{{ store.name }}</strong>. El administrador confirmará el pedido y seleccionará el método de pago (efectivo de caja, transferencia o mixto).
                 </div>
 
                 <!-- Campo 4: Confirmar Pedido y Pago -->
@@ -325,7 +325,7 @@
             function updatePreview() {
                 const val = parseInt(amountInput.value, 10);
                 if (!isNaN(val) && val > 0) {
-                    amountPreview.textContent = '💵 Total a cobrar: $' + val.toLocaleString('es-CO') + ' COP';
+                    amountPreview.textContent = 'Total a cobrar: $' + val.toLocaleString('es-CO') + ' COP';
                 } else {
                     amountPreview.textContent = '';
                 }

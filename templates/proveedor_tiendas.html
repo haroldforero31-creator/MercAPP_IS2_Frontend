@@ -154,8 +154,8 @@
             MercAPP
         </div>
         <div class="nav-links" style="display: flex; align-items: center; gap: 18px;">
-            <a href="{{ url_for('proveedor_tiendas') }}" style="color: var(--primary); text-decoration: none; font-weight: 700;">🏪 Tiendas</a>
-            <a href="{{ url_for('proveedor_pedidos') }}" style="color: var(--text-secondary); text-decoration: none; font-weight: 600;">📦 Mis Pedidos</a>
+            <a href="{{ url_for('proveedor_tiendas') }}" style="color: var(--primary); text-decoration: none; font-weight: 700;">Tiendas</a>
+            <a href="{{ url_for('proveedor_pedidos') }}" style="color: var(--text-secondary); text-decoration: none; font-weight: 600;">Mis Pedidos</a>
             <span style="color: var(--text-secondary); font-size: 0.92rem;">
                 Proveedor: <strong style="color: var(--text);">{{ current_user.company_name }}</strong>
             </span>
@@ -180,7 +180,7 @@
         <h1 style="font-size: 2.2rem; margin: 0 0 6px; color: var(--text); font-weight: 800;">Tiendas Disponibles</h1>
         <p style="color: var(--text-secondary); font-size: 1rem; margin: 0;">Selecciona una tienda para registrar la fecha, costo y novedades de tu pedido.</p>
         
-        <input type="text" id="store-search-input" onkeyup="filterStores()" placeholder="🔍 Filtrar tiendas por nombre o ciudad..." class="search-bar">
+        <input type="text" id="store-search-input" onkeyup="filterStores()" placeholder="Filtrar tiendas por nombre o ciudad..." class="search-bar">
 
         <div class="store-grid" id="stores-grid">
             {% for store in stores %}
@@ -192,7 +192,7 @@
                     </div>
                     <div class="store-name">{{ store.name }}</div>
                     <div class="store-meta">
-                        📍 {{ settings.direccion if settings and settings.direccion else 'Sede Principal' }}
+                        {{ settings.direccion if settings and settings.direccion else 'Sede Principal' }}
                         {% if settings and settings.ciudad %} • {{ settings.ciudad }}{% endif %}
                     </div>
                 </div>
@@ -212,7 +212,7 @@
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 12px;">
                 <div>
                     <h2 style="font-size: 1.4rem; font-weight: 800; color: var(--text); margin: 0 0 4px;">
-                        📦 Mis Pedidos Recientes a Tiendas
+                        Mis Pedidos Recientes a Tiendas
                     </h2>
                     <p style="color: var(--text-secondary); font-size: 0.9rem; margin: 0;">
                         Monitorea el estado de aprobación y cobro en tiempo real de tus despachos.
@@ -233,7 +233,7 @@
                                 <span style="color: var(--text-secondary); font-size: 0.9rem;">• Tienda Destino: <strong style="color: var(--primary);">{{ order.store.name if order.store else 'Tienda' }}</strong></span>
                             </div>
                             <div style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 3px;">
-                                📅 {{ order.created_at.strftime('%d/%m/%Y %H:%M') if order.created_at else 'Reciente' }}
+                                {{ order.created_at.strftime('%d/%m/%Y %H:%M') if order.created_at else 'Reciente' }}
                             </div>
                         </div>
                         <div style="text-align: right; display: flex; align-items: center; gap: 16px;">

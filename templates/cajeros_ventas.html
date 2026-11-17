@@ -9,7 +9,7 @@
  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 12px;">
   <div>
    <h1 style="font-size: 1.6rem; font-weight: 800; color: var(--text-primary); margin: 0;">
-    📊 Ventas por Cajero
+    Ventas por Cajero
    </h1>
    <p style="color: var(--text-secondary); font-size: 0.85rem; margin-top: 4px;">
     Historial diario de ventas de cada cajero
@@ -22,9 +22,9 @@
 
  <!-- Date Selector -->
  <div style="background: var(--card-bg, #1e1e2e); border-radius: 14px; padding: 16px 20px; margin-bottom: 24px; border: 1px solid var(--border, #2a2a3e); display: flex; align-items: center; gap: 16px; flex-wrap: wrap;">
-  <label for="input_date" style="font-weight: 600; color: var(--text-primary); font-size: 0.95rem;">📅 Fecha:</label>
+  <label for="input_date" style="font-weight: 600; color: var(--text-primary); font-size: 0.95rem;">Fecha:</label>
   <form method="GET" style="display: flex; align-items: center; gap: 10px; flex: 1;">
-   <input id="input_date" aria-label="📅 Fecha:" type="date" name="date" value="{{ view_date.strftime('%Y-%m-%d') }}" 
+   <input id="input_date" aria-label="Fecha de ventas" type="date" name="date" value="{{ view_date.strftime('%Y-%m-%d') }}" 
     class="form-control" style="max-width: 200px; padding: 10px 14px; border-radius: 10px; font-size: 0.95rem;"
     onchange="this.form.submit()">
    <span style="color: var(--text-secondary); font-size: 0.9rem;">
@@ -80,11 +80,12 @@
       <tr style="border-bottom: 1px solid var(--border, #2a2a3e);">
        <td style="padding: 10px 16px; font-size: 0.9rem; color: var(--text-primary);">{{ sale.sale_date.strftime('%H:%M:%S') }}</td>
        <td style="padding: 10px 16px; font-size: 0.85rem; color: var(--text-secondary); font-family: monospace;">{{ sale.receipt_number }}</td>
-       <td style="padding: 10px 16px; text-align: center; font-size: 0.85rem;">
-        {% if sale.payment_method == 'efectivo' %}💵
-        {% elif sale.payment_method == 'tarjeta' %}💳
-        {% elif sale.payment_method == 'transferencia' %}📱
-        {% else %}📋{% endif %}
+       <td style="padding: 10px 16px; text-align: center; font-size: 0.85rem; font-weight: 600; color: var(--text-primary);">
+        {% if sale.payment_method == 'efectivo' %}Efectivo
+        {% elif sale.payment_method == 'tarjeta' %}Tarjeta
+        {% elif sale.payment_method == 'transferencia' %}Transferencia
+        {% elif sale.payment_method == 'mixto' %}Mixto
+        {% else %}{{ sale.payment_method|capitalize }}{% endif %}
        </td>
        <td style="padding: 10px 16px; text-align: right; font-weight: 700; color: var(--text-primary);">{{ sale.total | cop }}</td>
       </tr>

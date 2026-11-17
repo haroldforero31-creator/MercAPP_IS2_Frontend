@@ -144,9 +144,9 @@
  <div style="grid-column: span 2; margin-top: 10px; padding: 12px; background: var(--bg-input, rgba(255,255,255,0.05)); border-radius: 8px;">
    <div class="form-label" style="margin-bottom: 8px;">Desglose del Pago Mixto:</div>
    <div style="display: flex; gap: 20px; font-weight: 600; flex-wrap: wrap;">
-     {% if sale.amount_cash %} <span>💵 Efectivo: {{ sale.amount_cash | cop }}</span> {% endif %}
-     {% if sale.amount_card %} <span>💳 Tarjeta: {{ sale.amount_card | cop }}</span> {% endif %}
-     {% if sale.amount_transfer %} <span>📲 Transferencia: {{ sale.amount_transfer | cop }}</span> {% endif %}
+     {% if sale.amount_cash %} <span>Efectivo: {{ sale.amount_cash | cop }}</span> {% endif %}
+     {% if sale.amount_card %} <span>Tarjeta: {{ sale.amount_card | cop }}</span> {% endif %}
+     {% if sale.amount_transfer %} <span>Transferencia: {{ sale.amount_transfer | cop }}</span> {% endif %}
    </div>
  </div>
  {% endif %}

@@ -146,7 +146,8 @@
         left: 0;
         width: 100%;
         height: 100%;
-        background: rgba(0,0,0,0.6);
+        background: rgba(0, 0, 0, 0.75);
+        backdrop-filter: blur(4px);
         align-items: center;
         justify-content: center;
         z-index: 1000;
@@ -155,30 +156,54 @@
         display: flex;
     }
     .modal-content {
-        background: var(--card-bg, #1e1e2e);
-        border: 1px solid var(--border, #2a2a3e);
+        background: #181C28;
+        border: 1px solid #334155;
         border-radius: 16px;
-        padding: 24px;
+        padding: 26px;
         width: 90%;
         max-width: 500px;
-        box-shadow: 0 20px 25px -5px rgba(0,0,0,0.3);
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+        color: #F8FAFC;
     }
     .modal-header {
         font-size: 1.25rem;
-        font-weight: bold;
-        color: var(--text-primary);
+        font-weight: 700;
+        color: #F8FAFC;
         margin-bottom: 16px;
     }
     .form-control {
         width: 100%;
-        background: rgba(0,0,0,0.2);
-        border: 1px solid var(--border, #2a2a3e);
-        color: white;
+        background: #0F1420;
+        border: 1px solid #374151;
+        color: #FFFFFF;
         padding: 12px;
         border-radius: 8px;
         box-sizing: border-box;
         margin-top: 8px;
-        margin-bottom: 20px;
+        margin-bottom: 16px;
+        font-size: 0.95rem;
+    }
+    .form-control:focus {
+        border-color: #3B82F6;
+        outline: none;
+        box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.25);
+    }
+    select.form-control {
+        background-color: #0F1420 !important;
+        color: #FFFFFF !important;
+        border: 1px solid #374151 !important;
+    }
+    select.form-control option,
+    select option {
+        background-color: #181C28 !important;
+        color: #FFFFFF !important;
+        padding: 12px 14px;
+        font-size: 0.95rem;
+    }
+    select.form-control option:checked,
+    select option:checked {
+        background-color: #2563EB !important;
+        color: #FFFFFF !important;
     }
     .modal-footer {
         display: flex;
@@ -214,7 +239,7 @@
                 <div class="order-title">
                     <span style="color: #FFA726;">ORD-{{ "%04d"|format(order.id) }}</span>
                     <span class="badge" style="background: rgba(255, 167, 38, 0.2); color: #FFA726; border: 1px solid rgba(255, 167, 38, 0.4);">
-                        🚚 PEDIDO PROVEEDOR
+                        PEDIDO PROVEEDOR
                     </span>
                     <span class="badge badge-{{ order.status }}">{{ order.status }}</span>
                 </div>
@@ -240,7 +265,7 @@
                 </div>
                 
                 <div>
-                    <strong style="display:block; margin-bottom:8px; font-size:0.95rem; color:#FFA726;">📝 Anotaciones de Errores / Novedades:</strong>
+                    <strong style="display:block; margin-bottom:8px; font-size:0.95rem; color:#FFA726;">Anotaciones / Novedades:</strong>
                     <div class="items-list" style="padding: 12px 14px; color: #CBD5E1; font-size: 0.9rem; border-left: 3px solid #FFA726;">
                         {{ order.notes if order.notes else 'Ningún error o novedad reportada por el proveedor.' }}
                     </div>
@@ -261,7 +286,7 @@
                     </button>
                     {% elif order.status == 'confirmado' or order.status == 'completado' %}
                     <span style="color: #10B981; font-weight: 700; font-size: 0.95rem;">
-                        ✓ Confirmado & Pagado ({{ order.payment_method|capitalize }})
+                        Confirmado & Pagado ({{ order.payment_method|capitalize }})
                     </span>
                     {% endif %}
                 </div>
@@ -292,9 +317,9 @@
                         <strong>Entrega:</strong> 
                         <span>
                             {% if order.order_type == 'domicilio' %}
-                            🚚 Domicilio a: {{ order.customer_address }}
+                            Domicilio a: {{ order.customer_address }}
                             {% else %}
-                            🏪 Recoger en Tienda
+                            Recoger en Tienda
                             {% endif %}
                         </span>
                     </div>
@@ -414,60 +439,63 @@
 
 <!-- Confirm Supplier Payment Modal -->
 <div class="modal" id="supplierPaymentModal">
-    <div class="modal-content" style="max-width: 480px;">
-        <div class="modal-header" style="color: #FFA726; display: flex; align-items: center; gap: 10px;">
-            <span>🚚</span> Confirmar Pago a Proveedor
+    <div class="modal-content" style="max-width: 480px; background: #181C28; border: 1px solid #334155; border-radius: 16px; padding: 26px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);">
+        <div class="modal-header" style="color: #FFA726; font-weight: 800; font-size: 1.25rem; margin-bottom: 14px;">
+            Confirmar Pago a Proveedor
         </div>
-        <p style="color: var(--text-secondary); margin-bottom: 16px; font-size: 0.9rem;">
-            Proveedor: <strong id="supplierNameDisplay" style="color: #FFFFFF;"></strong>
+        <p style="color: #94A3B8; margin-bottom: 18px; font-size: 0.95rem;">
+            Proveedor: <strong id="supplierNameDisplay" style="color: #FFFFFF; font-weight: 700;"></strong>
         </p>
 
-        <div style="margin-bottom: 16px;">
-            <label for="supplierPaymentTotal" style="display: block; font-size: 0.85rem; font-weight: 700; color: #CBD5E1; margin-bottom: 6px;">
+        <div style="margin-bottom: 18px;">
+            <label for="supplierPaymentTotal" style="display: block; font-size: 0.88rem; font-weight: 700; color: #E2E8F0; margin-bottom: 6px;">
                 Costo a Pagar al Proveedor ($ COP) *
             </label>
             <input aria-label="Costo a Pagar al proveedor" type="number" id="supplierPaymentTotal" class="form-control" 
                    min="1" step="50" onkeydown="return preventNegativeKey(event)" oninput="sanitizePositiveInput(this); updatePaymentSplit()" required
-                   style="font-size: 1.15rem; font-weight: 800; color: #FFA726;">
+                   style="font-size: 1.25rem; font-weight: 800; color: #FFA726; background: #0F1420; border: 1px solid #374151; padding: 12px; border-radius: 8px;">
         </div>
 
-        <div style="margin-bottom: 16px;">
-            <label for="supplierPaymentMethod" style="display: block; font-size: 0.85rem; font-weight: 700; color: #CBD5E1; margin-bottom: 6px;">
+        <div style="margin-bottom: 18px;">
+            <label for="supplierPaymentMethod" style="display: block; font-size: 0.88rem; font-weight: 700; color: #E2E8F0; margin-bottom: 6px;">
                 Método de Pago Seleccionado *
             </label>
-            <select aria-label="Método de Pago Seleccionado" id="supplierPaymentMethod" class="form-control" onchange="toggleSupplierSplitInputs()" style="padding: 10px 12px;">
-                <option value="efectivo">💵 Efectivo (Descontar de la Caja Registradora)</option>
-                <option value="transferencia">📲 Transferencia Bancaria (Nequi / Banco)</option>
-                <option value="mixto">🔄 Parte y Parte (Mixto: Efectivo + Transferencia)</option>
+            <select aria-label="Método de Pago Seleccionado" id="supplierPaymentMethod" class="form-control" onchange="toggleSupplierSplitInputs()" 
+                    style="padding: 12px; font-size: 0.95rem; font-weight: 500; background-color: #0F1420; color: #FFFFFF; border: 1px solid #374151; border-radius: 8px; width: 100%;">
+                <option value="efectivo" style="background-color: #181C28; color: #FFFFFF;">Efectivo (Descontar de la Caja Registradora)</option>
+                <option value="transferencia" style="background-color: #181C28; color: #FFFFFF;">Transferencia Bancaria (Nequi / Banco)</option>
+                <option value="mixto" style="background-color: #181C28; color: #FFFFFF;">Pago Mixto (Efectivo + Transferencia)</option>
             </select>
         </div>
 
         <!-- Campos de división para método mixto -->
-        <div id="supplierSplitBox" style="display: none; background: rgba(0,0,0,0.25); border: 1px solid var(--border); border-radius: 10px; padding: 14px; margin-bottom: 16px;">
-            <div style="margin-bottom: 10px;">
-                <label for="splitCashAmount" style="display: block; font-size: 0.8rem; font-weight: 600; color: #EF4444; margin-bottom: 4px;">
-                    💵 Efectivo a sacar de la Caja ($ COP):
+        <div id="supplierSplitBox" style="display: none; background: #0F1420; border: 1px solid #334155; border-radius: 10px; padding: 16px; margin-bottom: 18px;">
+            <div style="margin-bottom: 12px;">
+                <label for="splitCashAmount" style="display: block; font-size: 0.85rem; font-weight: 600; color: #F87171; margin-bottom: 6px;">
+                    Efectivo a descontar de la Caja ($ COP):
                 </label>
                 <input aria-label="Monto en efectivo sacado de caja" type="number" id="splitCashAmount" class="form-control" value="0" min="0" step="50"
-                       onkeydown="return preventNegativeKey(event)" oninput="sanitizePositiveInput(this); validateSplitSum()">
+                       onkeydown="return preventNegativeKey(event)" oninput="sanitizePositiveInput(this); validateSplitSum()"
+                       style="background: #181C28; border: 1px solid #374151; color: #FFFFFF; font-weight: 700; margin: 0;">
             </div>
             <div>
-                <label for="splitTransferAmount" style="display: block; font-size: 0.8rem; font-weight: 600; color: #60A5FA; margin-bottom: 4px;">
-                    📲 Monto por Transferencia ($ COP):
+                <label for="splitTransferAmount" style="display: block; font-size: 0.85rem; font-weight: 600; color: #60A5FA; margin-bottom: 6px;">
+                    Monto por Transferencia ($ COP):
                 </label>
                 <input aria-label="Monto por transferencia bancaria" type="number" id="splitTransferAmount" class="form-control" value="0" min="0" step="50"
-                       onkeydown="return preventNegativeKey(event)" oninput="sanitizePositiveInput(this); validateSplitSum()">
+                       onkeydown="return preventNegativeKey(event)" oninput="sanitizePositiveInput(this); validateSplitSum()"
+                       style="background: #181C28; border: 1px solid #374151; color: #FFFFFF; font-weight: 700; margin: 0;">
             </div>
-            <div id="splitFeedback" style="font-size: 0.78rem; margin-top: 6px; color: #FBBF24;"></div>
+            <div id="splitFeedback" style="font-size: 0.82rem; margin-top: 8px; font-weight: 600; color: #FBBF24;"></div>
         </div>
 
-        <!-- Advertencia de cuadre de caja -->
-        <div style="background: rgba(239, 68, 68, 0.08); border: 1px solid rgba(239, 68, 68, 0.25); border-radius: 10px; padding: 12px; margin-bottom: 20px; font-size: 0.82rem; color: #FCA5A5; line-height: 1.45;">
-            ⚠️ <strong>Control de Cuadre de Caja:</strong> El monto pagado en efectivo se descontará automáticamente del arqueo de la caja abierta de hoy y de las ventas/ganancias del día para que el dinero físico en el cajón sea exacto.
+        <!-- Advertencia de cuadre de caja con alto contraste -->
+        <div style="background: rgba(239, 68, 68, 0.12); border: 1px solid rgba(239, 68, 68, 0.35); border-radius: 10px; padding: 14px; margin-bottom: 22px; font-size: 0.85rem; color: #FECACA; line-height: 1.5;">
+            <strong>Control de Cuadre de Caja:</strong> El monto pagado en efectivo se descontará automáticamente del arqueo de la caja abierta de hoy y de las ventas del día para que el dinero físico en el cajón sea exacto.
         </div>
 
         <div class="modal-footer">
-            <button class="btn btn-secondary" onclick="closeModals()">Cancelar</button>
+            <button class="btn btn-secondary" onclick="closeModals()" style="background: #334155; color: #F8FAFC; border: 1px solid #475569; padding: 10px 18px; border-radius: 8px; cursor: pointer; font-weight: 600;">Cancelar</button>
             <button class="btn" id="btnSubmitSupplierPayment" onclick="submitSupplierPayment()" style="background: linear-gradient(135deg, #FFA726, #F57C00); color: #000; font-weight: 800; border: none; padding: 10px 18px; border-radius: 8px; cursor: pointer;">
                 Confirmar Pago y Descontar
             </button>
@@ -562,27 +590,27 @@
 
         if (total <= 0) {
             feedback.style.color = '#F87171';
-            feedback.textContent = '⚠️ El costo a pagar debe ser mayor a 0.';
+            feedback.textContent = 'El costo a pagar debe ser mayor a 0.';
             document.getElementById('btnSubmitSupplierPayment').disabled = true;
             return;
         }
 
         if (cash < 0 || transfer < 0) {
             feedback.style.color = '#F87171';
-            feedback.textContent = '⚠️ Los montos no pueden ser negativos.';
+            feedback.textContent = 'Los montos no pueden ser negativos.';
             document.getElementById('btnSubmitSupplierPayment').disabled = true;
             return;
         }
 
         if (sum === total) {
             feedback.style.color = '#4ADE80';
-            feedback.textContent = `✓ Suma exacta: $${sum.toLocaleString('es-CO')}`;
+            feedback.textContent = `Suma exacta: $${sum.toLocaleString('es-CO')}`;
             document.getElementById('btnSubmitSupplierPayment').disabled = false;
         } else {
             feedback.style.color = '#F87171';
             const diff = total - sum;
             const diffText = diff > 0 ? `Faltan: $${diff.toLocaleString('es-CO')}` : `Excede: $${Math.abs(diff).toLocaleString('es-CO')}`;
-            feedback.textContent = `⚠️ Suma: $${sum.toLocaleString('es-CO')} (${diffText})`;
+            feedback.textContent = `Suma: $${sum.toLocaleString('es-CO')} (${diffText})`;
             document.getElementById('btnSubmitSupplierPayment').disabled = true;
         }
     }

@@ -214,8 +214,8 @@
             </a>
         </div>
         <div style="display:flex; align-items:center; gap:20px;">
-            <a href="{{ url_for('customer_stores') }}" style="color: var(--text-secondary); text-decoration: none; font-weight: 500; transition: var(--transition);">🏪 Tiendas</a>
-            <a href="{{ url_for('customer_orders') }}" style="color: var(--primary); text-decoration: none; font-weight: 600;">🛍️ Mis Pedidos</a>
+            <a href="{{ url_for('customer_stores') }}" style="color: var(--text-secondary); text-decoration: none; font-weight: 500; transition: var(--transition);">Tiendas</a>
+            <a href="{{ url_for('customer_orders') }}" style="color: var(--primary); text-decoration: none; font-weight: 600;">Mis Pedidos</a>
             <span style="color: var(--text-secondary);">Hola, <strong style="color: var(--text);">{{ current_user.name }}</strong></span>
             <a href="#" onclick="confirmAppLogout(event, '{{ url_for('customer_logout') }}')" style="color: var(--error); text-decoration: none; font-weight: 500; display: inline-flex; align-items: center; gap: 4px; padding: 6px 12px; border-radius: var(--radius-sm); background: rgba(239, 68, 68, 0.1); transition: var(--transition);">
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
@@ -288,7 +288,9 @@
                 {% else %}
                 <tr>
                     <td colspan="5" style="text-align: center; padding: 60px 20px;">
-                        <div style="font-size: 2.8rem; margin-bottom: 12px;">🛍️</div>
+                        <div style="width: 44px; height: 44px; margin: 0 auto 12px; color: var(--text-secondary);">
+                            <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+                        </div>
                         <h3 style="margin: 0 0 8px 0; color: var(--text); font-size: 1.25rem; font-weight: 600;">Aún no has realizado ningún pedido</h3>
                         <p style="color: var(--text-secondary); margin: 0 0 20px 0; font-size: 0.95rem;">Explora las tiendas disponibles y agrega productos a tu carrito de compras.</p>
                         <a href="{{ url_for('customer_stores') }}" style="display: inline-flex; align-items: center; gap: 8px; text-decoration: none; padding: 10px 20px; background: var(--primary); color: white; border-radius: var(--radius-sm); font-weight: 600; box-shadow: var(--shadow); transition: var(--transition);">

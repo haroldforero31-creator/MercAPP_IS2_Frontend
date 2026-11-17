@@ -122,8 +122,8 @@
             MercAPP
         </div>
         <div class="nav-links" style="display: flex; align-items: center; gap: 18px;">
-            <a href="{{ url_for('proveedor_tiendas') }}" style="color: var(--text-secondary); text-decoration: none; font-weight: 600;">🏪 Tiendas</a>
-            <a href="{{ url_for('proveedor_pedidos') }}" style="color: var(--primary); text-decoration: none; font-weight: 700;">📦 Mis Pedidos</a>
+            <a href="{{ url_for('proveedor_tiendas') }}" style="color: var(--text-secondary); text-decoration: none; font-weight: 600;">Tiendas</a>
+            <a href="{{ url_for('proveedor_pedidos') }}" style="color: var(--primary); text-decoration: none; font-weight: 700;">Mis Pedidos</a>
             <span style="color: var(--text-secondary); font-size: 0.92rem;">
                 Proveedor: <strong style="color: var(--text);">{{ current_user.company_name }}</strong>
             </span>
@@ -193,7 +193,7 @@
                                 <span style="color: var(--text-secondary); font-size: 0.95rem;">• Tienda Destino: <strong style="color: var(--primary);">{{ order.store.name if order.store else 'Tienda' }}</strong></span>
                             </div>
                             <div style="color: var(--text-secondary); font-size: 0.85rem; margin-top: 4px;">
-                                📅 Fecha de Solicitud: <strong style="color: var(--text);">{{ order.created_at.strftime('%d/%m/%Y %H:%M') if order.created_at else 'Reciente' }}</strong>
+                                Fecha de Solicitud: <strong style="color: var(--text);">{{ order.created_at.strftime('%d/%m/%Y %H:%M') if order.created_at else 'Reciente' }}</strong>
                             </div>
                         </div>
                         <div style="text-align: right;">
@@ -203,15 +203,15 @@
                             <div style="margin-top: 6px;">
                                 {% if order.status == 'pendiente' %}
                                 <span class="badge badge-pendiente">
-                                    ⏳ Esperando confirmación del administrador
+                                    Esperando confirmación del administrador
                                 </span>
                                 {% elif order.status in ('completado', 'confirmado') %}
                                 <span class="badge badge-completado">
-                                    ✓ Confirmado & Pagado ({{ order.payment_method|capitalize }})
+                                    Confirmado & Pagado ({{ order.payment_method|capitalize }})
                                 </span>
                                 {% else %}
                                 <span class="badge badge-cancelado">
-                                    ✕ Rechazado por Tienda
+                                    Rechazado por Tienda
                                 </span>
                                 {% endif %}
                             </div>
@@ -220,16 +220,16 @@
 
                     <!-- Detalles / Notas del pedido -->
                     <div style="background: rgba(0,0,0,0.2); border-radius: 8px; padding: 12px 16px; font-size: 0.88rem; color: #CBD5E1;">
-                        <span style="color: #94A3B8; font-weight: 600;">📝 Novedades / Anotaciones:</span>
+                        <span style="color: #94A3B8; font-weight: 600;">Novedades / Anotaciones:</span>
                         {{ order.notes if order.notes else 'Se entregó mercancía completa sin anotaciones de averías.' }}
                     </div>
 
                     <!-- Mensaje de Soporte / Correo -->
                     <div style="margin-top: 12px; display: flex; align-items: center; gap: 8px; font-size: 0.82rem;">
                         {% if order.status in ('completado', 'confirmado') %}
-                        <span style="color: #4ADE80;">📧 Soporte oficial de liquidación y pago enviado al correo: <strong>{{ current_user.email }}</strong></span>
+                        <span style="color: #4ADE80;">Soporte oficial de liquidación y pago enviado al correo: <strong>{{ current_user.email }}</strong></span>
                         {% else %}
-                        <span style="color: #94A3B8;">ℹ️ Al ser confirmado por el administrador en caja, se enviará automáticamente el comprobante de pago a <strong>{{ current_user.email }}</strong>.</span>
+                        <span style="color: #94A3B8;">Al ser confirmado por el administrador en caja, se enviará automáticamente el comprobante de pago a <strong>{{ current_user.email }}</strong>.</span>
                         {% endif %}
                     </div>
                 </div>
@@ -237,7 +237,9 @@
             </div>
         {% else %}
             <div style="background: var(--bg-card); border: 1px dashed var(--border); border-radius: var(--radius); padding: 50px 20px; text-align: center;">
-                <div style="font-size: 3rem; margin-bottom: 12px;">🚚</div>
+                <div style="width: 48px; height: 48px; margin: 0 auto 12px; color: var(--text-secondary);">
+                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+                </div>
                 <h3 style="margin: 0 0 8px; font-size: 1.3rem; color: var(--text);">Aún no tienes pedidos registrados</h3>
                 <p style="color: var(--text-secondary); margin: 0 0 20px; font-size: 0.95rem;">
                     Selecciona una tienda para cargar la orden de mercancía y solicitar el pago.
