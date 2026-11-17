@@ -449,13 +449,27 @@
         window.addEventListener('offline', updateNetworkStatus);
         document.addEventListener('DOMContentLoaded', updateNetworkStatus);
 
-        // Prevención global contra números negativos en todos los inputs numéricos y monetarios
+        // Prevención global contra números negativos, puntos decimales y exponentes en inputs numéricos y monetarios (COP)
+        function isMoneyOrNumberInput(el) {
+            if (!el || el.tagName !== 'INPUT') return false;
+            if (el.type === 'number') return true;
+            const id = (el.id || '').toLowerCase();
+            const name = (el.name || '').toLowerCase();
+            const cls = (el.className || '').toLowerCase();
+            return (
+                id.includes('price') || id.includes('precio') || id.includes('amount') || id.includes('monto') ||
+                id.includes('cost') || id.includes('total') || id.includes('cash') || id.includes('efectivo') ||
+                id.includes('transferencia') || id.includes('abono') || id.includes('pago') ||
+                name.includes('price') || name.includes('precio') || name.includes('amount') || name.includes('monto') ||
+                name.includes('cost') || name.includes('total') || cls.includes('money') || cls.includes('amount')
+            );
+        }
+
         document.addEventListener('keydown', function(e) {
-            if (e.target && e.target.tagName === 'INPUT') {
-                const type = e.target.type;
+            if (isMoneyOrNumberInput(e.target)) {
                 const minAttr = e.target.getAttribute('min');
-                if (type === 'number' && (minAttr === null || parseFloat(minAttr) >= 0)) {
-                    if (e.key === '-' || e.key === 'e' || e.key === 'E' || e.key === '+') {
+                if (minAttr === null || parseFloat(minAttr) >= 0) {
+                    if (e.key === '-' || e.key === '.' || e.key === ',' || e.key === 'e' || e.key === 'E' || e.key === '+') {
                         e.preventDefault();
                     }
                 }
@@ -463,11 +477,11 @@
         }, true);
 
         document.addEventListener('input', function(e) {
-            if (e.target && e.target.tagName === 'INPUT' && e.target.type === 'number') {
+            if (isMoneyOrNumberInput(e.target)) {
                 const minAttr = e.target.getAttribute('min');
                 if (minAttr === null || parseFloat(minAttr) >= 0) {
-                    if (e.target.value && e.target.value.includes('-')) {
-                        e.target.value = e.target.value.replace(/-/g, '');
+                    if (e.target.value && /[-.,eE+]/.test(e.target.value)) {
+                        e.target.value = e.target.value.replace(/[-.,eE+]/g, '');
                     }
                     if (parseFloat(e.target.value) < 0) {
                         e.target.value = '0';
