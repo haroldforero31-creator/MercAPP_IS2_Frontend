@@ -334,6 +334,8 @@
  <div class="form-group">
  <label for="paymentAmount" class="form-label">Monto a abonar (COP)</label>
  <input aria-label="Monto a abonar" type="text" id="paymentAmount" class="form-control" placeholder="Ej: 50000"
+ onkeydown="if(['-','.','e','E','+'].includes(event.key)) event.preventDefault();"
+ oninput="this.value = this.value.replace(/[-.,eE+]/g, '');"
  style="font-size: 1.3rem; font-weight: 700; text-align: center;">
  </div>
 

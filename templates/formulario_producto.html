@@ -130,7 +130,8 @@
         <label class="form-label" for="productPrice" id="priceLabel">Precio (Pesos Colombianos) *</label>
         <input aria-label="Precio" type="text" id="productPrice" name="price" class="form-control"
           placeholder="Ej: 3500 (sin puntos ni comas)" maxlength="9" value="{{ product.price if editing else '' }}"
-          required style="font-size: 1.2rem; font-weight: 700;" oninput="onProductNameOrPriceChange()">
+          onkeydown="if(['-','.','e','E','+'].includes(event.key)) event.preventDefault();"
+          required style="font-size: 1.2rem; font-weight: 700;" oninput="this.value = this.value.replace(/[-.,eE+]/g, ''); onProductNameOrPriceChange()">
         <div class="form-hint" id="priceHint">Solo números enteros. Ejemplo: 3500 = $3.500 COP. Mínimo $100, Máximo
           $100.000.000</div>
       </div>
