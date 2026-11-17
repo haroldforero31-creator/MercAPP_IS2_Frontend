@@ -480,7 +480,7 @@
     let activeSupplierOrderId = null;
 
     function preventNegativeKey(e) {
-        if (e.key === '-' || e.key === 'e' || e.key === 'E' || e.key === '+') {
+        if (e.key === '-' || e.key === '.' || e.key === ',' || e.key === 'e' || e.key === 'E' || e.key === '+') {
             e.preventDefault();
             return false;
         }
@@ -489,8 +489,8 @@
 
     function sanitizePositiveInput(input) {
         if (!input) return;
-        if (input.value && input.value.includes('-')) {
-            input.value = input.value.replace(/-/g, '');
+        if (input.value && /[-.,eE+]/.test(input.value)) {
+            input.value = input.value.replace(/[-.,eE+]/g, '');
         }
         const val = parseFloat(input.value);
         if (isNaN(val) || val < 0) {

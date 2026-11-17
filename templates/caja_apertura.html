@@ -74,7 +74,7 @@
  <button type="button" class="btn btn-outline money-btn" data-val="50">+ $50</button>
  <button type="button" class="btn btn-outline"
  style="background-color: var(--background-dark); color: var(--text-color); border: none;"
- onclick="document.getElementById('base_amount').value=''">Borrar todo</button>
+ onclick="document.getElementById('base_amount').value=''; validateAmount();">Borrar todo</button>
  </div>
 
  <button type="submit" class="btn btn-primary" id="submitBtn"
@@ -98,31 +98,45 @@
  const submitBtn = document.getElementById('submitBtn');
  const montoError = document.getElementById('montoError');
 
+ // Bloqueo estricto de números negativos, puntos decimales, comas y notación científica
+ baseInput.addEventListener('keydown', function(e) {
+     if (e.key === '-' || e.key === '.' || e.key === ',' || e.key === 'e' || e.key === 'E' || e.key === '+') {
+         e.preventDefault();
+         return false;
+     }
+ });
+
  function validateAmount() {
- let val = parseInt(baseInput.value, 10);
- if (isNaN(val) || val < 0) {
- baseInput.value = '';
- val = 0;
- }
- if (val > 0 && val % 50 !== 0) {
- montoError.style.display = 'block';
- submitBtn.disabled = true;
- } else {
- montoError.style.display = 'none';
- submitBtn.disabled = false;
- }
+     if (baseInput.value) {
+         baseInput.value = baseInput.value.replace(/[-.,eE+]/g, '');
+     }
+     let val = parseInt(baseInput.value, 10);
+     if (isNaN(val) || val < 0) {
+         baseInput.value = '';
+         val = 0;
+     }
+     if (val > 0 && val % 50 !== 0) {
+         montoError.style.display = 'block';
+         submitBtn.disabled = true;
+     } else {
+         montoError.style.display = 'none';
+         submitBtn.disabled = false;
+     }
  }
 
  baseInput.addEventListener('input', validateAmount);
 
  document.querySelectorAll('.money-btn').forEach(btn => {
- btn.addEventListener('click', () => {
- let current = parseInt(baseInput.value, 10) || 0;
- let add = parseInt(btn.getAttribute('data-val'), 10);
- baseInput.value = current + add;
- validateAmount();
+     btn.addEventListener('click', (e) => {
+         e.preventDefault();
+         let current = parseInt(baseInput.value, 10) || 0;
+         let add = parseInt(btn.getAttribute('data-val'), 10) || 0;
+         baseInput.value = current + add;
+         validateAmount();
+     });
  });
- });
+ </script>
+
     <!-- Modal de confirmación para cerrar sesión -->
     <div class="modal-overlay" id="logoutConfirmModal">
         <div class="modal" style="max-width: 380px;">

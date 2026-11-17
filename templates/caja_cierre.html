@@ -185,7 +185,18 @@
  const submitBtn = document.getElementById('submitBtn');
  const montoError = document.getElementById('montoError');
 
+ // Bloqueo estricto de números negativos, puntos decimales, comas y notación científica
+ actualInput.addEventListener('keydown', function(e) {
+     if (e.key === '-' || e.key === '.' || e.key === ',' || e.key === 'e' || e.key === 'E' || e.key === '+') {
+         e.preventDefault();
+         return false;
+     }
+ });
+
  function validateAmount() {
+ if (actualInput.value) {
+     actualInput.value = actualInput.value.replace(/[-.,eE+]/g, '');
+ }
  let actual = Number.parseInt(actualInput.value, 10);
  if (Number.isNaN(actual) || actual < 0) {
  actualInput.value = '';
@@ -224,9 +235,10 @@
  actualInput.addEventListener('input', validateAmount);
 
  document.querySelectorAll('.money-btn').forEach(btn => {
- btn.addEventListener('click', () => {
+ btn.addEventListener('click', (e) => {
+ e.preventDefault();
  let current = Number.parseInt(actualInput.value, 10) || 0;
- let add = Number.parseInt(btn.getAttribute('data-val'), 10);
+ let add = Number.parseInt(btn.getAttribute('data-val'), 10) || 0;
  actualInput.value = current + add;
  validateAmount();
  });
